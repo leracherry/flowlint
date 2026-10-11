@@ -3,7 +3,7 @@
 Offline linting for AG-UI agent event traces. A small TypeScript library and CLI
 that catches stream lifecycle mistakes without starting an agent or calling an LLM.
 
-**Status: v0.1.0 GitHub release.** Runtime schema validation uses the official
+**Status: v0.1.0 released.** Runtime schema validation uses the official
 `@ag-ui/core/schemas` entry point, pinned to AG-UI core 1.0.2. Explicit run, text
 message, and tool-call lifecycles are checked, including text/tool shorthand
 normalization and complete versus partial capture boundaries. A successful check
@@ -23,7 +23,16 @@ cat examples/valid.ndjson | node dist/cli.js check -
 node dist/cli.js check capture.ndjson --allow-partial
 ```
 
-## Install the GitHub release
+## Install
+
+```sh
+npm install @leracherry/flowlint
+npx flowlint check your-trace.ndjson
+```
+
+Published as [@leracherry/flowlint](https://www.npmjs.com/package/@leracherry/flowlint).
+
+### GitHub release tarball
 
 The release package exposes the `flowlint` executable and TypeScript library.
 Download the tarball and checksum from the [v0.1.0 release](https://github.com/leracherry/flowlint/releases/tag/v0.1.0).
@@ -36,8 +45,6 @@ npm install ./leracherry-flowlint-0.1.0.tgz
 npx --no-install flowlint check your-trace.ndjson
 ```
 
-The intended npm name is `@leracherry/flowlint`. Registry publication is pending
-npm account/scope verification; the package is not yet available through `npm install @leracherry/flowlint`.
 The FlowLint name is also used by unrelated [n8n](https://flowlint.dev/) and
 [Python](https://github.com/js-lover/flowlint) projects.
 
@@ -202,8 +209,7 @@ suspended for that run pending full attribution support. These warnings mean som
 checks were skipped; they do not establish that the unchecked events are correct.
 A new run restores explicit item checking.
 
-Milestones 0–4 and GitHub release preparation are implemented. npm publication
-remains pending account setup. See
+Milestones 0–5 are implemented, including verified GitHub and npm distribution. See
 [ROADMAP.md](ROADMAP.md) for progress.
 
 ## Use in GitHub Actions
@@ -211,7 +217,7 @@ remains pending account setup. See
 For traces stored in a FlowLint checkout, copy this to
 `.github/workflows/lint-trace.yml`. Replace `TRACE_FILE` with your recorded trace.
 The final step fails the job on a lint error or input failure; warnings pass.
-This example builds from source and works before npm publication.
+This example builds from source.
 
 ```yaml
 name: Lint agent trace
@@ -235,9 +241,9 @@ jobs:
       - run: node dist/cli.js check "$TRACE_FILE"
 ```
 
-In another project, install the FlowLint GitHub Release tarball, or build a separate FlowLint checkout and invoke its `dist/cli.js` with
-the path to your trace. Access to this private source repository requires GitHub
-authorization. The npm package is not yet available.
+In another project, run `npm install --save-dev @leracherry/flowlint` and
+`npx flowlint check path/to/trace.ndjson`. The npm package is public; access to
+this private source repository and its GitHub release assets requires GitHub authorization.
 
 ## Development and releases
 

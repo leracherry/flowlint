@@ -24,4 +24,4 @@ conformance certification.
 ### Distribution
 
 The GitHub Release contains an installable npm tarball and SHA-256 checksum.
-npm registry publication is pending account/scope verification and authentication.
+Published on npm as `@leracherry/flowlint@0.1.0`.

@@ -21,42 +21,30 @@
 The repository is private. People downloading a release need repository access.
 The MIT license does not change the repository's access settings.
 
-## npm bootstrap and Trusted Publishing
+## npm publishing
 
-As of 2026-10-11, the anonymous registry lookup for `@leracherry/flowlint` returned
-404, and this machine had no authenticated npm account. A 404 is not proof of
-scope ownership or publish authorization. GitHub and npm usernames are separate.
-The intended scope must be verified by its npm owner before registry publication.
+The repository's `NPM_TOKEN` Actions secret authenticates npm publication. Use a
+publish-capable token for the `leracherry` npm account with access to
+`@leracherry/flowlint`, including any required 2FA bypass permission. Never place
+the token in source files or workflow logs.
 
-1. Sign in to npm locally using `npm login`, then confirm `npm whoami` and access
-   to the intended scope. Do not put tokens or credentials in this repository.
-   If a different scope is required, update package metadata, documentation, and
-   the package-name check in `npm-publish.yml` before making a new release.
-2. The scope owner can bootstrap the first package using the verified release:
+After the GitHub Release finishes, dispatch **Publish verified release to npm**
+with its version tag. The workflow downloads the existing tarball, checks its
+SHA-256 checksum and package name/version, verifies `npm whoami` is `leracherry`,
+and publishes with public access. GitHub repository visibility stays private.
+Publishing an existing npm version again is not supported; fix forward with a
+new version.
 
-   ```sh
-   npm publish ./leracherry-flowlint-0.1.0.tgz --access public
-   ```
+The workflow uses Node 24 and npm 11.6.1. Provenance is disabled for this private
+repository because npm does not support provenance from private repositories;
+it enables automatically if the repository becomes public.
 
-   This command makes the package public on npm. Complete npm's authentication
-   and any two-factor challenge locally.
+## Optional migration to Trusted Publishing
 
-3. In the npm package settings, add a GitHub Trusted Publisher with owner
-   `leracherry`, repository `flowlint`, workflow `npm-publish.yml`, no environment,
-   and permission to publish directly. The file name is case-sensitive.
-4. Set GitHub repository variable `NPM_PUBLISH_ENABLED` to `true`. Dispatch
-   **Publish verified release to npm** with an existing release tag. The workflow
-   downloads and checks the release tarball, verifies its name/version, and
-   publishes using OIDC. No npm token secret is used. Do this for a new version;
-   npm cannot republish an already published version.
-
-The workflow is disabled until the variable is enabled. Trusted publisher
-registration requires npm package settings access and has not been completed.
-Use the current [npm Trusted Publishing documentation](https://docs.npmjs.com/trusted-publishers/)
-when configuring it. The workflow uses Node 24 and npm 11.6.1. Provenance is
-explicitly disabled for this private repository because npm does not support
-provenance from private repositories; it enables automatically if the repository
-becomes public. Repository visibility is a separate owner decision.
-
-A new trusted publisher currently needs its first successful publish within two
-days of registration; configure it when the next version is ready.
+After the package exists, its npm owner can configure a GitHub Trusted Publisher
+for owner `leracherry`, repository `flowlint`, workflow `npm-publish.yml`, with no
+environment. Follow the current
+[npm Trusted Publishing documentation](https://docs.npmjs.com/trusted-publishers/).
+Then update the workflow to grant `id-token: write`, remove token authentication
+and the token-based `npm whoami` step, and verify a new-version publication before
+removing the repository secret. Trusted Publishing has not been configured.

@@ -40,4 +40,4 @@ jobs:
       - name: Verify npm scope owner
         run: test "$(npm whoami)" = "leracherry"
       - name: Publish using repository npm token
-        run: npm publish release/*.tgz --access public
+        run: npm publish ./release/*.tgz --access public

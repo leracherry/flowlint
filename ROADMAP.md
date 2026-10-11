@@ -19,8 +19,8 @@ in one TypeScript package, with a CLI and deterministic library API.
   - [x] Package metadata, changelog, contributor feedback template, and release docs.
   - [x] Packed file-list verification and fresh-project CLI/API/type checks.
   - [x] GitHub release automation with a verified tarball and checksum.
-  - [x] Optional npm OIDC workflow, disabled until configured by the npm owner.
-  - [ ] Confirm npm scope ownership, register Trusted Publisher, and publish to npm.
+  - [x] npm publishing workflow using the repository NPM_TOKEN secret.
+  - [ ] Confirm npm scope ownership and publish to npm.
 
 GitHub v0.1.0 is distributed as an installable tarball. npm publication is pending
 authentication and scope ownership verification. See RELEASING.md.

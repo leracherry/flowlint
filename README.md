@@ -249,8 +249,8 @@ pnpm format
 GitHub Actions runs formatting/lint, strict typechecking, tests, and build on
 Node 22 and 24 for main and pull requests. Pushing a version tag matching
 `package.json` runs release checks and creates a GitHub Release containing the
-installable package and checksums. An optional OIDC publishing workflow is prepared but disabled pending
-npm account setup. See [RELEASING.md](RELEASING.md) for exact setup and release
+installable package and checksums. A separate npm publishing workflow uses the repository
+`NPM_TOKEN` secret to publish a verified GitHub release. See [RELEASING.md](RELEASING.md) for exact setup and release
 instructions, and [CHANGELOG.md](CHANGELOG.md) for release notes.
 See [CONTRIBUTING.md](CONTRIBUTING.md) for the release process and next milestones.
 

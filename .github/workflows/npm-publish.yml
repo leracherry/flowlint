@@ -1,0 +1,41 @@
+name: Publish verified release to npm
+on:
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: Existing GitHub release tag (for example v0.1.0)
+        required: true
+        type: string
+permissions:
+  contents: read
+concurrency:
+  group: npm-publish
+  cancel-in-progress: false
+jobs:
+  publish:
+    if: vars.NPM_PUBLISH_ENABLED == 'true'
+    runs-on: ubuntu-24.04
+    permissions:
+      contents: read
+      id-token: write
+    env:
+      RELEASE_TAG: ${{ inputs.tag }}
+      GH_TOKEN: ${{ github.token }}
+      NPM_CONFIG_PROVENANCE: ${{ github.event.repository.private && 'false' || 'true' }}
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 24
+          package-manager-cache: false
+      - run: npm install --global npm@11.6.1
+      - name: Download and verify release artifact
+        run: |
+          node -e 'if (!/^v\d+\.\d+\.\d+$/.test(process.env.RELEASE_TAG)) throw new Error("Expected a stable version tag")'
+          gh release download "$RELEASE_TAG" --pattern '*.tgz' --pattern SHA256SUMS --dir release
+          (cd release && sha256sum --check SHA256SUMS)
+          mkdir extracted
+          tar -xzf release/*.tgz -C extracted
+          node -e 'const p = require("./extracted/package/package.json"); if (`v${p.version}` !== process.env.RELEASE_TAG || p.name !== "@leracherry/flowlint") throw new Error("Unexpected release package")'
+      - name: Publish using npm Trusted Publishing
+        run: npm publish release/*.tgz --access public

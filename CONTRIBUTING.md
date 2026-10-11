@@ -12,8 +12,7 @@ rules, text/tool chunk normalization (FL010/FL011), and EOF checks are implement
 coverage in README, paired valid/invalid fixtures, and partial-capture regressions.
 SSE parsing and reasoning/subagent lifecycle checks are later work.
 
-To release, update `package.json` and its lockfile, commit to main, then push a
-matching version tag (for example `v0.1.0`). The release workflow runs all checks
-on Node 22 and 24, tests the installable package, and creates a GitHub Release
-with a tarball and SHA-256 checksum. It does not publish to npm. Check package-name
-availability and configure publishing separately before an npm release.
+Run `pnpm verify:package` to check the distributable in a fresh consumer project.
+See [RELEASING.md](RELEASING.md) for GitHub release and optional npm Trusted
+Publishing instructions. The npm workflow remains disabled until account setup
+is complete. Include an entry in CHANGELOG.md for each release.

@@ -37,19 +37,10 @@ jobs:
           node-version: 22
           cache: pnpm
       - run: pnpm install --frozen-lockfile
-      - run: pnpm pack --pack-destination release
-      - name: Check packaged CLI and library
-        run: |
-          mkdir package-smoke
-          cd package-smoke
-          npm init -y
-          npm install ../release/*.tgz
-          npx --no-install flowlint --version
-          npx --no-install flowlint check ../examples/valid.ndjson
-          node --input-type=module -e 'import { lintEvents, parseTrace } from "@leracherry/flowlint"; import { readFileSync } from "node:fs"; if (!lintEvents(parseTrace(readFileSync("../examples/valid.ndjson", "utf8"))).valid) process.exit(1)'
+      - run: pnpm verify:package
       - name: Create release with package and checksum
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
-          sha256sum release/*.tgz > release/SHA256SUMS
-          gh release create "$GITHUB_REF_NAME" release/*.tgz release/SHA256SUMS --verify-tag --generate-notes --title "FlowLint $GITHUB_REF_NAME"
+          (cd release && sha256sum *.tgz > SHA256SUMS)
+          gh release create "$GITHUB_REF_NAME" release/*.tgz release/SHA256SUMS --verify-tag --notes-file CHANGELOG.md --title "FlowLint $GITHUB_REF_NAME"

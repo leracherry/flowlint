@@ -3,7 +3,7 @@
 Offline linting for AG-UI agent event traces. A small TypeScript library and CLI
 that catches stream lifecycle mistakes without starting an agent or calling an LLM.
 
-**Status: milestone 4 implemented.** Runtime schema validation uses the official
+**Status: v0.1.0 GitHub release.** Runtime schema validation uses the official
 `@ag-ui/core/schemas` entry point, pinned to AG-UI core 1.0.2. Explicit run, text
 message, and tool-call lifecycles are checked, including text/tool shorthand
 normalization and complete versus partial capture boundaries. A successful check
@@ -23,8 +23,21 @@ cat examples/valid.ndjson | node dist/cli.js check -
 node dist/cli.js check capture.ndjson --allow-partial
 ```
 
-The installable package exposes a `flowlint` executable. The intended npm package
-name is `@leracherry/flowlint`; it has not been published or checked for availability.
+## Install the GitHub release
+
+The release package exposes the `flowlint` executable and TypeScript library.
+Download the tarball and checksum from the [v0.1.0 release](https://github.com/leracherry/flowlint/releases/tag/v0.1.0).
+This repository is private, so downloading requires GitHub access.
+
+```sh
+gh release download v0.1.0 --repo leracherry/flowlint --pattern '*.tgz' --pattern SHA256SUMS
+shasum -a 256 -c SHA256SUMS
+npm install ./leracherry-flowlint-0.1.0.tgz
+npx --no-install flowlint check your-trace.ndjson
+```
+
+The intended npm name is `@leracherry/flowlint`. Registry publication is pending
+npm account/scope verification; the package is not yet available through `npm install @leracherry/flowlint`.
 The FlowLint name is also used by unrelated [n8n](https://flowlint.dev/) and
 [Python](https://github.com/js-lover/flowlint) projects.
 
@@ -189,7 +202,8 @@ suspended for that run pending full attribution support. These warnings mean som
 checks were skipped; they do not establish that the unchecked events are correct.
 A new run restores explicit item checking.
 
-Milestones 0–4 are implemented; milestone 5 is release preparation. See
+Milestones 0–4 and GitHub release preparation are implemented. npm publication
+remains pending account setup. See
 [ROADMAP.md](ROADMAP.md) for progress.
 
 ## Use in GitHub Actions
@@ -221,8 +235,7 @@ jobs:
       - run: node dist/cli.js check "$TRACE_FILE"
 ```
 
-In another project, install a FlowLint GitHub Release tarball when one is
-available, or build a separate FlowLint checkout and invoke its `dist/cli.js` with
+In another project, install the FlowLint GitHub Release tarball, or build a separate FlowLint checkout and invoke its `dist/cli.js` with
 the path to your trace. Access to this private source repository requires GitHub
 authorization. The npm package is not yet available.
 
@@ -236,10 +249,20 @@ pnpm format
 GitHub Actions runs formatting/lint, strict typechecking, tests, and build on
 Node 22 and 24 for main and pull requests. Pushing a version tag matching
 `package.json` runs release checks and creates a GitHub Release containing the
-installable package and checksums. npm publishing is not configured.
+installable package and checksums. An optional OIDC publishing workflow is prepared but disabled pending
+npm account setup. See [RELEASING.md](RELEASING.md) for exact setup and release
+instructions, and [CHANGELOG.md](CHANGELOG.md) for release notes.
 See [CONTRIBUTING.md](CONTRIBUTING.md) for the release process and next milestones.
 
 Protocol references: [AG-UI event model](https://github.com/ag-ui-protocol/ag-ui/blob/main/docs/spec/1.0/basic/index.mdx)
 and [streaming rules](https://github.com/ag-ui-protocol/ag-ui/blob/main/docs/spec/1.0/basic/patterns/streaming.mdx).
 
 MIT licensed.
+
+## Feedback
+
+Report false positives, missed errors, or CLI problems in
+[GitHub Issues](https://github.com/leracherry/flowlint/issues). Include the FlowLint
+and Node versions, the command, expected output, and a small synthetic or redacted
+trace. Remove credentials, personal information, prompts, and private tool/message
+bodies while preserving event types and ID relationships.

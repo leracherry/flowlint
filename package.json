@@ -24,7 +24,10 @@
   "files": [
     "dist",
     "README.md",
-    "LICENSE"
+    "LICENSE",
+    "CHANGELOG.md",
+    "RELEASING.md",
+    "examples"
   ],
   "scripts": {
     "build": "tsup",
@@ -33,7 +36,8 @@
     "typecheck": "tsc --noEmit",
     "test": "vitest run",
     "check": "pnpm lint && pnpm typecheck && pnpm test && pnpm build",
-    "prepack": "pnpm build"
+    "prepack": "pnpm build",
+    "verify:package": "pnpm build && node scripts/verify-package.mjs"
   },
   "dependencies": {
     "@ag-ui/core": "1.0.2",
@@ -49,5 +53,21 @@
     "eslint": "^9.39.0",
     "typescript-eslint": "^8.71.1",
     "prettier": "^3.6.2"
+  },
+  "keywords": [
+    "ag-ui",
+    "ai-agents",
+    "linter",
+    "typescript",
+    "cli",
+    "event-streams"
+  ],
+  "homepage": "https://github.com/leracherry/flowlint#readme",
+  "bugs": {
+    "url": "https://github.com/leracherry/flowlint/issues"
+  },
+  "publishConfig": {
+    "access": "public",
+    "registry": "https://registry.npmjs.org/"
   }
 }

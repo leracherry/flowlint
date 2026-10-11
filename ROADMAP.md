@@ -15,10 +15,15 @@ in one TypeScript package, with a CLI and deterministic library API.
       implicit closure, conflicting repeats, and compatibility fixtures.
 - [x] Milestone 4: developer experience and CI readiness, final reporter polish,
       one-file/glob policy, and a copy-pasteable GitHub Actions usage example.
-- [ ] Milestone 5: OSS release, package name verification, npm publishing setup,
-      tagged release, and changelog.
+- [ ] Milestone 5: distribution and OSS release (npm account setup remains pending).
+  - [x] Package metadata, changelog, contributor feedback template, and release docs.
+  - [x] Packed file-list verification and fresh-project CLI/API/type checks.
+  - [x] GitHub release automation with a verified tarball and checksum.
+  - [x] Optional npm OIDC workflow, disabled until configured by the npm owner.
+  - [ ] Confirm npm scope ownership, register Trusted Publisher, and publish to npm.
 
-GitHub release automation is already configured; no release has been published.
+GitHub v0.1.0 is distributed as an installable tarball. npm publication is pending
+authentication and scope ownership verification. See RELEASING.md.
 The current rules deliberately do not validate reasoning/step/subagent lifecycles,
 SSE transport framing, state patch application, or reopened item attributes.
 Reasoning and subagent coverage warnings identify skipped checks until supported.

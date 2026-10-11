@@ -1,0 +1,5 @@
+{"type": "RUN_STARTED", "threadId": "thread", "runId": "run"}
+{"type": "TEXT_MESSAGE_CHUNK", "messageId": "m", "delta": "Hello"}
+{"type": "TEXT_MESSAGE_CHUNK", "delta": "!"}
+{"type": "TOOL_CALL_CHUNK", "toolCallId": "t", "toolCallName": "search", "delta": "args"}
+{"type": "RUN_FINISHED", "threadId": "thread", "runId": "run"}

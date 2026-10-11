@@ -69,3 +69,14 @@ it("reports EOF errors in complete captures and warnings in partial captures", (
 });
 it("accepts the interleaved example", () =>
   expect(cli("check", "examples/interleaved.ndjson").status).toBe(0));
+it("accepts shorthand fixtures through the bundled CLI", () => {
+  expect(cli("check", "examples/chunks.ndjson").status).toBe(0);
+  const result = cli(
+    "check",
+    "test/fixtures/invalid/FL011.json",
+    "--format",
+    "json",
+  );
+  expect(result.status).toBe(1);
+  expect(JSON.parse(result.stdout).diagnostics[0].ruleId).toBe("FL011");
+});

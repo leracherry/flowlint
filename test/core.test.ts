@@ -142,15 +142,15 @@ describe("schema and initial lifecycle slice", () => {
         (d) => d.ruleId,
       ),
     ).toEqual(["SCHEMA_EVENT", "FL001", "FL002", "FL012"]));
-  it("marks chunks as incomplete coverage", () => {
+  it("rejects mixing chunks and explicit content", () => {
     const result = lint([
       start,
       { type: "TEXT_MESSAGE_CHUNK", messageId: "m", delta: "Hello" },
       content,
       finish,
     ]);
-    expect(result.valid).toBe(true);
-    expect(result.diagnostics[0]?.ruleId).toBe("COVERAGE_CHUNKS");
+    expect(result.valid).toBe(false);
+    expect(result.diagnostics.map((d) => d.ruleId)).toEqual(["FL002", "FL011"]);
   });
   it("bounds diagnostics with an explicit error", () => {
     const result = lint(Array.from({ length: 1002 }, () => null));

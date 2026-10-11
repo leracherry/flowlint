@@ -235,7 +235,7 @@ describe("protocol and boundary regressions", () => {
       "FL012",
       "SCHEMA_EVENT",
     ]));
-  it("suspends only the chunk family while keeping run EOF checks", () => {
+  it("normalizes chunks while keeping independent explicit closures and EOF checks", () => {
     expect(
       codes([
         start,
@@ -243,7 +243,7 @@ describe("protocol and boundary regressions", () => {
         tool,
         finish,
       ]),
-    ).toEqual(["COVERAGE_CHUNKS", "FL009"]);
+    ).toEqual(["FL009"]);
     expect(
       codes([
         start,
@@ -256,12 +256,12 @@ describe("protocol and boundary regressions", () => {
         },
         finish,
       ]),
-    ).toEqual(["COVERAGE_CHUNKS", "FL003"]);
+    ).toEqual(["FL003"]);
     expect(
       codes([start, { type: "TEXT_MESSAGE_CHUNK", messageId: "m" }]),
-    ).toEqual(["COVERAGE_CHUNKS", "FL012"]);
+    ).toEqual(["FL012"]);
   });
-  it("resets coverage suspension at the next run", () =>
+  it("resets chunk state at the next run", () =>
     expect(
       codes([
         start,
@@ -271,7 +271,7 @@ describe("protocol and boundary regressions", () => {
         content,
         { ...finish, runId: "next" },
       ]),
-    ).toEqual(["COVERAGE_CHUNKS", "FL002"]));
+    ).toEqual(["FL002"]));
   it("does not guess implicitly attributed subagent item ownership", () =>
     expect(
       codes([

@@ -7,8 +7,8 @@ Add regression cases for both broken traces and legal streams before expanding
 rule coverage. Reuse the official AG-UI schemas, preserve source locations, and
 keep event content out of diagnostics. Arrival order is authoritative.
 
-The next milestone is chunk normalization and FL010/FL011. Explicit lifecycle
-rules and EOF capture checks are implemented. Add each new rule with its ID and
+The next milestone is developer experience and CI readiness. Explicit lifecycle
+rules, text/tool chunk normalization (FL010/FL011), and EOF checks are implemented. Add each new rule with its ID and
 coverage in README, paired valid/invalid fixtures, and partial-capture regressions.
 SSE parsing and reasoning/subagent lifecycle checks are later work.
 

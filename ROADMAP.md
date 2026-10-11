@@ -11,7 +11,7 @@ in one TypeScript package, with a CLI and deterministic library API.
 - [x] Milestone 2: explicit run/text/tool lifecycle rules FL001–FL009, run identity,
       interleaving, error/finish distinction, complete and partial capture modes,
       EOF FL012 checks, paired valid/invalid fixtures and regression tests.
-- [ ] Milestone 3: normalize text and tool chunks, FL010/FL011, lane transitions,
+- [x] Milestone 3: normalize text and tool chunks, FL010/FL011, lane transitions,
       implicit closure, conflicting repeats, and compatibility fixtures.
 - [ ] Milestone 4: developer experience and CI readiness, final reporter polish,
       one-file/glob policy, and a copy-pasteable GitHub Actions usage example.
@@ -21,5 +21,7 @@ in one TypeScript package, with a CLI and deterministic library API.
 GitHub release automation is already configured; no release has been published.
 The current rules deliberately do not validate reasoning/step/subagent lifecycles,
 SSE transport framing, state patch application, or reopened item attributes.
-Chunk and subagent coverage warnings identify skipped checks until supported.
+Reasoning and subagent coverage warnings identify skipped checks until supported.
+Text/tool chunk assembly supports resolvable attribution lanes; full explicit
+subagent item lifecycle checks remain suspended and are not claimed as complete.
 EOF checks refer to capture truncation, not tool execution or result completion.

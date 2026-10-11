@@ -1,4 +1,5 @@
 import { EventSchemas } from "@ag-ui/core/schemas";
+import { ChunkNormalizer } from "./normalize-chunks";
 import { createState, createItemState } from "./state";
 import type { Diagnostic, LintOptions, LintResult, SourceEvent } from "./types";
 const MAX_DIAGNOSTICS = 1000;
@@ -12,6 +13,8 @@ export const SUPPORTED_RULES = [
   "FL007",
   "FL008",
   "FL009",
+  "FL010",
+  "FL011",
   "FL012",
   "RUN_TRANSITION",
   "RUN_IDENTITY",
@@ -39,6 +42,7 @@ export function lintEvents(
     const { eventIndex, line, column } = record;
     diagnostics.push({ ruleId, severity, message, eventIndex, line, column });
   };
+  const normalizer = new ChunkNormalizer(emit);
   const resetItems = () => {
     state.messages = createItemState();
     state.tools = createItemState();
@@ -93,11 +97,11 @@ export function lintEvents(
       continue;
     }
     lastValid = record;
-    const event = parsed.data;
+    const original = parsed.data;
     if (
       state.status === "initial" &&
-      event.type !== "RUN_STARTED" &&
-      event.type !== "RUN_ERROR"
+      original.type !== "RUN_STARTED" &&
+      original.type !== "RUN_ERROR"
     ) {
       emit(
         record,
@@ -107,193 +111,186 @@ export function lintEvents(
       );
       state.status = "excerpt";
     }
-    if (event.type === "RUN_STARTED") {
-      if (state.status === "active") {
-        emit(
-          record,
-          "FL006",
-          `RUN_STARTED while run ${JSON.stringify(state.run?.runId)} is active`,
-        );
-        // Reject the nested start rather than discarding the prior run's items.
+    for (const event of normalizer.push(
+      original,
+      record,
+      !!options.allowPartial && state.status === "excerpt",
+    )) {
+      if (event.type === "RUN_STARTED") {
+        if (state.status === "active") {
+          emit(
+            record,
+            "FL006",
+            `RUN_STARTED while run ${JSON.stringify(state.run?.runId)} is active`,
+          );
+          // Reject the nested start rather than discarding the prior run's items.
+          continue;
+        }
+        const seen = state.seenRuns.get(event.threadId) ?? new Set<string>();
+        if (seen.has(event.runId))
+          emit(
+            record,
+            "FL007",
+            `runId ${JSON.stringify(event.runId)} is reused on thread ${JSON.stringify(event.threadId)}`,
+          );
+        seen.add(event.runId);
+        state.seenRuns.set(event.threadId, seen);
+        resetItems();
+        state.run = { threadId: event.threadId, runId: event.runId };
+        state.status = "active";
         continue;
       }
-      const seen = state.seenRuns.get(event.threadId) ?? new Set<string>();
-      if (seen.has(event.runId))
-        emit(
-          record,
-          "FL007",
-          `runId ${JSON.stringify(event.runId)} is reused on thread ${JSON.stringify(event.threadId)}`,
-        );
-      seen.add(event.runId);
-      state.seenRuns.set(event.threadId, seen);
-      resetItems();
-      state.run = { threadId: event.threadId, runId: event.runId };
-      state.status = "active";
-      continue;
-    }
-    if (event.type === "RUN_ERROR") {
-      if (state.status === "errored")
-        emit(record, "RUN_TRANSITION", "Only RUN_STARTED may follow RUN_ERROR");
-      resetItems();
-      state.run = undefined;
-      state.status = "errored";
-      continue;
-    }
-    if (state.status === "finished" || state.status === "errored") {
-      emit(
-        record,
-        "RUN_TRANSITION",
-        `${event.type} arrives after the run closed`,
-      );
-      continue;
-    }
-    if (event.type === "RUN_FINISHED") {
-      if (
-        state.run &&
-        (state.run.threadId !== event.threadId ||
-          state.run.runId !== event.runId)
-      ) {
-        emit(
-          record,
-          "RUN_IDENTITY",
-          "RUN_FINISHED identifiers do not match the active run",
-        );
+      if (event.type === "RUN_ERROR") {
+        if (state.status === "errored")
+          emit(
+            record,
+            "RUN_TRANSITION",
+            "Only RUN_STARTED may follow RUN_ERROR",
+          );
+        resetItems();
+        state.run = undefined;
+        state.status = "errored";
         continue;
       }
-      if (!state.run)
+      if (state.status === "finished" || state.status === "errored") {
         emit(
           record,
           "RUN_TRANSITION",
-          "RUN_FINISHED has no observed RUN_STARTED",
-          options.allowPartial ? "warning" : "error",
+          `${event.type} arrives after the run closed`,
         );
-      for (const id of state.messages.open)
-        emit(
-          record,
-          "FL003",
-          `RUN_FINISHED with open text message ${JSON.stringify(id)}`,
-        );
-      for (const id of state.tools.open)
-        emit(
-          record,
-          "FL009",
-          `RUN_FINISHED with open tool call ${JSON.stringify(id)}`,
-        );
-      resetItems();
-      state.run = undefined;
-      state.status = "finished";
-      continue;
-    }
-    // Attribution can be implicit through parent messages. Suspend both item
-    // families once subagents appear rather than guessing ownership before attribution support.
-    if (
-      ("subagentRunId" in event && event.subagentRunId) ||
-      event.type.startsWith("SUBAGENT_")
-    ) {
-      if (!state.subagentsWarned)
-        emit(
-          record,
-          "COVERAGE_SUBAGENTS",
-          "Subagent attribution is not implemented; text/tool lifecycle checks are suspended for this run",
-          "warning",
-        );
-      state.subagentsWarned = true;
-      state.messages.suspended = true;
-      state.messages.open.clear();
-      state.tools.suspended = true;
-      state.tools.open.clear();
-      continue;
-    }
-    if (
-      event.type === "TEXT_MESSAGE_CHUNK" ||
-      event.type === "TOOL_CALL_CHUNK"
-    ) {
-      const item =
-        event.type === "TEXT_MESSAGE_CHUNK" ? state.messages : state.tools;
-      if (!item.suspended)
-        emit(
-          record,
-          "COVERAGE_CHUNKS",
-          `${event.type} normalization is not implemented; its family's lifecycle checks are suspended for this run`,
-          "warning",
-        );
-      item.suspended = true;
-      item.open.clear();
-      continue;
-    }
-    switch (event.type) {
-      case "TEXT_MESSAGE_START":
-        checkItem(
-          record,
-          state.messages,
-          event.messageId,
-          "start",
-          "FL008",
-          "FL002",
-          event.type,
-          "text message",
-        );
-        break;
-      case "TEXT_MESSAGE_CONTENT":
-        checkItem(
-          record,
-          state.messages,
-          event.messageId,
-          "content",
-          "FL008",
-          "FL002",
-          event.type,
-          "text message",
-        );
-        break;
-      case "TEXT_MESSAGE_END":
-        checkItem(
-          record,
-          state.messages,
-          event.messageId,
-          "end",
-          "FL008",
-          "FL002",
-          event.type,
-          "text message",
-        );
-        break;
-      case "TOOL_CALL_START":
-        checkItem(
-          record,
-          state.tools,
-          event.toolCallId,
-          "start",
-          "FL004",
-          "FL005",
-          event.type,
-          "tool call",
-        );
-        break;
-      case "TOOL_CALL_ARGS":
-        checkItem(
-          record,
-          state.tools,
-          event.toolCallId,
-          "content",
-          "FL004",
-          "FL005",
-          event.type,
-          "tool call",
-        );
-        break;
-      case "TOOL_CALL_END":
-        checkItem(
-          record,
-          state.tools,
-          event.toolCallId,
-          "end",
-          "FL004",
-          "FL005",
-          event.type,
-          "tool call",
-        );
-        break;
+        continue;
+      }
+      if (event.type === "RUN_FINISHED") {
+        if (
+          state.run &&
+          (state.run.threadId !== event.threadId ||
+            state.run.runId !== event.runId)
+        ) {
+          emit(
+            record,
+            "RUN_IDENTITY",
+            "RUN_FINISHED identifiers do not match the active run",
+          );
+          continue;
+        }
+        if (!state.run)
+          emit(
+            record,
+            "RUN_TRANSITION",
+            "RUN_FINISHED has no observed RUN_STARTED",
+            options.allowPartial ? "warning" : "error",
+          );
+        for (const id of state.messages.open)
+          emit(
+            record,
+            "FL003",
+            `RUN_FINISHED with open text message ${JSON.stringify(id)}`,
+          );
+        for (const id of state.tools.open)
+          emit(
+            record,
+            "FL009",
+            `RUN_FINISHED with open tool call ${JSON.stringify(id)}`,
+          );
+        resetItems();
+        state.run = undefined;
+        state.status = "finished";
+        continue;
+      }
+      // Attribution can be implicit through parent messages. Suspend both item
+      // families once subagents appear rather than guessing ownership before attribution support.
+      if (
+        ("subagentRunId" in event && event.subagentRunId) ||
+        event.type.startsWith("SUBAGENT_")
+      ) {
+        if (!state.subagentsWarned)
+          emit(
+            record,
+            "COVERAGE_SUBAGENTS",
+            "Subagent attribution is not implemented; text/tool lifecycle checks are suspended for this run",
+            "warning",
+          );
+        state.subagentsWarned = true;
+        state.messages.suspended = true;
+        state.messages.open.clear();
+        state.tools.suspended = true;
+        state.tools.open.clear();
+        continue;
+      }
+      switch (event.type) {
+        case "TEXT_MESSAGE_START":
+          checkItem(
+            record,
+            state.messages,
+            event.messageId,
+            "start",
+            "FL008",
+            "FL002",
+            event.type,
+            "text message",
+          );
+          break;
+        case "TEXT_MESSAGE_CONTENT":
+          checkItem(
+            record,
+            state.messages,
+            event.messageId,
+            "content",
+            "FL008",
+            "FL002",
+            event.type,
+            "text message",
+          );
+          break;
+        case "TEXT_MESSAGE_END":
+          checkItem(
+            record,
+            state.messages,
+            event.messageId,
+            "end",
+            "FL008",
+            "FL002",
+            event.type,
+            "text message",
+          );
+          break;
+        case "TOOL_CALL_START":
+          checkItem(
+            record,
+            state.tools,
+            event.toolCallId,
+            "start",
+            "FL004",
+            "FL005",
+            event.type,
+            "tool call",
+          );
+          break;
+        case "TOOL_CALL_ARGS":
+          checkItem(
+            record,
+            state.tools,
+            event.toolCallId,
+            "content",
+            "FL004",
+            "FL005",
+            event.type,
+            "tool call",
+          );
+          break;
+        case "TOOL_CALL_END":
+          checkItem(
+            record,
+            state.tools,
+            event.toolCallId,
+            "end",
+            "FL004",
+            "FL005",
+            event.type,
+            "tool call",
+          );
+          break;
+      }
     }
   }
   if (

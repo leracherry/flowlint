@@ -1,0 +1,55 @@
+name: GitHub Release
+on:
+  push:
+    tags: ["v*"]
+permissions:
+  contents: read
+concurrency:
+  group: release-${{ github.ref }}
+  cancel-in-progress: false
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        node: [22, 24]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ matrix.node }}
+          cache: pnpm
+      - name: Verify tag matches package version
+        run: node -e 'const p = require("./package.json"); if (process.env.GITHUB_REF_NAME !== `v${p.version}`) process.exit(1)'
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm check
+  release:
+    needs: verify
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm pack --pack-destination release
+      - name: Check packaged CLI and library
+        run: |
+          mkdir package-smoke
+          cd package-smoke
+          npm init -y
+          npm install ../release/*.tgz
+          npx --no-install flowlint --version
+          npx --no-install flowlint check ../examples/valid.ndjson
+          node --input-type=module -e 'import { lintEvents, parseTrace } from "@leracherry/flowlint"; import { readFileSync } from "node:fs"; if (!lintEvents(parseTrace(readFileSync("../examples/valid.ndjson", "utf8"))).valid) process.exit(1)'
+      - name: Create release with package and checksum
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          sha256sum release/*.tgz > release/SHA256SUMS
+          gh release create "$GITHUB_REF_NAME" release/*.tgz release/SHA256SUMS --verify-tag --generate-notes --title "FlowLint $GITHUB_REF_NAME"

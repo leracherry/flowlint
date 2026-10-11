@@ -1,0 +1,3 @@
+{"type":"RUN_STARTED","threadId":"thread-1","runId":"run-1"}
+{"type":"TEXT_MESSAGE_CONTENT","messageId":"m-2","delta":"Missing opener"}
+{"type":"RUN_FINISHED","threadId":"thread-1","runId":"run-1"}

@@ -13,20 +13,20 @@ concurrency:
   cancel-in-progress: false
 jobs:
   publish:
-    if: vars.NPM_PUBLISH_ENABLED == 'true'
     runs-on: ubuntu-24.04
     permissions:
       contents: read
-      id-token: write
     env:
       RELEASE_TAG: ${{ inputs.tag }}
       GH_TOKEN: ${{ github.token }}
+      NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
       NPM_CONFIG_PROVENANCE: ${{ github.event.repository.private && 'false' || 'true' }}
     steps:
       - uses: actions/checkout@v7
       - uses: actions/setup-node@v7
         with:
           node-version: 24
+          registry-url: https://registry.npmjs.org
           package-manager-cache: false
       - run: npm install --global npm@11.6.1
       - name: Download and verify release artifact
@@ -37,5 +37,7 @@ jobs:
           mkdir extracted
           tar -xzf release/*.tgz -C extracted
           node -e 'const p = require("./extracted/package/package.json"); if (`v${p.version}` !== process.env.RELEASE_TAG || p.name !== "@leracherry/flowlint") throw new Error("Unexpected release package")'
-      - name: Publish using npm Trusted Publishing
+      - name: Verify npm scope owner
+        run: test "$(npm whoami)" = "leracherry"
+      - name: Publish using repository npm token
         run: npm publish release/*.tgz --access public

@@ -13,7 +13,7 @@ in one TypeScript package, with a CLI and deterministic library API.
       EOF FL012 checks, paired valid/invalid fixtures and regression tests.
 - [x] Milestone 3: normalize text and tool chunks, FL010/FL011, lane transitions,
       implicit closure, conflicting repeats, and compatibility fixtures.
-- [ ] Milestone 4: developer experience and CI readiness, final reporter polish,
+- [x] Milestone 4: developer experience and CI readiness, final reporter polish,
       one-file/glob policy, and a copy-pasteable GitHub Actions usage example.
 - [ ] Milestone 5: OSS release, package name verification, npm publishing setup,
       tagged release, and changelog.

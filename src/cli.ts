@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-import { Command, CommanderError } from "commander";
+import { Command, CommanderError, Option } from "commander";
 import { createReadStream } from "node:fs";
 import {
   lintEvents,
@@ -9,6 +9,7 @@ import {
   MAX_INPUT_BYTES,
 } from "./index";
 import type { Diagnostic, InputFormat, LintResult } from "./types";
+import { formatJson, formatPretty } from "./reporters";
 import packageJson from "../package.json";
 async function readInput(file: string): Promise<string> {
   const stream = file === "-" ? process.stdin : createReadStream(file);
@@ -29,34 +30,51 @@ async function readInput(file: string): Promise<string> {
   return Buffer.concat(chunks).toString("utf8");
 }
 function report(result: LintResult, format: string, file: string): void {
-  if (format === "json") {
-    console.log(JSON.stringify(result, null, 2));
-    return;
-  }
   console.log(
-    `${file}\nAG-UI 1.0; FlowLint supported rules: ${result.supportedRules.length} (${result.supportedRules.join(", ")})`,
+    format === "json"
+      ? formatJson(result)
+      : formatPretty(result, file, {
+          color: !!process.stdout.isTTY && process.env.NO_COLOR === undefined,
+        }),
   );
-  for (const d of result.diagnostics)
-    console.log(
-      `  ${d.line ?? "?"}:${d.column ?? "?"}  ${d.severity}  ${d.ruleId}  ${d.message}`,
-    );
-  const errors = result.diagnostics.filter(
-    (d) => d.severity === "error",
-  ).length;
-  console.log(
-    `${errors} errors, ${result.diagnostics.length - errors} warnings (${result.checkedEvents} events checked)`,
+}
+function reportFailure(diagnostic: Diagnostic, format: string, source: string) {
+  report(
+    {
+      valid: false,
+      protocol: "ag-ui/1.0",
+      checkedEvents: 0,
+      supportedRules: [...SUPPORTED_RULES],
+      diagnostics: [diagnostic],
+    },
+    format,
+    source,
   );
+  process.exitCode = 2;
 }
 const program = new Command()
   .name("flowlint")
   .description("Offline checks for AG-UI event traces")
-  .version(packageJson.version);
+  .version(packageJson.version)
+  .configureOutput({ writeErr: () => {} });
 program.exitOverride();
-program
+const checkCommand = program
   .command("check")
-  .argument("<file>", "NDJSON/JSON trace, or - for stdin")
-  .option("--input <format>", "auto, ndjson, or json", "auto")
-  .option("--format <format>", "pretty or json", "pretty")
+  .allowExcessArguments(false)
+  .argument(
+    "<file>",
+    "one NDJSON/JSON file, or - for stdin (no glob expansion)",
+  )
+  .addOption(
+    new Option("--input <format>", "input encoding")
+      .choices(["auto", "ndjson", "json"])
+      .default("auto"),
+  )
+  .addOption(
+    new Option("--format <format>", "output format")
+      .choices(["pretty", "json"])
+      .default("pretty"),
+  )
   .option(
     "--allow-partial",
     "Warn on uncertain capture boundaries and EOF truncation",
@@ -67,11 +85,6 @@ program
       options: { input: InputFormat; format: string; allowPartial?: boolean },
     ) => {
       try {
-        if (!["pretty", "json"].includes(options.format))
-          throw new TraceInputError(
-            "CLI_USAGE",
-            "Output format must be pretty or json",
-          );
         const result = lintEvents(
           parseTrace(await readInput(file), { format: options.input }),
           { allowPartial: options.allowPartial },
@@ -93,18 +106,7 @@ program
                 severity: "error",
                 message: "Unable to read trace input",
               };
-        report(
-          {
-            valid: false,
-            protocol: "ag-ui/1.0",
-            checkedEvents: 0,
-            supportedRules: [...SUPPORTED_RULES],
-            diagnostics: [d],
-          },
-          options.format,
-          file,
-        );
-        process.exitCode = 2;
+        reportFailure(d, options.format, file);
       }
     },
   );
@@ -114,10 +116,28 @@ if (process.argv.length === 2) {
 } else {
   program.exitOverride();
   try {
-    await program.parseAsync();
+    await program.parseAsync(process.argv, { from: "node" });
   } catch (error) {
-    if (error instanceof CommanderError)
-      process.exitCode = error.exitCode === 0 ? 0 : 2;
-    else throw error;
+    if (error instanceof CommanderError) {
+      if (error.exitCode === 0) process.exitCode = 0;
+      else {
+        // Even failures before argument parsing finish honor a requested JSON format.
+        const args = process.argv.slice(2);
+        const jsonRequested = args.some(
+          (arg, i) =>
+            arg === "--format=json" ||
+            (arg === "--format" && args[i + 1] === "json"),
+        );
+        reportFailure(
+          {
+            ruleId: "CLI_USAGE",
+            severity: "error",
+            message: error.message.replace(/^error: /, ""),
+          },
+          jsonRequested ? "json" : "pretty",
+          checkCommand.args[0] ?? "flowlint",
+        );
+      }
+    } else throw error;
   }
 }

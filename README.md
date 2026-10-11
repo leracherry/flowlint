@@ -3,10 +3,11 @@
 Offline linting for AG-UI agent event traces. A small TypeScript library and CLI
 that catches stream lifecycle mistakes without starting an agent or calling an LLM.
 
-**Status: milestone 3 implemented.** Runtime schema validation uses the official
+**Status: milestone 4 implemented.** Runtime schema validation uses the official
 `@ag-ui/core/schemas` entry point, pinned to AG-UI core 1.0.2. Explicit run, text
 message, and tool-call lifecycles are checked, including text/tool shorthand
-normalization and complete versus partial capture boundaries. A successful check means only the documented checks passed;
+normalization and complete versus partial capture boundaries. A successful check
+means only the documented checks passed;
 FlowLint does not provide full protocol conformance certification.
 
 ## Run locally
@@ -31,12 +32,42 @@ The FlowLint name is also used by unrelated [n8n](https://flowlint.dev/) and
 
 Accepts NDJSON, JSON event arrays, or stdin (`-`). Blank NDJSON lines are ignored.
 Auto detection treats a leading `[` as a JSON array; `--input ndjson|json` overrides
-it. SSE transcripts require a future parser and are not supported.
+it. Each invocation accepts exactly one file or stdin, with paths resolved from
+the current directory. Directories and additional paths are rejected. FlowLint
+does not expand globs: pass a concrete path and quote it if it contains spaces.
+SSE transcripts require a future parser and are not supported.
 
 `--format pretty|json` selects output. Diagnostics carry a code, severity,
 zero-based event index and one-based line/column. JSON array locations point to
 individual array items. Schema-invalid events are reported and skipped safely.
 Parse errors use `PARSE_*`; event schema errors use `SCHEMA_EVENT`.
+
+Pretty output aligns location, severity, and code columns. Colors appear only
+when stdout is a terminal and `NO_COLOR` is absent; redirected output is always
+plain, even with `FORCE_COLOR`. Setting `NO_COLOR` (including an empty value)
+disables color. JSON is always uncolored, follows the library `LintResult` shape,
+and ends with a newline. All reports go to stdout, so CI can save them:
+
+```sh
+node dist/cli.js check examples/invalid.ndjson --format json > findings.json
+```
+
+The command above exits 1 because the example is invalid. JSON output also covers
+input, parse, and usage failures (`INPUT_READ`, `PARSE_*`, `CLI_USAGE`), with
+`checkedEvents: 0` when checking could not begin. `--help` and `--version` produce
+normal text and exit 0. Invoking `flowlint` without a command shows help and exits 2.
+Unknown commands/options or extra file arguments exit 2.
+
+For example, checking the invalid trace produces:
+
+```text
+examples/invalid.ndjson
+AG-UI 1.0; FlowLint supported rules: 14 (FL001, FL002, FL003, FL004, FL005, FL006, FL007, FL008, FL009, FL010, FL011, FL012, RUN_TRANSITION, RUN_IDENTITY)
+
+  2:1  error  FL002  TEXT_MESSAGE_CONTENT refers to unopened text message "m-2"
+
+1 error, 0 warnings (3 events checked)
+```
 
 Exit codes: **0** no errors, **1** schema or lint errors, **2** input/parse/usage
 failure. Warnings do not cause failure. Reads are limited to 10 MiB and diagnostics
@@ -59,6 +90,10 @@ console.log(result.valid, result.diagnostics);
 The canonical input to `lintEvents` is a source-aware `SourceEvent[]`, returned by
 `parseTrace`. The result includes `protocol`, `checkedEvents`, `supportedRules`,
 `valid`, and `diagnostics`. `TraceInputError` exposes a safe code and location.
+`formatPretty(result, source)` and `formatJson(result)` are also exported for
+integrations; both return strings without a trailing newline. The pretty formatter
+is plain by default; `{ color: true }` explicitly enables ANSI styling for callers
+that have already checked their output destination.
 
 ## Current coverage
 
@@ -154,8 +189,42 @@ suspended for that run pending full attribution support. These warnings mean som
 checks were skipped; they do not establish that the unchecked events are correct.
 A new run restores explicit item checking.
 
-Milestone 4 is developer experience and CI readiness. See
+Milestones 0–4 are implemented; milestone 5 is release preparation. See
 [ROADMAP.md](ROADMAP.md) for progress.
+
+## Use in GitHub Actions
+
+For traces stored in a FlowLint checkout, copy this to
+`.github/workflows/lint-trace.yml`. Replace `TRACE_FILE` with your recorded trace.
+The final step fails the job on a lint error or input failure; warnings pass.
+This example builds from source and works before npm publication.
+
+```yaml
+name: Lint agent trace
+on: [push, pull_request]
+permissions:
+  contents: read
+jobs:
+  lint-trace:
+    runs-on: ubuntu-24.04
+    env:
+      TRACE_FILE: examples/valid.ndjson
+    steps:
+      - uses: actions/checkout@v7
+      - uses: pnpm/action-setup@v6
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 22
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm build
+      - run: node dist/cli.js check "$TRACE_FILE"
+```
+
+In another project, install a FlowLint GitHub Release tarball when one is
+available, or build a separate FlowLint checkout and invoke its `dist/cli.js` with
+the path to your trace. Access to this private source repository requires GitHub
+authorization. The npm package is not yet available.
 
 ## Development and releases
 

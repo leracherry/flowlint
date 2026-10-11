@@ -7,3 +7,5 @@ export type {
   LintResult,
   SourceEvent,
 } from "./types";
+
+export { formatPretty, formatJson } from "./reporters";

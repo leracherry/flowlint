@@ -316,7 +316,7 @@ export function lintEvents(
   diagnostics.sort(
     (a, b) =>
       (a.eventIndex ?? records.length) - (b.eventIndex ?? records.length) ||
-      a.ruleId.localeCompare(b.ruleId),
+      (a.ruleId < b.ruleId ? -1 : a.ruleId > b.ruleId ? 1 : 0),
   );
   return {
     valid: !diagnostics.some((d) => d.severity === "error"),

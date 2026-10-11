@@ -24,13 +24,14 @@ const paths = packed.files.map((file) => file.path);
 for (const path of paths)
   assert.match(
     path,
-    /^(dist\/[^/]+\.(?:js|js\.map|d\.ts)|examples\/[^/]+\.ndjson|package\.json|README\.md|LICENSE|CHANGELOG\.md|RELEASING\.md)$/,
+    /^(dist\/[^/]+\.(?:js|js\.map|d\.ts)|examples\/[^/]+\.ndjson|package\.json|README\.md|REFERENCE\.md|LICENSE|CHANGELOG\.md|RELEASING\.md)$/,
   );
 for (const path of [
   "dist/cli.js",
   "dist/index.js",
   "dist/index.d.ts",
   "README.md",
+  "REFERENCE.md",
   "LICENSE",
   "CHANGELOG.md",
 ])

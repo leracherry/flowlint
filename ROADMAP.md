@@ -15,17 +15,17 @@ in one TypeScript package, with a CLI and deterministic library API.
       implicit closure, conflicting repeats, and compatibility fixtures.
 - [x] Milestone 4: developer experience and CI readiness, final reporter polish,
       one-file/glob policy, and a copy-pasteable GitHub Actions usage example.
-- [ ] Milestone 5: distribution and release (npm registry availability pending).
+- [x] Milestone 5: distribution and release.
   - [x] Package metadata, changelog, contributor feedback template, and release docs.
   - [x] Packed file-list verification and fresh-project CLI/API/type checks.
   - [x] GitHub release automation with a verified tarball and checksum.
   - [x] npm publishing workflow using the repository NPM_TOKEN secret.
   - [x] Confirm npm scope ownership and submit v0.1.0 successfully to npm.
-  - [ ] Verify public registry availability and a fresh npm registry installation.
+  - [x] Verify public registry availability and a fresh npm registry installation.
 
-v0.1.0 is distributed as a verified GitHub tarball. npm accepted the public package
-`@leracherry/flowlint`, but its initial processing still returned 404 during
-post-publication checks on 2026-10-11. The source repository remains private. Token-based
+v0.1.0 is available as a verified GitHub tarball and the public npm package
+`@leracherry/flowlint`. A fresh registry installation, CLI run, and library import
+passed on 2026-10-11. The source repository remains private. Token-based
 publishing is configured; Trusted Publishing remains an optional migration.
 See RELEASING.md.
 The current rules deliberately do not validate reasoning/step/subagent lifecycles,

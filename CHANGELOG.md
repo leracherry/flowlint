@@ -18,10 +18,10 @@ Initial release of FlowLint, an offline CLI and TypeScript library for AG-UI tra
 Reasoning chunks and full subagent lifecycle checks remain incomplete and produce
 coverage warnings where relevant. SSE parsing, state patch application, step
 lifecycles, and reopened-item attribute checks are outside this release's scope.
-See README for precise supported behavior. A clean result is not full protocol
+See REFERENCE.md for precise supported behavior. A clean result is not full protocol
 conformance certification.
 
 ### Distribution
 
 The GitHub Release contains an installable npm tarball and SHA-256 checksum.
-npm accepted `@leracherry/flowlint@0.1.0`; initial registry availability is pending.
+Published on npm as `@leracherry/flowlint@0.1.0`; fresh installation verified.

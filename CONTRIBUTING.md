@@ -9,7 +9,7 @@ keep event content out of diagnostics. Arrival order is authoritative.
 
 Distribution automation is implemented. Explicit lifecycle
 rules, text/tool chunk normalization (FL010/FL011), and EOF checks are implemented. Add each new rule with its ID and
-coverage in README, paired valid/invalid fixtures, and partial-capture regressions.
+coverage in REFERENCE.md, paired valid/invalid fixtures, and partial-capture regressions.
 SSE parsing and reasoning/subagent lifecycle checks are later work.
 
 Run `pnpm verify:package` to check the distributable in a fresh consumer project.

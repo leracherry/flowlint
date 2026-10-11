@@ -30,7 +30,9 @@ npm install @leracherry/flowlint
 npx flowlint check your-trace.ndjson
 ```
 
-Published as [@leracherry/flowlint](https://www.npmjs.com/package/@leracherry/flowlint).
+npm accepted [@leracherry/flowlint](https://www.npmjs.com/package/@leracherry/flowlint)
+for publication on 2026-10-11. Initial registry processing is still pending; if
+installation returns 404, use the verified GitHub tarball below.
 
 ### GitHub release tarball
 
@@ -209,7 +211,8 @@ suspended for that run pending full attribution support. These warnings mean som
 checks were skipped; they do not establish that the unchecked events are correct.
 A new run restores explicit item checking.
 
-Milestones 0–5 are implemented, including verified GitHub and npm distribution. See
+Milestones 0–4 and release automation are implemented. npm accepted v0.1.0;
+public registry availability is the remaining release verification. See
 [ROADMAP.md](ROADMAP.md) for progress.
 
 ## Use in GitHub Actions

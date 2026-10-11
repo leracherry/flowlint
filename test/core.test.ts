@@ -117,11 +117,16 @@ describe("schema and initial lifecycle slice", () => {
         start,
         message,
         { type: "RUN_ERROR", message: "Failed" },
+        { ...start, runId: "next" },
+        { ...finish, runId: "next" },
         { type: "RUN_ERROR", message: "Late" },
       ]).valid,
     ).toBe(true));
   it("downgrades missing excerpt openers", () =>
-    expect(lint([content], true).diagnostics[0]?.severity).toBe("warning"));
+    expect(
+      lint([content], true).diagnostics.find((d) => d.ruleId === "FL002")
+        ?.severity,
+    ).toBe("warning"));
   it("retains observed contradictions in partial mode", () =>
     expect(lint([start, content], true).diagnostics[0]?.severity).toBe(
       "error",
@@ -136,7 +141,7 @@ describe("schema and initial lifecycle slice", () => {
       lint([{ type: "TEXT_MESSAGE_START" }, content]).diagnostics.map(
         (d) => d.ruleId,
       ),
-    ).toEqual(["SCHEMA_EVENT", "FL002"]));
+    ).toEqual(["SCHEMA_EVENT", "FL001", "FL002", "FL012"]));
   it("marks chunks as incomplete coverage", () => {
     const result = lint([
       start,

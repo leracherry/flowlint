@@ -1,0 +1,26 @@
+[
+  {
+    "type": "RUN_STARTED",
+    "threadId": "thread",
+    "runId": "run"
+  },
+  {
+    "type": "TOOL_CALL_START",
+    "toolCallId": "t",
+    "toolCallName": "search"
+  },
+  {
+    "type": "TOOL_CALL_ARGS",
+    "toolCallId": "t",
+    "delta": "fragment"
+  },
+  {
+    "type": "TOOL_CALL_END",
+    "toolCallId": "t"
+  },
+  {
+    "type": "RUN_FINISHED",
+    "threadId": "thread",
+    "runId": "run"
+  }
+]

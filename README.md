@@ -3,11 +3,11 @@
 Offline linting for AG-UI agent event traces. A small TypeScript library and CLI
 that catches stream lifecycle mistakes without starting an agent or calling an LLM.
 
-**Status: initial implementation.** Runtime schema validation uses the official
-`@ag-ui/core/schemas` entry point, pinned to AG-UI core 1.0.2. The initial sequence
-rule is **FL002: text content references a message that is not open**.
-This is a first working slice, not full protocol conformance or the completed v0.1
-rule set. A successful check means only the documented checks passed.
+**Status: milestone 2 implemented.** Runtime schema validation uses the official
+`@ag-ui/core/schemas` entry point, pinned to AG-UI core 1.0.2. Explicit run, text
+message, and tool-call lifecycles are checked, including complete versus partial
+capture boundaries. A successful check means only the documented checks passed;
+FlowLint does not provide full protocol conformance certification.
 
 ## Run locally
 
@@ -62,18 +62,61 @@ The canonical input to `lintEvents` is a source-aware `SourceEvent[]`, returned 
 
 ## Current coverage
 
-- Official runtime validation for all event shapes in the pinned schema.
-- FL002 for `TEXT_MESSAGE_CONTENT` after a missing start or observed end.
-- Message IDs tracked independently; legal tool/text interleaving accepted.
-- Run terminals reset message state; `RUN_ERROR` is not itself a lint failure.
-- Partial mode downgrades missing openers before an observed run start to warnings.
-- Text chunks trigger a coverage warning and suspend FL002 for that run because
-  chunk expansion is pending.
+| Code           | Check                                                                 |
+| -------------- | --------------------------------------------------------------------- |
+| FL001          | Stream starts without `RUN_STARTED` or `RUN_ERROR`                    |
+| FL002          | Explicit text content/end references a message that is not open       |
+| FL003          | Explicitly opened text message remains open at `RUN_FINISHED`         |
+| FL004          | Tool call starts while its ID is already open                         |
+| FL005          | Explicit tool arguments/end references a tool call that is not open   |
+| FL006          | New run starts while the prior run is active                          |
+| FL007          | A run ID is reused for another run on the same thread                 |
+| FL008          | Text message starts while its ID is already open                      |
+| FL009          | Explicitly opened tool call remains open at `RUN_FINISHED`            |
+| FL012          | Capture ends without a terminal event or with open items              |
+| RUN_TRANSITION | Event follows a closed run illegally, or finish has no observed start |
+| RUN_IDENTITY   | Finish identifiers differ from the active run                         |
 
-Run identity, duplicate opens, unopened end events, tool lifecycle, EOF/truncation,
-chunk normalization, reasoning, and subagent lanes are not yet sequence-checked.
-Attributed subagent text events are excluded from FL002 pending lane support.
-Do not use this initial slice as a conformance gate for those features.
+Messages and tool calls are independent, so interleaving is legal. Closed items
+can be reopened. Run ID history is tracked separately for each thread. Event
+arrival order is authoritative, regardless of timestamps. Diagnostics are ordered
+by source event index and code; closure findings point to the terminal event and
+EOF findings point to the last schema-valid event.
+
+`RUN_ERROR` abandons open items without closure findings. A late `RUN_ERROR` after
+`RUN_FINISHED` is accepted; after `RUN_ERROR`, only a new `RUN_STARTED` is legal.
+Cancelled and interrupted finishes require closed items but do not require a
+resuming run in the same trace. `TOOL_CALL_END` ends argument streaming; a tool
+result is not required. Arguments are never parsed as JSON.
+
+### Complete and partial captures
+
+Complete mode is the default: an opening boundary and a terminal run event are
+required. `--allow-partial` downgrades uncertain findings at the opening capture
+boundary and EOF truncation to warnings. Missing item openers can be outside an
+excerpt until an observed run start establishes a complete scope. An observed
+item end proves subsequent content without a new start is an error. Duplicate
+starts, reused run IDs, observed run-transition contradictions, and items still
+open at an observed finish remain errors in partial mode.
+
+```sh
+node dist/cli.js check examples/interleaved.ndjson
+node dist/cli.js check examples/partial.ndjson --allow-partial --format json
+```
+
+### Coverage limits and next milestone
+
+Chunk normalization (`FL010`/`FL011`) is milestone 3. Text/tool chunk events emit
+`COVERAGE_CHUNKS` and suspend that family's item checks for the rest of the run.
+Subagent events or attributed items emit `COVERAGE_SUBAGENTS` and suspend both
+text/tool families, since tool ownership can be implicit through a parent message.
+Run boundaries and EOF checks still apply. These warnings mean some sequencing
+checks were skipped; they do not establish that the unchecked events are correct.
+A new run restores item checking.
+
+Reasoning, steps, state patches, item-reopening attributes, and subagent lifecycles
+are not sequence-checked. Their event shapes still undergo official schema
+validation. See [ROADMAP.md](ROADMAP.md) for milestone progress.
 
 ## Development and releases
 

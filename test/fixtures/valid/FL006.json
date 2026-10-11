@@ -1,0 +1,22 @@
+[
+  {
+    "type": "RUN_STARTED",
+    "threadId": "thread",
+    "runId": "run"
+  },
+  {
+    "type": "RUN_FINISHED",
+    "threadId": "thread",
+    "runId": "run"
+  },
+  {
+    "type": "RUN_STARTED",
+    "threadId": "thread",
+    "runId": "next"
+  },
+  {
+    "type": "RUN_FINISHED",
+    "threadId": "thread",
+    "runId": "next"
+  }
+]

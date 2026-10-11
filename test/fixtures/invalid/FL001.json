@@ -1,0 +1,11 @@
+[
+  {
+    "type": "STATE_SNAPSHOT",
+    "snapshot": {}
+  },
+  {
+    "type": "RUN_FINISHED",
+    "threadId": "thread",
+    "runId": "run"
+  }
+]

@@ -1,0 +1,8 @@
+{"type": "RUN_STARTED", "threadId": "thread", "runId": "run"}
+{"type": "TEXT_MESSAGE_START", "messageId": "m", "role": "assistant"}
+{"type": "TOOL_CALL_START", "toolCallId": "t", "toolCallName": "search"}
+{"type": "TEXT_MESSAGE_CONTENT", "messageId": "m", "delta": "Hello"}
+{"type": "TOOL_CALL_ARGS", "toolCallId": "t", "delta": "fragment"}
+{"type": "TOOL_CALL_END", "toolCallId": "t"}
+{"type": "TEXT_MESSAGE_END", "messageId": "m"}
+{"type": "RUN_FINISHED", "threadId": "thread", "runId": "run"}

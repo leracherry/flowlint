@@ -7,8 +7,9 @@ Add regression cases for both broken traces and legal streams before expanding
 rule coverage. Reuse the official AG-UI schemas, preserve source locations, and
 keep event content out of diagnostics. Arrival order is authoritative.
 
-The next steps are explicit run/message/tool lifecycle rules, chunk normalization,
-and EOF capture-boundary checks. Add each rule with its ID and coverage in README.
+The next milestone is chunk normalization and FL010/FL011. Explicit lifecycle
+rules and EOF capture checks are implemented. Add each new rule with its ID and
+coverage in README, paired valid/invalid fixtures, and partial-capture regressions.
 SSE parsing and reasoning/subagent lifecycle checks are later work.
 
 To release, update `package.json` and its lockfile, commit to main, then push a

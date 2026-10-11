@@ -35,3 +35,37 @@ it("reads stdin and keeps sensitive syntax errors private", () => {
   expect(result.stdout).not.toContain("PRIVATE_BODY");
   expect(JSON.parse(result.stdout).diagnostics[0].ruleId).toBe("PARSE_JSON");
 });
+it("uses the same supported rule list in pretty and JSON output", () => {
+  const json = JSON.parse(
+    cli("check", "examples/valid.ndjson", "--format", "json").stdout,
+  );
+  const pretty = cli("check", "examples/valid.ndjson").stdout;
+  expect(json.supportedRules).toContain("FL009");
+  expect(pretty).toContain(`supported rules: ${json.supportedRules.length}`);
+});
+it("supports partial excerpts without hiding observed duplicate starts", () => {
+  expect(cli("check", "examples/partial.ndjson").status).toBe(1);
+  expect(
+    cli("check", "examples/partial.ndjson", "--allow-partial").status,
+  ).toBe(0);
+  expect(
+    cli("check", "test/fixtures/invalid/FL008.json", "--allow-partial").status,
+  ).toBe(1);
+});
+it("reports EOF errors in complete captures and warnings in partial captures", () => {
+  expect(cli("check", "test/fixtures/invalid/FL012.json").status).toBe(1);
+  const partial = cli(
+    "check",
+    "test/fixtures/invalid/FL012.json",
+    "--allow-partial",
+    "--format",
+    "json",
+  );
+  expect(partial.status).toBe(0);
+  expect(JSON.parse(partial.stdout).diagnostics[0]).toMatchObject({
+    ruleId: "FL012",
+    severity: "warning",
+  });
+});
+it("accepts the interleaved example", () =>
+  expect(cli("check", "examples/interleaved.ndjson").status).toBe(0));

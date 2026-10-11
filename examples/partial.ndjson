@@ -1,0 +1,3 @@
+{"type": "TEXT_MESSAGE_CONTENT", "messageId": "m", "delta": "Hello"}
+{"type": "TEXT_MESSAGE_END", "messageId": "m"}
+{"type": "RUN_FINISHED", "threadId": "thread", "runId": "run"}

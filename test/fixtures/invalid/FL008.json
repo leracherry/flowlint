@@ -1,0 +1,26 @@
+[
+  {
+    "type": "RUN_STARTED",
+    "threadId": "thread",
+    "runId": "run"
+  },
+  {
+    "type": "TEXT_MESSAGE_START",
+    "messageId": "m",
+    "role": "assistant"
+  },
+  {
+    "type": "TEXT_MESSAGE_START",
+    "messageId": "m",
+    "role": "assistant"
+  },
+  {
+    "type": "TEXT_MESSAGE_END",
+    "messageId": "m"
+  },
+  {
+    "type": "RUN_FINISHED",
+    "threadId": "thread",
+    "runId": "run"
+  }
+]

@@ -3,6 +3,7 @@ import { Command, CommanderError } from "commander";
 import { createReadStream } from "node:fs";
 import {
   lintEvents,
+  SUPPORTED_RULES,
   parseTrace,
   TraceInputError,
   MAX_INPUT_BYTES,
@@ -33,7 +34,7 @@ function report(result: LintResult, format: string, file: string): void {
     return;
   }
   console.log(
-    `${file}\nAG-UI 1.0; FlowLint supported rules: 1 (FL002 text content)`,
+    `${file}\nAG-UI 1.0; FlowLint supported rules: ${result.supportedRules.length} (${result.supportedRules.join(", ")})`,
   );
   for (const d of result.diagnostics)
     console.log(
@@ -56,7 +57,10 @@ program
   .argument("<file>", "NDJSON/JSON trace, or - for stdin")
   .option("--input <format>", "auto, ndjson, or json", "auto")
   .option("--format <format>", "pretty or json", "pretty")
-  .option("--allow-partial", "Downgrade missing openers at an excerpt boundary")
+  .option(
+    "--allow-partial",
+    "Warn on uncertain capture boundaries and EOF truncation",
+  )
   .action(
     async (
       file: string,
@@ -94,7 +98,7 @@ program
             valid: false,
             protocol: "ag-ui/1.0",
             checkedEvents: 0,
-            supportedRules: ["FL002 (text content)"],
+            supportedRules: [...SUPPORTED_RULES],
             diagnostics: [d],
           },
           options.format,

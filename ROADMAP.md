@@ -28,9 +28,15 @@ v0.1.0 is available as a verified GitHub tarball and the public npm package
 passed on 2026-10-11. The source repository remains private. Token-based
 publishing is configured; Trusted Publishing remains an optional migration.
 See RELEASING.md.
-The current rules deliberately do not validate reasoning/step/subagent lifecycles,
-SSE transport framing, state patch application, or reopened item attributes.
-Reasoning and subagent coverage warnings identify skipped checks until supported.
-Text/tool chunk assembly supports resolvable attribution lanes; full explicit
-subagent item lifecycle checks remain suspended and are not claimed as complete.
+
+## After v0.1.0 (unreleased)
+
+- [x] Subagent lifecycle validation, nested/parallel invocations, attribution-only
+      streams, inherited entity ownership, snapshot/input ownership, and partial
+      capture regressions. Explicit item checks stay active in subagent runs.
+- [ ] Reasoning and step lifecycle checks.
+- [ ] SSE input and state patch validation.
+
+Reasoning chunks still emit a coverage warning. Attribution checks cover reasoning,
+activity, and steps, but do not establish full lifecycle or patch correctness.
 EOF checks refer to capture truncation, not tool execution or result completion.

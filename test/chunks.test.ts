@@ -320,9 +320,7 @@ describe("lanes and compatibility", () => {
       finish,
     ]);
     expect(result.valid).toBe(true);
-    expect(result.diagnostics.map((d) => d.ruleId)).toEqual([
-      "COVERAGE_SUBAGENTS",
-    ]);
+    expect(result.diagnostics.map((d) => d.ruleId)).toEqual([]);
   });
   it("untagged continuation prefers the parent stream", () => {
     const result = normalize([
@@ -407,6 +405,7 @@ describe("lanes and compatibility", () => {
       };
       const result = lint([
         start,
+        { type: "SUBAGENT_STARTED", subagentRunId: "a", name: "worker" },
         { ...text, subagentRunId: "a" },
         { ...tool, subagentRunId: "b" },
         terminal,
@@ -432,6 +431,7 @@ describe("lanes and compatibility", () => {
         text,
         { type: "SUBAGENT_STARTED", subagentRunId: "a", name: "worker" },
         { type: text.type, delta: "tail" },
+        { type: "SUBAGENT_FINISHED", subagentRunId: "a" },
         finish,
       ]).valid,
     ).toBe(true));
@@ -525,7 +525,6 @@ it("untagged reasoning continuations do not close a different owner lane", () =>
   expect(result.valid).toBe(true);
   expect(result.diagnostics.map((d) => d.ruleId)).toEqual([
     "COVERAGE_REASONING",
-    "COVERAGE_SUBAGENTS",
   ]);
 });
 it("explicit reasoning provenance preserves the parent chunk stream", () =>

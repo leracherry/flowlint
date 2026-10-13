@@ -1,4 +1,5 @@
 import { EventSchemas } from "@ag-ui/core/schemas";
+import { Attribution } from "./attribution";
 import { ChunkNormalizer } from "./normalize-chunks";
 import { createState, createItemState } from "./state";
 import type { Diagnostic, LintOptions, LintResult, SourceEvent } from "./types";
@@ -18,6 +19,11 @@ export const SUPPORTED_RULES = [
   "FL012",
   "RUN_TRANSITION",
   "RUN_IDENTITY",
+  "SUBAGENT_START",
+  "SUBAGENT_END",
+  "SUBAGENT_PARENT",
+  "SUBAGENT_OPEN",
+  "ATTRIBUTION",
 ] as const;
 export function lintEvents(
   records: readonly SourceEvent[],
@@ -42,11 +48,15 @@ export function lintEvents(
     const { eventIndex, line, column } = record;
     diagnostics.push({ ruleId, severity, message, eventIndex, line, column });
   };
-  const normalizer = new ChunkNormalizer(emit);
+  let normalizer = new ChunkNormalizer(emit);
+  let attribution = new Attribution(emit);
   const resetItems = () => {
     state.messages = createItemState();
     state.tools = createItemState();
-    state.subagentsWarned = false;
+    state.subagents.clear();
+    state.closedSubagents.clear();
+    state.attributed.clear();
+    attribution = new Attribution(emit);
   };
   const checkItem = (
     record: SourceEvent,
@@ -57,8 +67,8 @@ export function lintEvents(
     missingRule: string,
     eventType: string,
     label: string,
+    owner?: string,
   ) => {
-    if (item.suspended) return;
     if (operation === "start") {
       if (item.open.has(id))
         emit(
@@ -76,7 +86,10 @@ export function lintEvents(
           `${eventType} refers to unopened ${label} ${JSON.stringify(id)}`,
           options.allowPartial &&
             state.status === "excerpt" &&
-            !item.closed.has(id)
+            !item.closed.has(id) &&
+            (owner === undefined ||
+              (!state.subagents.has(owner) &&
+                !state.closedSubagents.has(owner)))
             ? "warning"
             : "error",
         );
@@ -98,6 +111,40 @@ export function lintEvents(
     }
     lastValid = record;
     const original = parsed.data;
+    // Reject invalid run transitions before they mutate attribution/chunk state.
+    if (original.type === "RUN_STARTED" && state.status === "active") {
+      emit(record, "FL006", "RUN_STARTED while a run is active");
+      continue;
+    }
+    if (
+      original.type === "RUN_FINISHED" &&
+      state.run &&
+      (state.run.threadId !== original.threadId ||
+        state.run.runId !== original.runId)
+    ) {
+      emit(
+        record,
+        "RUN_IDENTITY",
+        "RUN_FINISHED identifiers do not match the active run",
+      );
+      continue;
+    }
+    if (
+      (state.status === "finished" || state.status === "errored") &&
+      original.type !== "RUN_STARTED" &&
+      original.type !== "RUN_ERROR"
+    ) {
+      emit(
+        record,
+        "RUN_TRANSITION",
+        `${original.type} arrives after the run closed`,
+      );
+      continue;
+    }
+    if (original.type === "RUN_STARTED" || original.type === "RUN_ERROR") {
+      normalizer = new ChunkNormalizer(emit);
+      attribution = new Attribution(emit);
+    }
     if (
       state.status === "initial" &&
       original.type !== "RUN_STARTED" &&
@@ -111,21 +158,20 @@ export function lintEvents(
       );
       state.status = "excerpt";
     }
+    const resolved = attribution.resolve(original, record);
+    if (!resolved) continue;
+    if (
+      "subagentRunId" in resolved &&
+      typeof resolved.subagentRunId === "string" &&
+      !resolved.type.startsWith("SUBAGENT_")
+    )
+      state.attributed.add(resolved.subagentRunId);
     for (const event of normalizer.push(
-      original,
+      resolved,
       record,
       !!options.allowPartial && state.status === "excerpt",
     )) {
       if (event.type === "RUN_STARTED") {
-        if (state.status === "active") {
-          emit(
-            record,
-            "FL006",
-            `RUN_STARTED while run ${JSON.stringify(state.run?.runId)} is active`,
-          );
-          // Reject the nested start rather than discarding the prior run's items.
-          continue;
-        }
         const seen = state.seenRuns.get(event.threadId) ?? new Set<string>();
         if (seen.has(event.runId))
           emit(
@@ -136,6 +182,7 @@ export function lintEvents(
         seen.add(event.runId);
         state.seenRuns.set(event.threadId, seen);
         resetItems();
+        attribution.resolve(event, record);
         state.run = { threadId: event.threadId, runId: event.runId };
         state.status = "active";
         continue;
@@ -152,33 +199,19 @@ export function lintEvents(
         state.status = "errored";
         continue;
       }
-      if (state.status === "finished" || state.status === "errored") {
-        emit(
-          record,
-          "RUN_TRANSITION",
-          `${event.type} arrives after the run closed`,
-        );
-        continue;
-      }
       if (event.type === "RUN_FINISHED") {
-        if (
-          state.run &&
-          (state.run.threadId !== event.threadId ||
-            state.run.runId !== event.runId)
-        ) {
-          emit(
-            record,
-            "RUN_IDENTITY",
-            "RUN_FINISHED identifiers do not match the active run",
-          );
-          continue;
-        }
         if (!state.run)
           emit(
             record,
             "RUN_TRANSITION",
             "RUN_FINISHED has no observed RUN_STARTED",
             options.allowPartial ? "warning" : "error",
+          );
+        for (const id of state.subagents)
+          emit(
+            record,
+            "SUBAGENT_OPEN",
+            `RUN_FINISHED with active subagent ${JSON.stringify(id)}`,
           );
         for (const id of state.messages.open)
           emit(
@@ -197,24 +230,56 @@ export function lintEvents(
         state.status = "finished";
         continue;
       }
-      // Attribution can be implicit through parent messages. Suspend both item
-      // families once subagents appear rather than guessing ownership before attribution support.
-      if (
-        ("subagentRunId" in event && event.subagentRunId) ||
-        event.type.startsWith("SUBAGENT_")
-      ) {
-        if (!state.subagentsWarned)
+      if (event.type === "SUBAGENT_STARTED") {
+        const id = event.subagentRunId;
+        if (state.subagents.has(id) || state.closedSubagents.has(id)) {
           emit(
             record,
-            "COVERAGE_SUBAGENTS",
-            "Subagent attribution is not implemented; text/tool lifecycle checks are suspended for this run",
-            "warning",
+            "SUBAGENT_START",
+            `Subagent invocation ${JSON.stringify(id)} is already announced or closed`,
           );
-        state.subagentsWarned = true;
-        state.messages.suspended = true;
-        state.messages.open.clear();
-        state.tools.suspended = true;
-        state.tools.open.clear();
+          continue;
+        }
+        if (state.attributed.has(id))
+          emit(
+            record,
+            "SUBAGENT_START",
+            `Subagent ${JSON.stringify(id)} was attributed before its announcement`,
+          );
+        const parent = event.parentSubagentRunId;
+        if (
+          parent !== undefined &&
+          !state.subagents.has(parent) &&
+          !state.closedSubagents.has(parent)
+        )
+          emit(
+            record,
+            "SUBAGENT_PARENT",
+            `Parent subagent ${JSON.stringify(parent)} has not been announced`,
+            options.allowPartial && state.status === "excerpt" && parent !== id
+              ? "warning"
+              : "error",
+          );
+        state.subagents.add(id);
+        continue;
+      }
+      if (
+        event.type === "SUBAGENT_FINISHED" ||
+        event.type === "SUBAGENT_ERROR"
+      ) {
+        const id = event.subagentRunId;
+        if (!state.subagents.delete(id))
+          emit(
+            record,
+            "SUBAGENT_END",
+            `${event.type} has no active invocation ${JSON.stringify(id)}`,
+            options.allowPartial &&
+              state.status === "excerpt" &&
+              !state.closedSubagents.has(id)
+              ? "warning"
+              : "error",
+          );
+        state.closedSubagents.add(id);
         continue;
       }
       switch (event.type) {
@@ -228,6 +293,7 @@ export function lintEvents(
             "FL002",
             event.type,
             "text message",
+            event.subagentRunId,
           );
           break;
         case "TEXT_MESSAGE_CONTENT":
@@ -240,6 +306,7 @@ export function lintEvents(
             "FL002",
             event.type,
             "text message",
+            event.subagentRunId,
           );
           break;
         case "TEXT_MESSAGE_END":
@@ -252,6 +319,7 @@ export function lintEvents(
             "FL002",
             event.type,
             "text message",
+            event.subagentRunId,
           );
           break;
         case "TOOL_CALL_START":
@@ -264,6 +332,7 @@ export function lintEvents(
             "FL005",
             event.type,
             "tool call",
+            event.subagentRunId,
           );
           break;
         case "TOOL_CALL_ARGS":
@@ -276,6 +345,7 @@ export function lintEvents(
             "FL005",
             event.type,
             "tool call",
+            event.subagentRunId,
           );
           break;
         case "TOOL_CALL_END":
@@ -288,6 +358,7 @@ export function lintEvents(
             "FL005",
             event.type,
             "tool call",
+            event.subagentRunId,
           );
           break;
       }
@@ -298,7 +369,8 @@ export function lintEvents(
     (state.status === "active" ||
       state.status === "excerpt" ||
       state.messages.open.size ||
-      state.tools.open.size)
+      state.tools.open.size ||
+      state.subagents.size)
   ) {
     emit(
       lastValid,

@@ -272,7 +272,7 @@ describe("protocol and boundary regressions", () => {
         { ...finish, runId: "next" },
       ]),
     ).toEqual(["FL002"]));
-  it("does not guess implicitly attributed subagent item ownership", () =>
+  it("checks implicitly attributed subagent items at run finish", () =>
     expect(
       codes([
         start,
@@ -280,5 +280,5 @@ describe("protocol and boundary regressions", () => {
         { ...tool, parentMessageId: "m" },
         finish,
       ]),
-    ).toEqual(["COVERAGE_SUBAGENTS"]));
+    ).toEqual(["FL003", "FL009"]));
 });

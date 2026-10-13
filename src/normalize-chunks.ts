@@ -72,6 +72,24 @@ export class ChunkNormalizer {
         this.reasoningWarned = false;
         this.reasoningOwners.clear();
       }
+      if (event.type === "MESSAGES_SNAPSHOT" || event.type === "RUN_STARTED") {
+        const messages =
+          event.type === "MESSAGES_SNAPSHOT"
+            ? event.messages
+            : (event.input?.messages ?? []);
+        for (const message of messages) {
+          const m = message as typeof message & {
+            subagentRunId?: string;
+            toolCalls?: { id: string }[];
+          };
+          if (m.role === "reasoning")
+            this.reasoningOwners.set(m.id, m.subagentRunId);
+          else if (m.role !== "activity")
+            this.owners.text.set(m.id, new Set([m.subagentRunId]));
+          for (const tool of m.toolCalls ?? [])
+            this.owners.tool.set(tool.id, new Set([m.subagentRunId]));
+        }
+      }
       return [...output, event];
     }
     const family: Family | undefined = event.type.startsWith("TEXT_MESSAGE_")
@@ -160,6 +178,7 @@ export class ChunkNormalizer {
         }
       }
     }
+    if (event.type === "SUBAGENT_STARTED") this.boundaries.add(lane);
     if (event.type === "SUBAGENT_FINISHED" || event.type === "SUBAGENT_ERROR") {
       close(lane);
       this.reasoningStreams.delete(lane);

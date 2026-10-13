@@ -3,7 +3,6 @@ export function createItemState() {
   return {
     open: new Set<string>(),
     closed: new Set<string>(),
-    suspended: false,
   };
 }
 export function createState() {
@@ -14,6 +13,8 @@ export function createState() {
     messages: createItemState(),
     tools: createItemState(),
     seenRuns: new Map<string, Set<string>>(),
-    subagentsWarned: false,
+    subagents: new Set<string>(),
+    closedSubagents: new Set<string>(),
+    attributed: new Set<string>(),
   };
 }

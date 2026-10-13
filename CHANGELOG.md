@@ -1,5 +1,15 @@
 # Changelog
 
+## Unreleased
+
+- Validate subagent invocation starts, terminals, nested parents, and run closure.
+- Keep explicit message/tool checks active alongside parallel and nested subagents.
+- Check inherited ownership across text, tools, reasoning, activity, and steps,
+  including historical ownership from run input and message snapshots.
+- Accept attribution-only producers, trailing attributed output, and suspended
+  invocations resumed in later runs; retain partial-capture severity handling.
+- Preserve chunk state when rejecting invalid run boundaries.
+
 ## 0.1.0 — 2026-10-11
 
 Initial release of FlowLint, an offline CLI and TypeScript library for AG-UI traces.

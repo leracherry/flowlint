@@ -168,3 +168,23 @@ it.each(["ndjson", "json"])("accepts valid %s from stdin", (format) => {
     checkedEvents: 2,
   });
 });
+it("reports subagent lifecycle failures through the packaged CLI", () => {
+  const input: unknown[] = [
+    { type: "RUN_STARTED", threadId: "t", runId: "r" },
+    { type: "SUBAGENT_STARTED", subagentRunId: "a", name: "worker" },
+    { type: "RUN_FINISHED", threadId: "t", runId: "r" },
+  ];
+  const run = (events: unknown[]) =>
+    spawnSync(
+      process.execPath,
+      ["dist/cli.js", "check", "-", "--format", "json"],
+      { input: JSON.stringify(events), encoding: "utf8" },
+    );
+  const invalid = run(input);
+  expect(invalid.status).toBe(1);
+  expect(JSON.parse(invalid.stdout).diagnostics).toMatchObject([
+    { ruleId: "SUBAGENT_OPEN", severity: "error", eventIndex: 2 },
+  ]);
+  input.splice(2, 0, { type: "SUBAGENT_FINISHED", subagentRunId: "a" });
+  expect(run(input).status).toBe(0);
+});

@@ -45,13 +45,14 @@ Warnings do not fail a check, making FlowLint easy to use in CI.
 - Missing, duplicate, or out-of-order run, message, and tool-call events.
 - Text and tool chunks with missing fields or conflicting metadata.
 - Unfinished runs and open items at the end of a capture.
+- Subagent lifecycles, nested delegation, and consistent event ownership.
 
 Interleaved messages and tool calls are supported. Use `--allow-partial` for
 captures that may start or end mid-stream.
 
-Coverage is still growing: reasoning, step, and full subagent lifecycles, state
-patches, and SSE input are not supported. Reasoning and subagent events emit
-coverage warnings; subagent runs skip explicit message/tool lifecycle checks.
+Subagent checks are available on `main` for the next release.
+Reasoning and step lifecycles, state patches, and SSE input remain outside
+coverage. Reasoning chunks emit a coverage warning.
 See the [reference](REFERENCE.md) for every rule and its limits.
 
 ## TypeScript API

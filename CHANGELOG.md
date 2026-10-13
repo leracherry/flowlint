@@ -2,6 +2,11 @@
 
 ## Unreleased
 
+- Validate reasoning spans, explicit reasoning messages, and per-owner step
+  lifecycles, including run closure, error abandonment, and partial captures.
+- Normalize reasoning chunks with FL010/FL011 checks and remove the reasoning
+  coverage warning. Add a reasoning/step trace example.
+
 - Validate subagent invocation starts, terminals, nested parents, and run closure.
 - Keep explicit message/tool checks active alongside parallel and nested subagents.
 - Check inherited ownership across text, tools, reasoning, activity, and steps,

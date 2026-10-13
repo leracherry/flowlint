@@ -162,7 +162,14 @@ describe("chunk triad expansion", () => {
   ])("same-lane %j closes chunks", (event) => {
     expect(
       codes([start, text, event, { type: text.type, delta: "tail" }, finish]),
-    ).toEqual(["FL010"]);
+    ).toEqual([
+      "FL010",
+      ...(event.type === "STEP_STARTED"
+        ? ["STEP_OPEN"]
+        : event.type === "REASONING_MESSAGE_START"
+          ? ["REASONING_MESSAGE_OPEN"]
+          : []),
+    ]);
   });
   it("a tool result closes shorthand without being treated as mixed triad form", () =>
     expect(
@@ -435,7 +442,7 @@ describe("lanes and compatibility", () => {
         finish,
       ]).valid,
     ).toBe(true));
-  it("discloses reasoning chunk coverage and treats it as a lane boundary", () => {
+  it("normalizes reasoning chunks and treats them as a lane boundary", () => {
     expect(
       codes([
         start,
@@ -444,7 +451,7 @@ describe("lanes and compatibility", () => {
         { type: text.type, delta: "tail" },
         finish,
       ]),
-    ).toEqual(["COVERAGE_REASONING", "FL010"]);
+    ).toEqual(["FL010"]);
   });
 });
 it("forwards metadata-only continuations as valid empty content without retaining metadata", () => {
@@ -523,9 +530,7 @@ it("untagged reasoning continuations do not close a different owner lane", () =>
     finish,
   ]);
   expect(result.valid).toBe(true);
-  expect(result.diagnostics.map((d) => d.ruleId)).toEqual([
-    "COVERAGE_REASONING",
-  ]);
+  expect(result.diagnostics.map((d) => d.ruleId)).toEqual([]);
 });
 it("explicit reasoning provenance preserves the parent chunk stream", () =>
   expect(
@@ -539,6 +544,7 @@ it("explicit reasoning provenance preserves the parent chunk stream", () =>
         subagentRunId: "child",
       },
       { type: "REASONING_MESSAGE_CONTENT", messageId: "r", delta: "x" },
+      { type: "REASONING_MESSAGE_END", messageId: "r" },
       { type: text.type, delta: "tail" },
       finish,
     ]).valid,

@@ -60,7 +60,7 @@ try {
   const version = run(["--version"]);
   assert.equal(version.status, 0, version.stderr);
   assert.equal(version.stdout.trim(), pkg.version);
-  for (const name of ["valid", "interleaved", "chunks"]) {
+  for (const name of ["valid", "interleaved", "chunks", "reasoning"]) {
     const result = run([
       "check",
       join(root, "examples", `${name}.ndjson`),

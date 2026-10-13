@@ -24,6 +24,15 @@ export const SUPPORTED_RULES = [
   "SUBAGENT_PARENT",
   "SUBAGENT_OPEN",
   "ATTRIBUTION",
+  "REASONING_SPAN_START",
+  "REASONING_SPAN_END",
+  "REASONING_SPAN_OPEN",
+  "REASONING_MESSAGE_START",
+  "REASONING_MESSAGE_MISSING",
+  "REASONING_MESSAGE_OPEN",
+  "STEP_START",
+  "STEP_END",
+  "STEP_OPEN",
 ] as const;
 export function lintEvents(
   records: readonly SourceEvent[],
@@ -53,6 +62,9 @@ export function lintEvents(
   const resetItems = () => {
     state.messages = createItemState();
     state.tools = createItemState();
+    state.reasoningMessages = createItemState();
+    state.reasoningSpans = createItemState();
+    state.steps.clear();
     state.subagents.clear();
     state.closedSubagents.clear();
     state.attributed.clear();
@@ -158,7 +170,16 @@ export function lintEvents(
       );
       state.status = "excerpt";
     }
-    const resolved = attribution.resolve(original, record);
+    const owner =
+      "subagentRunId" in original && typeof original.subagentRunId === "string"
+        ? original.subagentRunId
+        : undefined;
+    const allowUnseenStep =
+      !!options.allowPartial &&
+      state.status === "excerpt" &&
+      (owner === undefined ||
+        (!state.subagents.has(owner) && !state.closedSubagents.has(owner)));
+    const resolved = attribution.resolve(original, record, allowUnseenStep);
     if (!resolved) continue;
     if (
       "subagentRunId" in resolved &&
@@ -225,6 +246,27 @@ export function lintEvents(
             "FL009",
             `RUN_FINISHED with open tool call ${JSON.stringify(id)}`,
           );
+        for (const [items, rule, label] of [
+          [
+            state.reasoningMessages,
+            "REASONING_MESSAGE_OPEN",
+            "reasoning message",
+          ],
+          [state.reasoningSpans, "REASONING_SPAN_OPEN", "reasoning span"],
+        ] as const)
+          for (const id of items.open)
+            emit(
+              record,
+              rule,
+              `RUN_FINISHED with open ${label} ${JSON.stringify(id)}`,
+            );
+        for (const [owner, items] of state.steps)
+          for (const name of items.open)
+            emit(
+              record,
+              "STEP_OPEN",
+              `RUN_FINISHED with open step ${JSON.stringify(name)}${owner === undefined ? "" : ` in subagent ${JSON.stringify(owner)}`}`,
+            );
         resetItems();
         state.run = undefined;
         state.status = "finished";
@@ -283,6 +325,57 @@ export function lintEvents(
         continue;
       }
       switch (event.type) {
+        case "REASONING_START":
+        case "REASONING_END":
+          checkItem(
+            record,
+            state.reasoningSpans,
+            event.messageId,
+            event.type === "REASONING_START" ? "start" : "end",
+            "REASONING_SPAN_START",
+            "REASONING_SPAN_END",
+            event.type,
+            "reasoning span",
+            event.subagentRunId,
+          );
+          break;
+        case "REASONING_MESSAGE_START":
+        case "REASONING_MESSAGE_CONTENT":
+        case "REASONING_MESSAGE_END":
+          checkItem(
+            record,
+            state.reasoningMessages,
+            event.messageId,
+            event.type === "REASONING_MESSAGE_START"
+              ? "start"
+              : event.type === "REASONING_MESSAGE_END"
+                ? "end"
+                : "content",
+            "REASONING_MESSAGE_START",
+            "REASONING_MESSAGE_MISSING",
+            event.type,
+            "reasoning message",
+            event.subagentRunId,
+          );
+          break;
+        case "STEP_STARTED":
+        case "STEP_FINISHED": {
+          const items =
+            state.steps.get(event.subagentRunId) ?? createItemState();
+          state.steps.set(event.subagentRunId, items);
+          checkItem(
+            record,
+            items,
+            event.stepName,
+            event.type === "STEP_STARTED" ? "start" : "end",
+            "STEP_START",
+            "STEP_END",
+            event.type,
+            "step",
+            event.subagentRunId,
+          );
+          break;
+        }
         case "TEXT_MESSAGE_START":
           checkItem(
             record,

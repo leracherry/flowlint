@@ -286,7 +286,7 @@ describe("ownership", () => {
     },
   );
   it.each(["REASONING_MESSAGE_CONTENT", "REASONING_MESSAGE_END"])(
-    "checks %s ownership without enabling reasoning lifecycle rules",
+    "checks %s ownership while preserving the open message",
     (type) =>
       expect(
         codes([
@@ -305,7 +305,7 @@ describe("ownership", () => {
           },
           finish,
         ]),
-      ).toEqual(["ATTRIBUTION"]),
+      ).toEqual(["ATTRIBUTION", "REASONING_MESSAGE_OPEN"]),
   );
   it("checks activity ownership and accepts omitted tags", () =>
     expect(
@@ -353,7 +353,7 @@ describe("ownership", () => {
         { type: "STEP_FINISHED", stepName: "s" },
         finish,
       ]),
-    ).toEqual(["ATTRIBUTION"]));
+    ).toEqual(["ATTRIBUTION", "STEP_OPEN"]));
   it("reads historical ownership from message snapshots without requiring announcements", () =>
     expect(
       codes([

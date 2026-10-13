@@ -36,7 +36,7 @@ For example, checking the invalid trace produces:
 
 ```text
 examples/invalid.ndjson
-AG-UI 1.0; FlowLint supported rules: 19 (FL001, FL002, FL003, FL004, FL005, FL006, FL007, FL008, FL009, FL010, FL011, FL012, RUN_TRANSITION, RUN_IDENTITY, SUBAGENT_START, SUBAGENT_END, SUBAGENT_PARENT, SUBAGENT_OPEN, ATTRIBUTION)
+AG-UI 1.0; FlowLint supported rules: 28 (FL001, FL002, FL003, FL004, FL005, FL006, FL007, FL008, FL009, FL010, FL011, FL012, RUN_TRANSITION, RUN_IDENTITY, SUBAGENT_START, SUBAGENT_END, SUBAGENT_PARENT, SUBAGENT_OPEN, ATTRIBUTION, REASONING_SPAN_START, REASONING_SPAN_END, REASONING_SPAN_OPEN, REASONING_MESSAGE_START, REASONING_MESSAGE_MISSING, REASONING_MESSAGE_OPEN, STEP_START, STEP_END, STEP_OPEN)
 
   2:1  error  FL002  TEXT_MESSAGE_CONTENT refers to unopened text message "m-2"
 
@@ -71,27 +71,36 @@ that have already checked their output destination.
 
 ## Current coverage
 
-| Code            | Check                                                                      |
-| --------------- | -------------------------------------------------------------------------- |
-| FL001           | Stream starts without `RUN_STARTED` or `RUN_ERROR`                         |
-| FL002           | Explicit text content/end references a message that is not open            |
-| FL003           | Explicitly opened text message remains open at `RUN_FINISHED`              |
-| FL004           | Tool call starts while its ID is already open                              |
-| FL005           | Explicit tool arguments/end references a tool call that is not open        |
-| FL006           | New run starts while the prior run is active                               |
-| FL007           | A run ID is reused for another run on the same thread                      |
-| FL008           | Text message starts while its ID is already open                           |
-| FL009           | Explicitly opened tool call remains open at `RUN_FINISHED`                 |
-| FL010           | Opening text/tool chunk omits required fields                              |
-| FL011           | Text/tool ownership or chunk conflicts, mixed forms, or ambiguous lanes    |
-| FL012           | Capture ends without a terminal event or with open items                   |
-| RUN_TRANSITION  | Event follows a closed run illegally, or finish has no observed start      |
-| RUN_IDENTITY    | Finish identifiers differ from the active run                              |
-| SUBAGENT_START  | Duplicate/reused invocation ID or announcement after attributed output     |
-| SUBAGENT_END    | Subagent terminal without an active invocation                             |
-| SUBAGENT_PARENT | Nested invocation names an unannounced parent                              |
-| SUBAGENT_OPEN   | Run finishes with an announced invocation still active                     |
-| ATTRIBUTION     | Reasoning/activity ownership or step attribution disagrees with its opener |
+| Code                      | Check                                                                           |
+| ------------------------- | ------------------------------------------------------------------------------- |
+| FL001                     | Stream starts without `RUN_STARTED` or `RUN_ERROR`                              |
+| FL002                     | Explicit text content/end references a message that is not open                 |
+| FL003                     | Explicitly opened text message remains open at `RUN_FINISHED`                   |
+| FL004                     | Tool call starts while its ID is already open                                   |
+| FL005                     | Explicit tool arguments/end references a tool call that is not open             |
+| FL006                     | New run starts while the prior run is active                                    |
+| FL007                     | A run ID is reused for another run on the same thread                           |
+| FL008                     | Text message starts while its ID is already open                                |
+| FL009                     | Explicitly opened tool call remains open at `RUN_FINISHED`                      |
+| FL010                     | Opening text/tool/reasoning chunk omits required fields                         |
+| FL011                     | Text/tool ownership conflicts; chunk conflicts, mixed forms, or ambiguous lanes |
+| FL012                     | Capture ends without a terminal event or with open items                        |
+| RUN_TRANSITION            | Event follows a closed run illegally, or finish has no observed start           |
+| RUN_IDENTITY              | Finish identifiers differ from the active run                                   |
+| SUBAGENT_START            | Duplicate/reused invocation ID or announcement after attributed output          |
+| SUBAGENT_END              | Subagent terminal without an active invocation                                  |
+| SUBAGENT_PARENT           | Nested invocation names an unannounced parent                                   |
+| SUBAGENT_OPEN             | Run finishes with an announced invocation still active                          |
+| ATTRIBUTION               | Reasoning/activity ownership or step attribution disagrees with its opener      |
+| REASONING_SPAN_START      | Reasoning span starts while its ID is open                                      |
+| REASONING_SPAN_END        | Reasoning span ends without an open span                                        |
+| REASONING_SPAN_OPEN       | Reasoning span remains open at run finish                                       |
+| REASONING_MESSAGE_START   | Reasoning message starts while its ID is open                                   |
+| REASONING_MESSAGE_MISSING | Reasoning content/end refers to an unopened message                             |
+| REASONING_MESSAGE_OPEN    | Reasoning message remains open at run finish                                    |
+| STEP_START                | Step starts while the same owner's step name is open                            |
+| STEP_END                  | Step finishes without an open step for that owner                               |
+| STEP_OPEN                 | Step remains open at run finish                                                 |
 
 Messages and tool calls are independent, so interleaving is legal. Closed items
 can be reopened. Run ID history is tracked separately for each thread. Event
@@ -122,9 +131,10 @@ node dist/cli.js check examples/partial.ndjson --allow-partial --format json
 
 ### Chunk shorthand
 
-Text and tool chunks expand into start/content/end transitions before lifecycle
+Text, tool, and reasoning chunks expand into start/content/end transitions before lifecycle
 checks. The first text chunk requires `messageId`; an omitted role means
-`assistant`. The first tool chunk requires `toolCallId` and `toolCallName`.
+`assistant`. The first reasoning chunk also requires `messageId`, with role
+`reasoning`. The first tool chunk requires `toolCallId` and `toolCallName`.
 Continuations can omit opening fields or repeat them consistently. Repeating a
 conflicting role, name, tool name, parent message, or owner produces `FL011`.
 Naming a different identifier opens a new item and closes the previous one;
@@ -157,10 +167,45 @@ ambiguous lanes, and mixed forms remain errors in partial mode.
 
 ### Coverage limits
 
-Reasoning chunks produce `COVERAGE_REASONING`: they are schema-validated but are
-not normalized or lifecycle-checked. Reasoning/step lifecycles, state
-patch application, and item-reopening attributes remain outside sequence coverage.
-Their event shapes still undergo official schema validation.
+State patch application, activity patch validation, encrypted-value target/storage
+validation, and item-reopening attributes other than ownership remain outside
+coverage. Event shapes still undergo official schema validation. Encrypted
+reasoning values stay opaque and never appear in diagnostics.
+
+### Reasoning and steps
+
+Available on `main` for the next release. The checks follow the AG-UI 1.0
+[reasoning](https://github.com/ag-ui-protocol/ag-ui/blob/main/docs/spec/1.0/events/reasoning.mdx)
+and [step](https://github.com/ag-ui-protocol/ag-ui/blob/main/docs/spec/1.0/events/lifecycle.mdx#steps) rules.
+
+Reasoning spans (`REASONING_START` / `REASONING_END`) and reasoning messages
+(`REASONING_MESSAGE_START` / `CONTENT` / `END`) have separate ID namespaces.
+A span and message can share an ID. Messages need no enclosing span; a span
+can contain several messages and does not implicitly open or close them.
+Duplicate openers, orphaned content/ends, and unclosed items at `RUN_FINISHED`
+are errors. Closed IDs may reopen under the same owner.
+
+`REASONING_MESSAGE_CHUNK` follows the same expansion and lane-boundary rules
+as text/tool chunks, including FL010 for missing opening IDs and FL011 for
+mixed explicit/chunk forms or ambiguous continuations. Named reasoning ownership
+conflicts use `ATTRIBUTION`. Switching chunk family or ID closes the previous
+chunk item in that lane. EOF does not synthesize closure. The previous
+`COVERAGE_REASONING` warning is removed.
+
+Steps are keyed by owner and `stepName`. They may overlap and do not contain
+other events: finishing a step closes no explicit reasoning/message items.
+Parent and child steps may share a name. A mismatched finish emits `ATTRIBUTION`
+if that name is open for another owner, or `STEP_END` if no opener is known.
+In an excerpt, another owner’s opener may be outside the capture; that case is
+a `STEP_END` warning until an observed run/child start establishes the boundary.
+
+Cancelled/interrupted run finishes still require all spans, messages, and steps
+to be closed. `RUN_ERROR` abandons them, and the next run starts fresh. In partial
+captures, unseen openers and EOF are warnings, but duplicate starts, repeated
+ends, and items observed open at run finish remain errors. Child announcements
+establish a known opening boundary for that owner's items.
+
+Try `node dist/cli.js check examples/reasoning.ndjson` after building.
 
 ### Subagents
 
@@ -184,8 +229,8 @@ openers and reject conflicting explicit tags. Tools inherit the known owner of
 their parent message. Ownership persists across item closure; run input and
 message snapshots seed historical ownership, with snapshots authoritative for
 included IDs. Steps with the same name are tracked separately per owner, and a
-step finish must carry that owner's tag explicitly. These attribution checks do
-not add reasoning/step lifecycle or activity patch validation.
+step finish must carry that owner's tag explicitly. Activity patch validation
+remains outside coverage.
 
 In partial excerpts, missing subagent announcements and unseen nested parents
 are warnings. Observed contradictions, duplicate terminals, self-parenting, and

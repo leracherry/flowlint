@@ -1,6 +1,12 @@
 import type { Event } from "@ag-ui/core";
 import type { Diagnostic, SourceEvent } from "./types";
-type Family = "text" | "tool";
+type Family = "text" | "tool" | "reasoning";
+const prefix = (family: Family) =>
+  family === "text"
+    ? "TEXT_MESSAGE"
+    : family === "tool"
+      ? "TOOL_CALL"
+      : "REASONING_MESSAGE";
 type Lane = string | undefined;
 type Item = {
   family: Family;
@@ -33,19 +39,19 @@ export class ChunkNormalizer {
   private familyStreams: Record<Family, Map<Lane, Item>> = {
     text: new Map(),
     tool: new Map(),
+    reasoning: new Map(),
   };
   private owners: Record<Family, Map<string, Set<Lane>>> = {
     text: new Map(),
     tool: new Map(),
+    reasoning: new Map(),
   };
   private explicit: Record<Family, Map<Lane, Set<string>>> = {
     text: new Map(),
     tool: new Map(),
+    reasoning: new Map(),
   };
   private boundaries = new Set<Lane>();
-  private reasoningWarned = false;
-  private reasoningOwners = new Map<string, Lane>();
-  private reasoningStreams = new Set<Lane>();
   constructor(private emit: Emit) {}
   push(event: Event, source: SourceEvent, partialBoundary = false): Event[] {
     // Shapes have already been validated by the official schema.
@@ -55,8 +61,8 @@ export class ChunkNormalizer {
       const item = this.streams.get(lane);
       if (!item) return;
       output.push({
-        type: item.family === "text" ? "TEXT_MESSAGE_END" : "TOOL_CALL_END",
-        [item.family === "text" ? "messageId" : "toolCallId"]: item.id,
+        type: `${prefix(item.family)}_END`,
+        [item.family === "tool" ? "toolCallId" : "messageId"]: item.id,
         ...(lane === undefined ? {} : { subagentRunId: lane }),
       } as Event);
       this.streams.delete(lane);
@@ -64,13 +70,18 @@ export class ChunkNormalizer {
     };
     if (globalBoundary.has(event.type)) {
       for (const lane of this.streams.keys()) close(lane);
-      this.reasoningStreams.clear();
       if (event.type !== "MESSAGES_SNAPSHOT") {
-        this.owners = { text: new Map(), tool: new Map() };
-        this.explicit = { text: new Map(), tool: new Map() };
+        this.owners = {
+          text: new Map(),
+          tool: new Map(),
+          reasoning: new Map(),
+        };
+        this.explicit = {
+          text: new Map(),
+          tool: new Map(),
+          reasoning: new Map(),
+        };
         this.boundaries.clear();
-        this.reasoningWarned = false;
-        this.reasoningOwners.clear();
       }
       if (event.type === "MESSAGES_SNAPSHOT" || event.type === "RUN_STARTED") {
         const messages =
@@ -83,7 +94,7 @@ export class ChunkNormalizer {
             toolCalls?: { id: string }[];
           };
           if (m.role === "reasoning")
-            this.reasoningOwners.set(m.id, m.subagentRunId);
+            this.owners.reasoning.set(m.id, new Set([m.subagentRunId]));
           else if (m.role !== "activity")
             this.owners.text.set(m.id, new Set([m.subagentRunId]));
           for (const tool of m.toolCalls ?? [])
@@ -96,9 +107,13 @@ export class ChunkNormalizer {
       ? "text"
       : event.type.startsWith("TOOL_CALL_")
         ? "tool"
-        : undefined;
+        : event.type.startsWith("REASONING_MESSAGE_")
+          ? "reasoning"
+          : undefined;
     const chunk =
-      event.type === "TEXT_MESSAGE_CHUNK" || event.type === "TOOL_CALL_CHUNK";
+      event.type === "TEXT_MESSAGE_CHUNK" ||
+      event.type === "TOOL_CALL_CHUNK" ||
+      event.type === "REASONING_MESSAGE_CHUNK";
     const idKey = family === "tool" ? "toolCallId" : "messageId";
     const id =
       family && typeof e[idKey] === "string" ? (e[idKey] as string) : undefined;
@@ -150,52 +165,13 @@ export class ChunkNormalizer {
         if (candidates.size === 1) lane = candidates.keys().next().value;
       }
     }
-    // Track only reasoning provenance to avoid closing a different owner's
-    // supported stream. Reasoning content/lifecycle validation remains deferred.
-    if (event.type.startsWith("REASONING_MESSAGE_") && !tagged) {
-      if (
-        typeof e.messageId === "string" &&
-        this.reasoningOwners.has(e.messageId)
-      )
-        lane = this.reasoningOwners.get(e.messageId);
-      else if (
-        event.type === "REASONING_MESSAGE_CHUNK" &&
-        e.messageId === undefined
-      ) {
-        if (this.reasoningStreams.has(undefined)) lane = undefined;
-        else if (this.reasoningStreams.size === 1)
-          lane = this.reasoningStreams.values().next().value;
-        else {
-          if (!this.reasoningWarned)
-            this.emit(
-              source,
-              "COVERAGE_REASONING",
-              "Reasoning chunks are schema-validated but not normalized or lifecycle-checked",
-              "warning",
-            );
-          this.reasoningWarned = true;
-          return [event];
-        }
-      }
-    }
     if (event.type === "SUBAGENT_STARTED") this.boundaries.add(lane);
     if (event.type === "SUBAGENT_FINISHED" || event.type === "SUBAGENT_ERROR") {
       close(lane);
-      this.reasoningStreams.delete(lane);
       this.boundaries.add(lane);
       return [...output, event];
     }
-    if (event.type === "REASONING_MESSAGE_CHUNK" && !this.reasoningWarned) {
-      this.emit(
-        source,
-        "COVERAGE_REASONING",
-        "Reasoning chunks are schema-validated but not normalized or lifecycle-checked",
-        "warning",
-      );
-      this.reasoningWarned = true;
-    }
     if (chunk && family) {
-      this.reasoningStreams.delete(lane);
       let item = this.streams.get(lane);
       if (
         item &&
@@ -207,9 +183,11 @@ export class ChunkNormalizer {
       }
       if (item) {
         const fields =
-          family === "text"
-            ? ["role", "name"]
-            : ["toolCallName", "parentMessageId"];
+          family === "tool"
+            ? ["toolCallName", "parentMessageId"]
+            : family === "text"
+              ? ["role", "name"]
+              : ["role"];
         for (const field of fields)
           if (e[field] !== undefined && e[field] !== item.attributes[field]) {
             fail(`${event.type} continuation conflicts with opening ${field}`);
@@ -223,9 +201,9 @@ export class ChunkNormalizer {
           this.emit(
             source,
             "FL010",
-            family === "text"
-              ? "Opening TEXT_MESSAGE_CHUNK requires messageId"
-              : "Opening TOOL_CALL_CHUNK requires toolCallId and toolCallName",
+            family === "tool"
+              ? "Opening TOOL_CALL_CHUNK requires toolCallId and toolCallName"
+              : `Opening ${prefix(family)}_CHUNK requires messageId`,
             partialBoundary && !this.boundaries.has(lane) ? "warning" : "error",
           );
           return output;
@@ -243,17 +221,19 @@ export class ChunkNormalizer {
           attributes:
             family === "text"
               ? { role: e.role ?? "assistant", name: e.name }
-              : {
-                  toolCallName: e.toolCallName,
-                  parentMessageId: e.parentMessageId,
-                },
+              : family === "reasoning"
+                ? { role: "reasoning" }
+                : {
+                    toolCallName: e.toolCallName,
+                    parentMessageId: e.parentMessageId,
+                  },
         };
         this.streams.set(lane, item);
         this.familyStreams[family].set(lane, item);
         this.remember(family, id, lane);
         output.push({
           ...this.common(e, lane),
-          type: family === "text" ? "TEXT_MESSAGE_START" : "TOOL_CALL_START",
+          type: `${prefix(family)}_START`,
           [idKey]: id,
           ...item.attributes,
         } as Event);
@@ -261,14 +241,13 @@ export class ChunkNormalizer {
       if (e.delta !== undefined || e.metadata !== undefined)
         output.push({
           ...this.common(e, lane),
-          type: family === "text" ? "TEXT_MESSAGE_CONTENT" : "TOOL_CALL_ARGS",
+          type: `${prefix(family)}_${family === "tool" ? "ARGS" : "CONTENT"}`,
           [idKey]: item.id,
           delta: e.delta ?? "",
         } as Event);
       return output;
     }
     if (!standAside.has(event.type)) {
-      this.reasoningStreams.delete(lane);
       const item = this.streams.get(lane);
       if (
         item &&
@@ -290,15 +269,6 @@ export class ChunkNormalizer {
         this.explicit[family].set(lane, open);
       } else if (event.type.endsWith("_END"))
         this.explicit[family].get(lane)?.delete(id);
-    }
-    if (
-      event.type === "REASONING_MESSAGE_START" ||
-      event.type === "REASONING_MESSAGE_CHUNK"
-    ) {
-      if (typeof e.messageId === "string")
-        this.reasoningOwners.set(e.messageId, lane);
-      if (event.type === "REASONING_MESSAGE_CHUNK")
-        this.reasoningStreams.add(lane);
     }
     output.push(event);
     return output;

@@ -188,3 +188,31 @@ it("reports subagent lifecycle failures through the packaged CLI", () => {
   input.splice(2, 0, { type: "SUBAGENT_FINISHED", subagentRunId: "a" });
   expect(run(input).status).toBe(0);
 });
+it("checks reasoning and step lifecycles through the CLI", () => {
+  expect(cli("check", "examples/reasoning.ndjson").status).toBe(0);
+  const result = spawnSync(
+    process.execPath,
+    ["dist/cli.js", "check", "-", "--format", "json"],
+    {
+      input: JSON.stringify([
+        { type: "RUN_STARTED", threadId: "t", runId: "r" },
+        { type: "REASONING_START", messageId: "span" },
+        {
+          type: "REASONING_MESSAGE_CONTENT",
+          messageId: "m",
+          delta: "PRIVATE_REASONING",
+        },
+        { type: "STEP_FINISHED", stepName: "missing" },
+        { type: "RUN_FINISHED", threadId: "t", runId: "r" },
+      ]),
+      encoding: "utf8",
+    },
+  );
+  expect(result.status).toBe(1);
+  expect(
+    JSON.parse(result.stdout).diagnostics.map(
+      (d: { ruleId: string }) => d.ruleId,
+    ),
+  ).toEqual(["REASONING_MESSAGE_MISSING", "STEP_END", "REASONING_SPAN_OPEN"]);
+  expect(result.stdout).not.toContain("PRIVATE_REASONING");
+});

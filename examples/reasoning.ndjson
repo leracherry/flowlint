@@ -1,0 +1,7 @@
+{"type":"RUN_STARTED","threadId":"example","runId":"reasoning"}
+{"type":"STEP_STARTED","stepName":"plan"}
+{"type":"REASONING_START","messageId":"thinking"}
+{"type":"REASONING_MESSAGE_CHUNK","messageId":"summary","delta":"Compare the available options."}
+{"type":"REASONING_END","messageId":"thinking"}
+{"type":"STEP_FINISHED","stepName":"plan"}
+{"type":"RUN_FINISHED","threadId":"example","runId":"reasoning"}

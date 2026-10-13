@@ -14,11 +14,16 @@ export class Attribution {
   private messages = new Map<string, Owner>();
   private tools = new Map<string, Owner>();
   private reasoning = new Map<string, Owner>();
+  private spans = new Map<string, Owner>();
   private activities = new Map<string, Owner>();
   private steps = new Map<string, Set<Owner>>();
   constructor(private emit: Emit) {}
 
-  resolve(event: Event, source: SourceEvent): Event | undefined {
+  resolve(
+    event: Event,
+    source: SourceEvent,
+    allowUnseenStep = false,
+  ): Event | undefined {
     const e = event as Event & Record<string, unknown>;
     const tag =
       typeof e.subagentRunId === "string" ? e.subagentRunId : undefined;
@@ -49,7 +54,7 @@ export class Attribution {
     if (event.type === "STEP_STARTED" || event.type === "STEP_FINISHED") {
       const owners = this.steps.get(event.stepName) ?? new Set<Owner>();
       if (event.type === "STEP_STARTED") owners.add(tag);
-      else if (!owners.delete(tag) && owners.size) {
+      else if (!owners.delete(tag) && owners.size && !allowUnseenStep) {
         this.emit(
           source,
           "ATTRIBUTION",
@@ -63,6 +68,8 @@ export class Attribution {
     const text = event.type.startsWith("TEXT_MESSAGE_");
     const tool = event.type.startsWith("TOOL_CALL_");
     const reasoning = event.type.startsWith("REASONING_MESSAGE_");
+    const span =
+      event.type === "REASONING_START" || event.type === "REASONING_END";
     const activity = event.type.startsWith("ACTIVITY_");
     const owners = text
       ? this.messages
@@ -70,9 +77,11 @@ export class Attribution {
         ? this.tools
         : reasoning
           ? this.reasoning
-          : activity
-            ? this.activities
-            : undefined;
+          : span
+            ? this.spans
+            : activity
+              ? this.activities
+              : undefined;
     const id = tool ? e.toolCallId : e.messageId;
     if (!owners || typeof id !== "string") return event;
     const rule = text || tool ? "FL011" : "ATTRIBUTION";

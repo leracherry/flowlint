@@ -34,9 +34,10 @@ See RELEASING.md.
 - [x] Subagent lifecycle validation, nested/parallel invocations, attribution-only
       streams, inherited entity ownership, snapshot/input ownership, and partial
       capture regressions. Explicit item checks stay active in subagent runs.
-- [ ] Reasoning and step lifecycle checks.
+- [x] Reasoning span/message and per-owner step lifecycle checks, reasoning
+      chunk normalization, and partial-capture regressions.
 - [ ] SSE input and state patch validation.
 
-Reasoning chunks still emit a coverage warning. Attribution checks cover reasoning,
-activity, and steps, but do not establish full lifecycle or patch correctness.
-EOF checks refer to capture truncation, not tool execution or result completion.
+Encrypted reasoning values remain opaque; encrypted-value storage/target checks
+and activity patch validation remain outside coverage. EOF checks refer to
+capture truncation, not tool execution or result completion.

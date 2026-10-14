@@ -1,4 +1,5 @@
 import { EventSchemas } from "@ag-ui/core/schemas";
+import { StatePatches } from "./state-patches";
 import { Attribution } from "./attribution";
 import { ChunkNormalizer } from "./normalize-chunks";
 import { createState, createItemState } from "./state";
@@ -33,6 +34,9 @@ export const SUPPORTED_RULES = [
   "STEP_START",
   "STEP_END",
   "STEP_OPEN",
+  "STATE_PATCH",
+  "STATE_BASELINE",
+  "STATE_LIMIT",
 ] as const;
 export function lintEvents(
   records: readonly SourceEvent[],
@@ -57,6 +61,7 @@ export function lintEvents(
     const { eventIndex, line, column } = record;
     diagnostics.push({ ruleId, severity, message, eventIndex, line, column });
   };
+  const statePatches = new StatePatches(emit);
   let normalizer = new ChunkNormalizer(emit);
   let attribution = new Attribution(emit);
   const resetItems = () => {
@@ -192,6 +197,7 @@ export function lintEvents(
       record,
       !!options.allowPartial && state.status === "excerpt",
     )) {
+      statePatches.observe(event, record);
       if (event.type === "RUN_STARTED") {
         const seen = state.seenRuns.get(event.threadId) ?? new Set<string>();
         if (seen.has(event.runId))

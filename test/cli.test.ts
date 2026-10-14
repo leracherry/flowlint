@@ -17,7 +17,7 @@ it("returns 0 for valid input and 1 for lint errors", () => {
 });
 it("returns 2 for input and usage failures", () => {
   expect(cli("check", "missing.ndjson").status).toBe(2);
-  expect(cli("check", "examples/valid.ndjson", "--input", "sse").status).toBe(
+  expect(cli("check", "examples/valid.ndjson", "--input", "yaml").status).toBe(
     2,
   );
   expect(cli("check", "examples/valid.ndjson", "--format", "xml").status).toBe(
@@ -90,7 +90,7 @@ it.each([
     "--format",
     "json",
   ],
-  ["check", "examples/valid.ndjson", "--input", "sse", "--format", "json"],
+  ["check", "examples/valid.ndjson", "--input", "yaml", "--format", "json"],
 ])("returns machine-readable usage errors for %j", (...args) => {
   const result = cli(...args);
   expect(result.status).toBe(2);
@@ -215,4 +215,61 @@ it("checks reasoning and step lifecycles through the CLI", () => {
     ),
   ).toEqual(["REASONING_MESSAGE_MISSING", "STEP_END", "REASONING_SPAN_OPEN"]);
   expect(result.stdout).not.toContain("PRIVATE_REASONING");
+});
+it("reads SSE files automatically and SSE stdin explicitly", () => {
+  expect(cli("check", "examples/stream.sse").status).toBe(0);
+  const result = spawnSync(
+    process.execPath,
+    ["dist/cli.js", "check", "-", "--input", "sse", "--format", "json"],
+    {
+      input: 'data: {"type":"RUN_ERROR","message":"example"}\n\n',
+      encoding: "utf8",
+    },
+  );
+  expect(result.status).toBe(0);
+  expect(JSON.parse(result.stdout).checkedEvents).toBe(1);
+});
+it("reports malformed SSE as an input error even in partial mode", () => {
+  const result = spawnSync(
+    process.execPath,
+    [
+      "dist/cli.js",
+      "check",
+      "-",
+      "--input",
+      "sse",
+      "--allow-partial",
+      "--format",
+      "json",
+    ],
+    {
+      input: 'data: {"type":"RUN_ERROR","message":"example"}\n',
+      encoding: "utf8",
+    },
+  );
+  expect(result.status).toBe(2);
+  expect(JSON.parse(result.stdout).diagnostics[0].ruleId).toBe(
+    "PARSE_SSE_TRUNCATED",
+  );
+});
+it("keeps unappliable state patches nonfatal in the CLI", () => {
+  const result = spawnSync(
+    process.execPath,
+    ["dist/cli.js", "check", "-", "--format", "json"],
+    {
+      input: JSON.stringify([
+        { type: "RUN_STARTED", threadId: "t", runId: "r" },
+        { type: "STATE_SNAPSHOT", snapshot: {} },
+        { type: "STATE_DELTA", delta: [{ op: "remove", path: "/PRIVATE" }] },
+        { type: "RUN_FINISHED", threadId: "t", runId: "r" },
+      ]),
+      encoding: "utf8",
+    },
+  );
+  expect(result.status).toBe(0);
+  expect(JSON.parse(result.stdout).diagnostics[0]).toMatchObject({
+    ruleId: "STATE_PATCH",
+    severity: "warning",
+  });
+  expect(result.stdout).not.toContain("PRIVATE");
 });

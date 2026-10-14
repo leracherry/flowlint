@@ -4,12 +4,13 @@ Detailed CLI behavior, supported rules, and protocol coverage.
 
 ## Inputs and output
 
-Accepts NDJSON, JSON event arrays, or stdin (`-`). Blank NDJSON lines are ignored.
+Accepts NDJSON, JSON event arrays, SSE, or stdin (`-`). Blank NDJSON lines are ignored.
 Auto detection treats a leading `[` as a JSON array; `--input ndjson|json` overrides
-it. Each invocation accepts exactly one file or stdin, with paths resolved from
+it. `--input sse` explicitly selects an SSE capture. Each invocation accepts exactly one file or stdin, with paths resolved from
 the current directory. Directories and additional paths are rejected. FlowLint
 does not expand globs: pass a concrete path and quote it if it contains spaces.
-SSE transcripts require a future parser and are not supported.
+SSE captures contain response bodies only, without HTTP headers. See the SSE
+section below for framing and truncation behavior.
 
 `--format pretty|json` selects output. Diagnostics carry a code, severity,
 zero-based event index and one-based line/column. JSON array locations point to
@@ -36,7 +37,7 @@ For example, checking the invalid trace produces:
 
 ```text
 examples/invalid.ndjson
-AG-UI 1.0; FlowLint supported rules: 28 (FL001, FL002, FL003, FL004, FL005, FL006, FL007, FL008, FL009, FL010, FL011, FL012, RUN_TRANSITION, RUN_IDENTITY, SUBAGENT_START, SUBAGENT_END, SUBAGENT_PARENT, SUBAGENT_OPEN, ATTRIBUTION, REASONING_SPAN_START, REASONING_SPAN_END, REASONING_SPAN_OPEN, REASONING_MESSAGE_START, REASONING_MESSAGE_MISSING, REASONING_MESSAGE_OPEN, STEP_START, STEP_END, STEP_OPEN)
+AG-UI 1.0; FlowLint supported rules: 31 (FL001, FL002, FL003, FL004, FL005, FL006, FL007, FL008, FL009, FL010, FL011, FL012, RUN_TRANSITION, RUN_IDENTITY, SUBAGENT_START, SUBAGENT_END, SUBAGENT_PARENT, SUBAGENT_OPEN, ATTRIBUTION, REASONING_SPAN_START, REASONING_SPAN_END, REASONING_SPAN_OPEN, REASONING_MESSAGE_START, REASONING_MESSAGE_MISSING, REASONING_MESSAGE_OPEN, STEP_START, STEP_END, STEP_OPEN, STATE_PATCH, STATE_BASELINE, STATE_LIMIT)
 
   2:1  error  FL002  TEXT_MESSAGE_CONTENT refers to unopened text message "m-2"
 
@@ -101,6 +102,9 @@ that have already checked their output destination.
 | STEP_START                | Step starts while the same owner's step name is open                            |
 | STEP_END                  | Step finishes without an open step for that owner                               |
 | STEP_OPEN                 | Step remains open at run finish                                                 |
+| STATE_PATCH               | Well-formed patch cannot apply; warn and retain prior state                     |
+| STATE_BASELINE            | No recorded state baseline; patch applicability is unknown                      |
+| STATE_LIMIT               | State validation exceeded its resource budget                                   |
 
 Messages and tool calls are independent, so interleaving is legal. Closed items
 can be reopened. Run ID history is tracked separately for each thread. Event
@@ -167,7 +171,7 @@ ambiguous lanes, and mixed forms remain errors in partial mode.
 
 ### Coverage limits
 
-State patch application, activity patch validation, encrypted-value target/storage
+Activity patch validation, encrypted-value target/storage
 validation, and item-reopening attributes other than ownership remain outside
 coverage. Event shapes still undergo official schema validation. Encrypted
 reasoning values stay opaque and never appear in diagnostics.
@@ -237,6 +241,68 @@ are warnings. Observed contradictions, duplicate terminals, self-parenting, and
 unclosed announced invocations at `RUN_FINISHED` remain errors. An observed child
 start establishes a boundary for that child's missing item openers. EOF remains
 `FL012`, downgraded to a warning with `--allow-partial`.
+
+## SSE captures
+
+SSE input follows the [AG-UI SSE binding](https://github.com/ag-ui-protocol/ag-ui/blob/main/docs/spec/1.0/basic/transports/http-sse.mdx).
+Each blank-line-delimited block's joined `data` fields must contain exactly one
+JSON event object. Multiline data fields join with a newline. Comments and other
+SSE fields, including `event`, `id`, and `retry`, are ignored. LF, CRLF, CR, and a
+leading BOM are accepted. Transport IDs neither deduplicate nor reorder events.
+
+Auto detection recognizes a leading comment or `data`, `event`, `id`, or `retry`
+field on the first nonempty line. Use `--input sse` for captures beginning with
+unknown extension fields. JSON and NDJSON retain their existing detection rules.
+Diagnostics map back to the JSON payload's original capture line and column,
+including multiline syntax errors. HTTP headers and `[DONE]` markers are not
+AG-UI event payloads and are not accepted as such.
+
+A final data block without its blank-line delimiter is `PARSE_SSE_TRUNCATED`
+(exit 2): it would not be dispatched by SSE. A properly framed stream that ends
+without a run terminal remains `FL012` (exit 1, or a warning in partial mode).
+`--allow-partial` does not repair malformed transport framing. Comments-only
+captures contain no events and produce `PARSE_EMPTY`. The 10 MiB raw input limit
+applies before decoding.
+
+```sh
+node dist/cli.js check examples/stream.sse
+cat examples/stream.sse | node dist/cli.js check - --input sse --format json
+```
+
+## State patches
+
+State uses [RFC 6902 JSON Patch](https://www.rfc-editor.org/rfc/rfc6902) and the
+[AG-UI snapshot/delta rules](https://github.com/ag-ui-protocol/ag-ui/blob/main/docs/spec/1.0/basic/patterns/snapshots.mdx).
+All six operations are supported: add, remove, replace, move, copy, and test.
+Pointers decode `~0` and `~1`; array indices are validated, and `-` appends only
+for add destinations. State may be any JSON value, including null or a scalar.
+Object keys are treated as own JSON properties, including names such as
+`__proto__`; inherited properties cannot be read or written.
+
+A delta applies atomically to a copy of the current document. On failure,
+`STATE_PATCH` identifies the operation number and reason without exposing paths
+or values; the prior state remains intact. This is a warning, not a failed run.
+Malformed operation shapes remain `SCHEMA_EVENT` errors from the pinned schema;
+unknown operation kinds are also rejected by that schema rather than silently
+skipped. Extension members on known operations are accepted.
+
+Recorded `RUN_STARTED.input.state` establishes the baseline; a recorded input
+that omits `state` defaults to `{}`. A snapshot replaces
+it wholesale; successful deltas amend it. State is shared by parent and subagents
+and retained separately per thread across runs, including errors. New recorded
+input supersedes stored state. An input omitted from a capture may have contained
+state, so FlowLint does not assume `{}`: `STATE_BASELINE` warns that the patch
+cannot be checked until a snapshot or recorded input supplies a baseline. This
+also applies in partial captures; an empty patch needs no baseline.
+
+Validation retains at most 10 MiB of serialized state across threads and budgets
+200 MiB of cumulative intermediate document sizes per trace. Expansion or work
+limits produce `STATE_LIMIT` and mark the affected baseline unknown. Snapshots
+can restore a baseline after an expansion limit; an exhausted work budget still
+prevents further patch validation. These warnings identify skipped checks.
+FlowLint does not emit reconstructed state or reconcile message/activity patches.
+
+Try `node dist/cli.js check examples/state.ndjson` after building.
 
 ## Use in GitHub Actions
 

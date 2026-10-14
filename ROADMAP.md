@@ -36,7 +36,8 @@ See RELEASING.md.
       capture regressions. Explicit item checks stay active in subagent runs.
 - [x] Reasoning span/message and per-owner step lifecycle checks, reasoning
       chunk normalization, and partial-capture regressions.
-- [ ] SSE input and state patch validation.
+- [x] SSE input with original source locations, transport truncation detection,
+      and atomic state-patch validation with bounded resources.
 
 Encrypted reasoning values remain opaque; encrypted-value storage/target checks
 and activity patch validation remain outside coverage. EOF checks refer to

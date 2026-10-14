@@ -24,7 +24,7 @@ const paths = packed.files.map((file) => file.path);
 for (const path of paths)
   assert.match(
     path,
-    /^(dist\/[^/]+\.(?:js|js\.map|d\.ts)|examples\/[^/]+\.ndjson|package\.json|README\.md|REFERENCE\.md|LICENSE|CHANGELOG\.md|RELEASING\.md)$/,
+    /^(dist\/[^/]+\.(?:js|js\.map|d\.ts)|examples\/[^/]+\.(?:ndjson|sse)|package\.json|README\.md|REFERENCE\.md|LICENSE|CHANGELOG\.md|RELEASING\.md)$/,
   );
 for (const path of [
   "dist/cli.js",
@@ -60,10 +60,17 @@ try {
   const version = run(["--version"]);
   assert.equal(version.status, 0, version.stderr);
   assert.equal(version.stdout.trim(), pkg.version);
-  for (const name of ["valid", "interleaved", "chunks", "reasoning"]) {
+  for (const name of [
+    "valid.ndjson",
+    "interleaved.ndjson",
+    "chunks.ndjson",
+    "reasoning.ndjson",
+    "state.ndjson",
+    "stream.sse",
+  ]) {
     const result = run([
       "check",
-      join(root, "examples", `${name}.ndjson`),
+      join(root, "examples", name),
       "--format",
       "json",
     ]);

@@ -1,0 +1,5 @@
+{"type":"RUN_STARTED","threadId":"example","runId":"state"}
+{"type":"STATE_SNAPSHOT","snapshot":{"tasks":[]}}
+{"type":"STATE_DELTA","delta":[{"op":"add","path":"/tasks/-","value":{"title":"Review trace","done":false}}]}
+{"type":"STATE_DELTA","delta":[{"op":"replace","path":"/tasks/0/done","value":true},{"op":"test","path":"/tasks/0/done","value":true}]}
+{"type":"RUN_FINISHED","threadId":"example","runId":"state"}

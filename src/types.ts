@@ -1,4 +1,4 @@
-export type InputFormat = "auto" | "ndjson" | "json";
+export type InputFormat = "auto" | "ndjson" | "json" | "sse";
 export type Diagnostic = {
   ruleId: string;
   severity: "error" | "warning";

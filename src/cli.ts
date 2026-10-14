@@ -67,7 +67,7 @@ const checkCommand = program
   )
   .addOption(
     new Option("--input <format>", "input encoding")
-      .choices(["auto", "ndjson", "json"])
+      .choices(["auto", "ndjson", "json", "sse"])
       .default("auto"),
   )
   .addOption(

@@ -2,6 +2,12 @@
 
 ## Unreleased
 
+- Parse SSE captures automatically or with `--input sse`, preserving source
+  locations across multiline data and detecting unfinished framing.
+- Validate RFC 6902 state patches atomically against recorded baselines,
+  warning on application failures and unknown baselines without leaking state.
+- Add state/SSE examples and bounded state validation across threads.
+
 - Validate reasoning spans, explicit reasoning messages, and per-owner step
   lifecycles, including run closure, error abandonment, and partial captures.
 - Normalize reasoning chunks with FL010/FL011 checks and remove the reasoning

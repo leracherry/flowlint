@@ -42,6 +42,16 @@ See RELEASING.md.
 - [x] Activity snapshot/delta validation, ownership replacement, history
       reconciliation, and bounded patch application across threads.
 
-Encrypted reasoning values remain opaque; encrypted-value storage/target checks
-remain outside coverage. EOF checks refer to
-capture truncation, not tool execution or result completion.
+## Next release (unreleased)
+
+- [x] Reopened message/tool attributes, including normalized chunks, historical
+      input, snapshots, and per-thread continuity.
+- [x] Encrypted reasoning target checks and preservation in later recorded input,
+      with snapshot withdrawal, opaque fingerprints, and warning-only handling
+      of missing targets and unknown string subtypes.
+
+Remaining work toward 1.0: real-producer trace fixtures, compatibility policy,
+fuzz/property testing, resource/performance validation, cross-platform installation
+checks, and a release candidate. FlowLint validates captures; consumer storage,
+provider restoration, metadata merging, and full protocol certification are not
+part of its current guarantees.

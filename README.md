@@ -52,6 +52,9 @@ Warnings do not fail a check, making FlowLint easy to use in CI.
 - Reasoning spans, reasoning message streams, and per-agent steps.
 - State and activity patches against recorded baselines.
 
+On `main` for the next release: reopened-item consistency and encrypted artifact
+target/preservation checks across recorded runs.
+
 Interleaved messages and tool calls are supported. Use `--allow-partial` for
 captures that may start or end mid-stream.
 

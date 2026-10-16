@@ -1,0 +1,9 @@
+{"type":"RUN_STARTED","threadId":"demo","runId":"first"}
+{"type":"TEXT_MESSAGE_START","messageId":"m","name":"assistant"}
+{"type":"TEXT_MESSAGE_END","messageId":"m"}
+{"type":"TEXT_MESSAGE_START","messageId":"m","name":"assistant"}
+{"type":"TEXT_MESSAGE_END","messageId":"m"}
+{"type":"REASONING_ENCRYPTED_VALUE","subtype":"message","entityId":"m","encryptedValue":"opaque-example"}
+{"type":"RUN_FINISHED","threadId":"demo","runId":"first"}
+{"type":"RUN_STARTED","threadId":"demo","runId":"second","input":{"threadId":"demo","runId":"second","messages":[{"id":"m","role":"assistant","name":"assistant","content":"","encryptedValue":"opaque-example"}],"tools":[],"context":[],"forwardedProps":{}}}
+{"type":"RUN_FINISHED","threadId":"demo","runId":"second"}

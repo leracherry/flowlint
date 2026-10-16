@@ -67,6 +67,7 @@ try {
     "reasoning.ndjson",
     "state.ndjson",
     "activity.ndjson",
+    "preservation.ndjson",
     "stream.sse",
   ]) {
     const result = run([

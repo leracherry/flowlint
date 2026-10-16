@@ -106,6 +106,10 @@ that have already checked their output destination.
 | STATE_BASELINE            | No recorded state baseline; patch applicability is unknown                      |
 | ACTIVITY_PATCH            | Activity patch cannot apply; warn and retain prior content                      |
 | ACTIVITY_BASELINE         | Activity baseline missing or no longer verified                                 |
+| ITEM_REOPEN               | Reopened message/tool attributes disagree with the established item             |
+| ENCRYPTED_TARGET          | No recorded compatible message or tool target; warning                          |
+| ENCRYPTED_PRESERVATION    | Later recorded input omits or changes a retained artifact; warning              |
+| ENCRYPTED_SUBTYPE         | Unknown string subtype; warn and skip the encrypted event                       |
 | ACTIVITY_CONTENT          | Patched activity content would not be an object                                 |
 | ACTIVITY_LIMIT            | Activity validation exceeded its shared resource budget                         |
 | STATE_LIMIT               | State validation exceeded its resource budget                                   |
@@ -175,9 +179,55 @@ ambiguous lanes, and mixed forms remain errors in partial mode.
 
 ### Coverage limits
 
-Encrypted-value target/storage validation, and item-reopening attributes other than ownership remain outside
-coverage. Event shapes still undergo official schema validation. Encrypted
-reasoning values stay opaque and never appear in diagnostics.
+FlowLint checks recorded protocol transitions, not a consumer’s internal storage
+or provider behavior. It does not decrypt encrypted values, assemble message
+bodies, validate metadata merging, or certify full protocol conformance. Event
+shapes use the pinned schema; unknown encrypted subtype strings receive the
+forward-compatibility handling described below.
+
+### Reopened items and encrypted artifacts
+
+These checks are available on `main` for the next release. They follow the
+[message](https://github.com/ag-ui-protocol/ag-ui/blob/main/docs/spec/1.0/events/text-messages.mdx),
+[tool](https://github.com/ag-ui-protocol/ag-ui/blob/main/docs/spec/1.0/events/tool-calls.mdx),
+and [reasoning](https://github.com/ag-ui-protocol/ag-ui/blob/main/docs/spec/1.0/events/reasoning.mdx)
+requirements.
+
+`ITEM_REOPEN` checks message role/name/ownership and tool name/parent/ownership.
+The default text role is `assistant`; omitted names and parents count as
+established values. Checks apply after chunk expansion and across runs on the
+same thread. Existing duplicate-start and attribution rules remain active.
+Snapshots and included input messages establish authoritative replacement
+attributes. Observed contradictions remain errors in partial captures; an unseen
+original opener does not establish attributes to compare.
+
+`REASONING_ENCRYPTED_VALUE` targets an observed message or tool call in its own
+namespace. Open and closed items, recorded history, reasoning messages, and tool
+result messages can be targets. Reasoning spans and activities cannot.
+`ENCRYPTED_TARGET` warns when a compatible target is not recorded, including in
+partial captures. The value opens or closes no stream and replaces any previous
+artifact for that target.
+
+When a subsequent `RUN_STARTED` includes recorded input, FlowLint compares
+retained artifacts against its messages and nested tool calls. Missing items,
+missing values, or changed values produce `ENCRYPTED_PRESERVATION` warnings.
+An omitted input provides no evidence of loss. Threads are isolated; errors do
+not erase history. Message snapshots replace included artifacts wholesale,
+including withdrawing an omitted encrypted value. Snapshot deletion removes a
+message and its attached tool calls. Reasoning/activity history follows the
+protocol’s role-specific snapshot retention rules.
+
+Only SHA-256 fingerprints of opaque strings are retained for comparison; values
+and fingerprints are never emitted in diagnostics. No decoding, parsing, or
+Unicode normalization is performed. The check establishes consistency of the
+capture, not proof of actual storage or successful provider restoration.
+Unknown string subtypes produce `ENCRYPTED_SUBTYPE` and are skipped when the rest
+of the event is well formed. Non-string subtypes and malformed required fields
+remain `SCHEMA_EVENT` errors.
+
+Try `node dist/cli.js check examples/preservation.ndjson`. The paired
+`examples/preservation-invalid.ndjson` demonstrates conflicting reopening
+attributes and a lost artifact.
 
 ### Reasoning and steps
 

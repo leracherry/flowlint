@@ -1,4 +1,5 @@
 import { EventSchemas } from "@ag-ui/core/schemas";
+import { Conversation } from "./conversation";
 import { ActivityPatches } from "./activity-patches";
 import { StatePatches } from "./state-patches";
 import { Attribution } from "./attribution";
@@ -42,6 +43,10 @@ export const SUPPORTED_RULES = [
   "ACTIVITY_BASELINE",
   "ACTIVITY_LIMIT",
   "ACTIVITY_CONTENT",
+  "ITEM_REOPEN",
+  "ENCRYPTED_TARGET",
+  "ENCRYPTED_PRESERVATION",
+  "ENCRYPTED_SUBTYPE",
 ] as const;
 export function lintEvents(
   records: readonly SourceEvent[],
@@ -66,6 +71,7 @@ export function lintEvents(
     const { eventIndex, line, column } = record;
     diagnostics.push({ ruleId, severity, message, eventIndex, line, column });
   };
+  const conversation = new Conversation(emit);
   const activityPatches = new ActivityPatches(emit);
   const statePatches = new StatePatches(emit);
   let normalizer = new ChunkNormalizer(emit);
@@ -123,6 +129,27 @@ export function lintEvents(
     }
   };
   for (const record of records) {
+    const raw = record.event;
+    if (
+      raw &&
+      typeof raw === "object" &&
+      "type" in raw &&
+      raw.type === "REASONING_ENCRYPTED_VALUE" &&
+      "subtype" in raw &&
+      typeof raw.subtype === "string" &&
+      raw.subtype !== "message" &&
+      raw.subtype !== "tool-call"
+    ) {
+      if (EventSchemas.safeParse({ ...raw, subtype: "message" }).success) {
+        emit(
+          record,
+          "ENCRYPTED_SUBTYPE",
+          "Unrecognized encrypted artifact subtype; event skipped",
+          "warning",
+        );
+        continue;
+      }
+    }
     const parsed = EventSchemas.safeParse(record.event);
     if (!parsed.success) {
       emit(
@@ -205,6 +232,7 @@ export function lintEvents(
       record,
       !!options.allowPartial && state.status === "excerpt",
     )) {
+      conversation.observe(event, record);
       statePatches.observe(event, record);
       if (event.type === "RUN_STARTED") {
         const seen = state.seenRuns.get(event.threadId) ?? new Set<string>();

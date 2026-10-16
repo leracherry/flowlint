@@ -1,5 +1,14 @@
 # Changelog
 
+## Unreleased
+
+- Check reopened message/tool attributes across explicit streams, chunks, history,
+  and runs on the same thread.
+- Validate encrypted artifact targets and preservation in later recorded input,
+  respecting snapshot replacement and withdrawal. Keep artifacts opaque and
+  retain only fingerprints for comparison.
+- Warn and skip well-formed encrypted events with unknown string subtypes.
+
 ## 0.2.0 — 2026-10-15
 
 - Validate activity patches, snapshot replacement and ownership, object-only

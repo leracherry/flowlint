@@ -1,6 +1,13 @@
 # Changelog
 
-## Unreleased
+## 0.2.0 — 2026-10-15
+
+- Validate activity patches, snapshot replacement and ownership, object-only
+  results, message-history reconciliation, and per-thread persistence.
+- Bound activity validation resources and keep content out of diagnostics.
+- Enable npm provenance for the now-public repository and publish version-specific
+  GitHub release notes.
+- Refresh README and reference documentation for the expanded coverage.
 
 - Parse SSE captures automatically or with `--input sse`, preserving source
   locations across multiline data and detecting unfinished framing.

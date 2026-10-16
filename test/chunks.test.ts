@@ -150,8 +150,19 @@ describe("chunk triad expansion", () => {
     },
   ])("stand-aside event %j does not close chunks", (event) => {
     expect(
-      lint([start, text, event, { type: text.type, delta: "tail" }, finish])
-        .diagnostics,
+      lint([
+        start,
+        {
+          type: "ACTIVITY_SNAPSHOT",
+          messageId: "a",
+          activityType: "test",
+          content: {},
+        },
+        text,
+        event,
+        { type: text.type, delta: "tail" },
+        finish,
+      ]).diagnostics,
     ).toEqual([]);
   });
   it.each([

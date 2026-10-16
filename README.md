@@ -1,7 +1,7 @@
 # FlowLint
 
 An offline linter for [AG-UI](https://docs.ag-ui.com/) event traces.
-Catch broken run, message, and tool-call lifecycles from your terminal or TypeScript app.
+Check lifecycles, subagents, reasoning, and JSON patches from your terminal or TypeScript app.
 No agent runtime or LLM calls required.
 
 ## Install
@@ -50,13 +50,11 @@ Warnings do not fail a check, making FlowLint easy to use in CI.
 - Unfinished runs and open items at the end of a capture.
 - Subagent lifecycles, nested delegation, and consistent event ownership.
 - Reasoning spans, reasoning message streams, and per-agent steps.
-- State patches against recorded input state and snapshots.
+- State and activity patches against recorded baselines.
 
 Interleaved messages and tool calls are supported. Use `--allow-partial` for
 captures that may start or end mid-stream.
 
-Subagent, reasoning, step, state-patch checks, and SSE input are available on
-`main` for the next release. Activity patch validation remains outside coverage.
 See the [reference](REFERENCE.md) for every rule and its limits.
 
 ## TypeScript API

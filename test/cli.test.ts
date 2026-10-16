@@ -7,7 +7,7 @@ const cli = (...args: string[]) =>
   spawnSync(process.execPath, ["dist/cli.js", ...args], { encoding: "utf8" });
 it("prints help and version", () => {
   expect(cli("--help").status).toBe(0);
-  expect(cli("--version").stdout.trim()).toBe("0.1.0");
+  expect(cli("--version").stdout.trim()).toBe("0.2.0");
 });
 it("returns 0 for valid input and 1 for lint errors", () => {
   expect(cli("check", "examples/valid.ndjson").status).toBe(0);

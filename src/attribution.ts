@@ -15,7 +15,6 @@ export class Attribution {
   private tools = new Map<string, Owner>();
   private reasoning = new Map<string, Owner>();
   private spans = new Map<string, Owner>();
-  private activities = new Map<string, Owner>();
   private steps = new Map<string, Set<Owner>>();
   constructor(private emit: Emit) {}
 
@@ -24,6 +23,7 @@ export class Attribution {
     source: SourceEvent,
     allowUnseenStep = false,
   ): Event | undefined {
+    if (event.type.startsWith("ACTIVITY_")) return event;
     const e = event as Event & Record<string, unknown>;
     const tag =
       typeof e.subagentRunId === "string" ? e.subagentRunId : undefined;
@@ -39,12 +39,8 @@ export class Attribution {
           subagentRunId?: string;
           toolCalls?: { id: string }[];
         };
-        const bucket =
-          m.role === "reasoning"
-            ? this.reasoning
-            : m.role === "activity"
-              ? this.activities
-              : this.messages;
+        if (m.role === "activity") continue;
+        const bucket = m.role === "reasoning" ? this.reasoning : this.messages;
         bucket.set(m.id, m.subagentRunId);
         for (const tool of m.toolCalls ?? [])
           this.tools.set(tool.id, m.subagentRunId);
@@ -70,7 +66,6 @@ export class Attribution {
     const reasoning = event.type.startsWith("REASONING_MESSAGE_");
     const span =
       event.type === "REASONING_START" || event.type === "REASONING_END";
-    const activity = event.type.startsWith("ACTIVITY_");
     const owners = text
       ? this.messages
       : tool
@@ -79,9 +74,7 @@ export class Attribution {
           ? this.reasoning
           : span
             ? this.spans
-            : activity
-              ? this.activities
-              : undefined;
+            : undefined;
     const id = tool ? e.toolCallId : e.messageId;
     if (!owners || typeof id !== "string") return event;
     const rule = text || tool ? "FL011" : "ATTRIBUTION";
@@ -115,11 +108,7 @@ export class Attribution {
       }
       owner = parent;
     }
-    if (
-      event.type.endsWith("_START") ||
-      event.type.endsWith("_CHUNK") ||
-      event.type === "ACTIVITY_SNAPSHOT"
-    )
+    if (event.type.endsWith("_START") || event.type.endsWith("_CHUNK"))
       owners.set(id, owner);
     // A tool result also establishes ownership of its result message.
     if (event.type === "TOOL_CALL_RESULT" && typeof e.messageId === "string")

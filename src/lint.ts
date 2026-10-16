@@ -1,4 +1,5 @@
 import { EventSchemas } from "@ag-ui/core/schemas";
+import { ActivityPatches } from "./activity-patches";
 import { StatePatches } from "./state-patches";
 import { Attribution } from "./attribution";
 import { ChunkNormalizer } from "./normalize-chunks";
@@ -37,6 +38,10 @@ export const SUPPORTED_RULES = [
   "STATE_PATCH",
   "STATE_BASELINE",
   "STATE_LIMIT",
+  "ACTIVITY_PATCH",
+  "ACTIVITY_BASELINE",
+  "ACTIVITY_LIMIT",
+  "ACTIVITY_CONTENT",
 ] as const;
 export function lintEvents(
   records: readonly SourceEvent[],
@@ -61,6 +66,7 @@ export function lintEvents(
     const { eventIndex, line, column } = record;
     diagnostics.push({ ruleId, severity, message, eventIndex, line, column });
   };
+  const activityPatches = new ActivityPatches(emit);
   const statePatches = new StatePatches(emit);
   let normalizer = new ChunkNormalizer(emit);
   let attribution = new Attribution(emit);
@@ -184,7 +190,9 @@ export function lintEvents(
       state.status === "excerpt" &&
       (owner === undefined ||
         (!state.subagents.has(owner) && !state.closedSubagents.has(owner)));
-    const resolved = attribution.resolve(original, record, allowUnseenStep);
+    const activity = activityPatches.observe(original, record);
+    if (!activity) continue;
+    const resolved = attribution.resolve(activity, record, allowUnseenStep);
     if (!resolved) continue;
     if (
       "subagentRunId" in resolved &&

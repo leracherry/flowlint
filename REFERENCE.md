@@ -104,6 +104,10 @@ that have already checked their output destination.
 | STEP_OPEN                 | Step remains open at run finish                                                 |
 | STATE_PATCH               | Well-formed patch cannot apply; warn and retain prior state                     |
 | STATE_BASELINE            | No recorded state baseline; patch applicability is unknown                      |
+| ACTIVITY_PATCH            | Activity patch cannot apply; warn and retain prior content                      |
+| ACTIVITY_BASELINE         | Activity baseline missing or no longer verified                                 |
+| ACTIVITY_CONTENT          | Patched activity content would not be an object                                 |
+| ACTIVITY_LIMIT            | Activity validation exceeded its shared resource budget                         |
 | STATE_LIMIT               | State validation exceeded its resource budget                                   |
 
 Messages and tool calls are independent, so interleaving is legal. Closed items
@@ -171,14 +175,13 @@ ambiguous lanes, and mixed forms remain errors in partial mode.
 
 ### Coverage limits
 
-Activity patch validation, encrypted-value target/storage
-validation, and item-reopening attributes other than ownership remain outside
+Encrypted-value target/storage validation, and item-reopening attributes other than ownership remain outside
 coverage. Event shapes still undergo official schema validation. Encrypted
 reasoning values stay opaque and never appear in diagnostics.
 
 ### Reasoning and steps
 
-Available on `main` for the next release. The checks follow the AG-UI 1.0
+The checks follow the AG-UI 1.0
 [reasoning](https://github.com/ag-ui-protocol/ag-ui/blob/main/docs/spec/1.0/events/reasoning.mdx)
 and [step](https://github.com/ag-ui-protocol/ag-ui/blob/main/docs/spec/1.0/events/lifecycle.mdx#steps) rules.
 
@@ -213,8 +216,7 @@ Try `node dist/cli.js check examples/reasoning.ndjson` after building.
 
 ### Subagents
 
-Subagent lifecycle and ownership checks are available on `main` for the next
-release. They follow the [AG-UI 1.0 subagent specification](https://github.com/ag-ui-protocol/ag-ui/blob/main/docs/spec/1.0/events/subagents.mdx).
+Subagent lifecycle and ownership checks follow the [AG-UI 1.0 subagent specification](https://github.com/ag-ui-protocol/ag-ui/blob/main/docs/spec/1.0/events/subagents.mdx).
 
 Invocations may overlap and nest. Announced IDs cannot be reused within a run,
 and every announced invocation needs one terminal before `RUN_FINISHED`.
@@ -233,8 +235,7 @@ openers and reject conflicting explicit tags. Tools inherit the known owner of
 their parent message. Ownership persists across item closure; run input and
 message snapshots seed historical ownership, with snapshots authoritative for
 included IDs. Steps with the same name are tracked separately per owner, and a
-step finish must carry that owner's tag explicitly. Activity patch validation
-remains outside coverage.
+step finish must carry that owner's tag explicitly. Replacing activity snapshots establish fresh ownership; `replace: false` preserves it.
 
 In partial excerpts, missing subagent announcements and unseen nested parents
 are warnings. Observed contradictions, duplicate terminals, self-parenting, and
@@ -300,9 +301,34 @@ Validation retains at most 10 MiB of serialized state across threads and budgets
 limits produce `STATE_LIMIT` and mark the affected baseline unknown. Snapshots
 can restore a baseline after an expansion limit; an exhausted work budget still
 prevents further patch validation. These warnings identify skipped checks.
-FlowLint does not emit reconstructed state or reconcile message/activity patches.
+FlowLint does not emit reconstructed state. Activity content has a separate,
+shared budget of the same size across all activities and threads.
 
 Try `node dist/cli.js check examples/state.ndjson` after building.
+
+## Activity patches
+
+[Activity events](https://github.com/ag-ui-protocol/ag-ui/blob/main/docs/spec/1.0/events/activity.mdx)
+use the same atomic RFC 6902 engine as state. Content is tracked by thread and
+message ID across runs. A snapshot replaces content and ownership by default,
+including clearing an old owner when the new snapshot is untagged.
+`replace: false` preserves an existing activity; a conflicting explicit owner
+produces `ATTRIBUTION`. Unknown activity types and retyping are allowed.
+
+A missing activity produces `ACTIVITY_BASELINE`, even for an empty patch.
+Patch application failures produce `ACTIVITY_PATCH`; both are warnings and skip
+the update. A successful patch whose final result is not an object produces
+`ACTIVITY_CONTENT`, an error. The prior content is retained in each case.
+Malformed patches remain schema errors. Resource exhaustion produces
+`ACTIVITY_LIMIT` and marks the affected baseline unknown until a fresh snapshot.
+Paths and content never appear in these diagnostics.
+
+`MESSAGES_SNAPSHOT` seeds included activities. If it contains any activity,
+omitted activities are removed; otherwise existing activities survive. An
+included non-activity with the same ID replaces the activity. Partial captures
+use the same patch rules, with missing baselines reported as warnings.
+
+Try `npx flowlint check examples/activity.ndjson` from a checkout.
 
 ## Use in GitHub Actions
 
@@ -334,5 +360,4 @@ jobs:
 ```
 
 In another project, run `npm install --save-dev @leracherry/flowlint` and
-`npx flowlint check path/to/trace.ndjson`. The npm package is public; access to
-this private source repository and its GitHub release assets requires GitHub authorization.
+`npx flowlint check path/to/trace.ndjson`. The npm package, source repository, and GitHub release assets are public.

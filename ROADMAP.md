@@ -25,11 +25,11 @@ in one TypeScript package, with a CLI and deterministic library API.
 
 v0.1.0 is available as a verified GitHub tarball and the public npm package
 `@leracherry/flowlint`. A fresh registry installation, CLI run, and library import
-passed on 2026-10-11. The source repository remains private. Token-based
+passed on 2026-10-11. The source repository is now public. Token-based
 publishing is configured; Trusted Publishing remains an optional migration.
 See RELEASING.md.
 
-## After v0.1.0 (unreleased)
+## v0.2.0
 
 - [x] Subagent lifecycle validation, nested/parallel invocations, attribution-only
       streams, inherited entity ownership, snapshot/input ownership, and partial
@@ -39,6 +39,9 @@ See RELEASING.md.
 - [x] SSE input with original source locations, transport truncation detection,
       and atomic state-patch validation with bounded resources.
 
+- [x] Activity snapshot/delta validation, ownership replacement, history
+      reconciliation, and bounded patch application across threads.
+
 Encrypted reasoning values remain opaque; encrypted-value storage/target checks
-and activity patch validation remain outside coverage. EOF checks refer to
+remain outside coverage. EOF checks refer to
 capture truncation, not tool execution or result completion.

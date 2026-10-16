@@ -1,13 +1,14 @@
 import type { Event } from "@ag-ui/core";
 import type { Diagnostic, SourceEvent } from "./types";
 import { MAX_INPUT_BYTES } from "./parse";
-type Emit = (
+export type Emit = (
   record: SourceEvent,
   rule: string,
   message: string,
   severity?: Diagnostic["severity"],
 ) => void;
 type Baseline = { known: boolean; value?: unknown };
+export type PatchBudget = { work: number; retained: number };
 class PatchError extends Error {}
 const own = (value: object, key: string) =>
   Object.prototype.hasOwnProperty.call(value, key);
@@ -100,14 +101,21 @@ const bytes = (value: unknown) =>
 export class StatePatches {
   private threads = new Map<string, Baseline>();
   private current: Baseline = { known: false };
-  private work = 0;
-  private retained = 0;
+
   private thread: string | undefined;
-  constructor(private emit: Emit) {}
+  constructor(
+    private emit: Emit,
+    private family = "STATE",
+    private budget: PatchBudget = { work: 0, retained: 0 },
+  ) {}
+  forget() {
+    if (this.current.known) this.budget.retained -= bytes(this.current.value);
+    this.current = { known: false };
+  }
   observe(event: Event, record: SourceEvent) {
     if (event.type === "RUN_STARTED") {
       if (this.thread === undefined && this.current.known)
-        this.retained -= bytes(this.current.value);
+        this.budget.retained -= bytes(this.current.value);
       this.thread = event.threadId;
       this.current = this.threads.get(event.threadId) ?? { known: false };
       this.threads.set(event.threadId, this.current);
@@ -123,13 +131,13 @@ export class StatePatches {
       if (!this.current.known) {
         this.emit(
           record,
-          "STATE_BASELINE",
-          "State patch cannot be checked without a recorded input state or snapshot",
+          `${this.family}_BASELINE`,
+          `${this.family === "STATE" ? "State" : "Activity"} patch cannot be checked without a recorded baseline`,
           "warning",
         );
         return;
       }
-      if (this.work > MAX_INPUT_BYTES * 20) {
+      if (this.budget.work > MAX_INPUT_BYTES * 20) {
         this.invalidate(record);
         return;
       }
@@ -180,18 +188,32 @@ export class StatePatches {
             }
           }
           const size = bytes(value);
-          this.work += size;
-          if (size > MAX_INPUT_BYTES || this.work > MAX_INPUT_BYTES * 20) {
+          this.budget.work += size;
+          if (
+            size > MAX_INPUT_BYTES ||
+            this.budget.work > MAX_INPUT_BYTES * 20
+          ) {
             this.invalidate(record);
             return;
           }
+        }
+        if (
+          this.family === "ACTIVITY" &&
+          (value === null || typeof value !== "object" || Array.isArray(value))
+        ) {
+          this.emit(
+            record,
+            "ACTIVITY_CONTENT",
+            "Activity patch result must remain an object; prior content retained",
+          );
+          return;
         }
         this.replace(value, record);
       } catch (error) {
         this.emit(
           record,
-          "STATE_PATCH",
-          `State patch operation ${operation} could not apply: ${error instanceof PatchError ? error.message : "unsupported state value"}; prior state retained`,
+          `${this.family}_PATCH`,
+          `${this.family === "STATE" ? "State" : "Activity"} patch operation ${operation} could not apply: ${error instanceof PatchError ? error.message : "unsupported state value"}; prior state retained`,
           "warning",
         );
       }
@@ -200,22 +222,22 @@ export class StatePatches {
   private replace(value: unknown, record: SourceEvent) {
     const size = bytes(value);
     const previous = this.current.known ? bytes(this.current.value) : 0;
-    if (this.retained - previous + size > MAX_INPUT_BYTES) {
+    if (this.budget.retained - previous + size > MAX_INPUT_BYTES) {
       this.invalidate(record);
       return;
     }
-    this.retained += size - previous;
+    this.budget.retained += size - previous;
     this.current.value = structuredClone(value);
     this.current.known = true;
   }
   private invalidate(record: SourceEvent) {
-    if (this.current.known) this.retained -= bytes(this.current.value);
+    if (this.current.known) this.budget.retained -= bytes(this.current.value);
     this.current.known = false;
     this.current.value = undefined;
     this.emit(
       record,
-      "STATE_LIMIT",
-      "State validation resource limit reached; this baseline is no longer verified",
+      `${this.family}_LIMIT`,
+      `${this.family === "STATE" ? "State" : "Activity"} validation resource limit reached; this baseline is no longer verified`,
       "warning",
     );
   }

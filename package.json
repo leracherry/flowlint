@@ -1,6 +1,6 @@
 {
   "name": "@leracherry/flowlint",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "Offline lifecycle linting for AG-UI agent event traces",
   "type": "module",
   "license": "MIT",

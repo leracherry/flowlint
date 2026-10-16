@@ -43,4 +43,5 @@ jobs:
           GH_TOKEN: ${{ github.token }}
         run: |
           (cd release && sha256sum *.tgz > SHA256SUMS)
-          gh release create "$GITHUB_REF_NAME" release/*.tgz release/SHA256SUMS --verify-tag --notes-file CHANGELOG.md --title "FlowLint $GITHUB_REF_NAME"
+          node scripts/release-notes.mjs
+          gh release create "$GITHUB_REF_NAME" release/*.tgz release/SHA256SUMS --verify-tag --notes-file release/notes.md --title "FlowLint $GITHUB_REF_NAME"

@@ -7,12 +7,9 @@ Add regression cases for both broken traces and legal streams before expanding
 rule coverage. Reuse the official AG-UI schemas, preserve source locations, and
 keep event content out of diagnostics. Arrival order is authoritative.
 
-Distribution automation is implemented. Explicit lifecycle
-rules, text/tool/reasoning chunk normalization (FL010/FL011), and EOF checks are implemented. Add each new rule with its ID and
-coverage in REFERENCE.md, paired valid/invalid fixtures, and partial-capture regressions.
-Subagent, reasoning, and step lifecycle checks are implemented on main.
-SSE parsing and state patch validation are implemented. Activity patch validation
-is later work.
+Add each new rule to REFERENCE.md with its ID, severity, and coverage limits.
+Include valid and invalid examples, plus partial-capture regressions where relevant.
+See [ROADMAP.md](ROADMAP.md) for completed phases and remaining gaps.
 
 Run `pnpm verify:package` to check the distributable in a fresh consumer project.
 See [RELEASING.md](RELEASING.md) for GitHub and npm release instructions.

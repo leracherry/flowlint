@@ -87,6 +87,7 @@ See the [contributing guide](CONTRIBUTING.md) to get started.
 ## Documentation
 
 - [CLI, rules, and CI examples](REFERENCE.md)
+- [Compatibility and versioning](COMPATIBILITY.md)
 - [Roadmap](ROADMAP.md)
 - [Changelog](CHANGELOG.md)
 - [Release guide](RELEASING.md)

@@ -1,5 +1,23 @@
 # Releasing FlowLint
 
+## Compatibility review
+
+Before selecting a version, apply [COMPATIBILITY.md](COMPATIBILITY.md):
+
+1. Compare CLI/API/JSON behavior, accepted traces, diagnostic codes and severity,
+   resource limits, pinned schemas, and runtime/compiler requirements with the
+   latest release. Review recorded producer results and explain every change.
+2. A newly failing trace requires a major release from 1.0 onward, even for a bug
+   fix. During 0.x it requires a new minor release. New warnings and compatible
+   features use minor releases; compatible corrections use patches.
+3. Record the classification and reason in the changelog. For breaking changes,
+   include before/after examples and migration guidance. Check deprecation notices.
+   The current unreleased reopening checks require **0.3.0**, not **0.2.1**.
+4. Run the existing CLI/API regressions and offline producer corpus with
+   `pnpm check`, then verify the distributable with `pnpm verify:package`. Check
+   that COMPATIBILITY.md is included in the tarball. Do not change expected
+   findings without reviewing their protocol basis.
+
 ## GitHub release
 
 1. Update the package version and changelog. Run `pnpm check` and

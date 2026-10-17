@@ -1,6 +1,8 @@
 # FlowLint reference
 
-Detailed CLI behavior, supported rules, and protocol coverage.
+Detailed CLI behavior, supported rules, and protocol coverage. See the
+[compatibility policy](COMPATIBILITY.md) for versioning guarantees and the
+machine-readable interfaces supported for automation.
 
 ## Inputs and output
 

@@ -7,6 +7,10 @@ Add regression cases for both broken traces and legal streams before expanding
 rule coverage. Reuse the official AG-UI schemas, preserve source locations, and
 keep event content out of diagnostics. Arrival order is authoritative.
 
+Classify behavior changes using [COMPATIBILITY.md](COMPATIBILITY.md). A new default
+error or stricter acceptance requires a breaking release, even for a bug fix.
+Do not update recorded-trace expectations merely to make new failures pass.
+
 Add each new rule to REFERENCE.md with its ID, severity, and coverage limits.
 Include valid and invalid examples, plus partial-capture regressions where relevant.
 See [ROADMAP.md](ROADMAP.md) for completed phases and remaining gaps.

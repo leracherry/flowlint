@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+- Adopt and ship a compatibility policy: default error additions and stricter
+  acceptance require a major release after 1.0, or a minor release during 0.x.
+  The new reopening checks therefore require 0.3.0 rather than 0.2.1.
+
 - Validate against 19 upstream recorded producer journeys (918 events), with
   reproducible imports, provenance, and offline CI regressions. Retain four
   observed DeepAgents reopening findings across two resume journeys.

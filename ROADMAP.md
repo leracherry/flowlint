@@ -54,7 +54,10 @@ See RELEASING.md.
       Python, Strands TypeScript, and LangGraph/DeepAgents, with provenance and
       exact diagnostic expectations. See test/fixtures/producers/README.md.
 
-Remaining work toward 1.0: compatibility policy,
+- [x] Compatibility policy for CLI/API/JSON, rule severity and acceptance changes,
+      protocol/schema updates, runtime support, and release classification.
+
+Remaining work toward 1.0:
 fuzz/property testing, resource/performance validation, cross-platform installation
 checks, and a release candidate. FlowLint validates captures; consumer storage,
 provider restoration, metadata merging, and full protocol certification are not

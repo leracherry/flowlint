@@ -6,7 +6,7 @@ No agent runtime or LLM calls required.
 
 ## Install
 
-Requires **Node.js 22+**.
+Requires **Node.js 22+**. Tested on Linux, macOS, and Windows.
 
 ```sh
 npm install --save-dev @leracherry/flowlint
@@ -51,14 +51,15 @@ Warnings do not fail a check, making FlowLint easy to use in CI.
 - Subagent lifecycles, nested delegation, and consistent event ownership.
 - Reasoning spans, reasoning message streams, and per-agent steps.
 - State and activity patches against recorded baselines.
-
-On `main` for the next release: reopened-item consistency and encrypted artifact
-target/preservation checks across recorded runs.
+- Consistent attributes when messages and tools reopen.
+- Encrypted artifact targets and preservation across recorded runs.
 
 Interleaved messages and tool calls are supported. Use `--allow-partial` for
 captures that may start or end mid-stream.
 
-See the [reference](REFERENCE.md) for every rule and its limits.
+See the [reference](REFERENCE.md) for every rule and its limits. From 1.0 onward,
+changes that make passing traces fail require a major release; see the
+[compatibility policy](COMPATIBILITY.md).
 
 ## TypeScript API
 

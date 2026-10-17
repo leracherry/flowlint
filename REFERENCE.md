@@ -35,15 +35,10 @@ input, parse, and usage failures (`INPUT_READ`, `PARSE_*`, `CLI_USAGE`), with
 normal text and exit 0. Invoking `flowlint` without a command shows help and exits 2.
 Unknown commands/options or extra file arguments exit 2.
 
-For example, checking the invalid trace produces:
+For example, an invalid trace includes this diagnostic:
 
 ```text
-examples/invalid.ndjson
-AG-UI 1.0; FlowLint supported rules: 31 (FL001, FL002, FL003, FL004, FL005, FL006, FL007, FL008, FL009, FL010, FL011, FL012, RUN_TRANSITION, RUN_IDENTITY, SUBAGENT_START, SUBAGENT_END, SUBAGENT_PARENT, SUBAGENT_OPEN, ATTRIBUTION, REASONING_SPAN_START, REASONING_SPAN_END, REASONING_SPAN_OPEN, REASONING_MESSAGE_START, REASONING_MESSAGE_MISSING, REASONING_MESSAGE_OPEN, STEP_START, STEP_END, STEP_OPEN, STATE_PATCH, STATE_BASELINE, STATE_LIMIT)
-
-  2:1  error  FL002  TEXT_MESSAGE_CONTENT refers to unopened text message "m-2"
-
-1 error, 0 warnings (3 events checked)
+2:1  error  FL002  TEXT_MESSAGE_CONTENT refers to unopened text message "m-2"
 ```
 
 Exit codes: **0** no errors, **1** schema or lint errors, **2** input/parse/usage
@@ -53,7 +48,7 @@ arguments; message identifiers remain visible. Checks run offline after installa
 
 ## Resource limits
 
-Unreleased hardening for 0.3.0 adds structured failures instead of recursive
+FlowLint 1.0 reports structured failures instead of recursive
 parser crashes: JSON nesting is limited to 256 containers (`PARSE_DEPTH`), and
 captures to 100,000 physical lines, counting a trailing empty line
 (`PARSE_LINES`). These are input errors and CLI exit 2. The 10 MiB byte limit
@@ -71,7 +66,7 @@ Patch results are subject to the same structural limits. Exceeding them produces
 `STATE_LIMIT` or `ACTIVITY_LIMIT` warnings and invalidates that baseline. The
 200 MiB work budget counts baseline copies as well as intermediate results, so
 failed patches cannot bypass it. New limits and stricter budget accounting are
-compatibility changes for 0.3.0; very deeply nested captures should be simplified
+compatibility changes introduced in 1.0; very deeply nested captures should be simplified
 or split at legitimate capture boundaries rather than bypassing the safeguards.
 
 ## Library
@@ -212,7 +207,7 @@ forward-compatibility handling described below.
 
 ### Reopened items and encrypted artifacts
 
-These checks are available on `main` for the next release. They follow the
+These checks follow the
 [message](https://github.com/ag-ui-protocol/ag-ui/blob/main/docs/spec/1.0/events/text-messages.mdx),
 [tool](https://github.com/ag-ui-protocol/ag-ui/blob/main/docs/spec/1.0/events/tool-calls.mdx),
 and [reasoning](https://github.com/ag-ui-protocol/ag-ui/blob/main/docs/spec/1.0/events/reasoning.mdx)

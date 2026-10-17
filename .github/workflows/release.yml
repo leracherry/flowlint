@@ -9,10 +9,12 @@ concurrency:
   cancel-in-progress: false
 jobs:
   verify:
-    runs-on: ubuntu-24.04
+    runs-on: ${{ matrix.os }}
     strategy:
+      fail-fast: false
       matrix:
         node: [22, 24]
+        os: [ubuntu-24.04, macos-14, windows-2022]
     steps:
       - uses: actions/checkout@v7
       - uses: pnpm/action-setup@v6
@@ -24,6 +26,8 @@ jobs:
         run: node -e 'const p = require("./package.json"); if (process.env.GITHUB_REF_NAME !== `v${p.version}`) process.exit(1)'
       - run: pnpm install --frozen-lockfile
       - run: pnpm check
+      - run: pnpm stress
+      - run: pnpm verify:package
   release:
     needs: verify
     runs-on: ubuntu-24.04

@@ -23,11 +23,10 @@ in one TypeScript package, with a CLI and deterministic library API.
   - [x] Confirm npm scope ownership and submit v0.1.0 successfully to npm.
   - [x] Verify public registry availability and a fresh npm registry installation.
 
-v0.1.0 is available as a verified GitHub tarball and the public npm package
-`@leracherry/flowlint`. A fresh registry installation, CLI run, and library import
-passed on 2026-10-11. The source repository is now public. Token-based
-publishing is configured; Trusted Publishing remains an optional migration.
-See RELEASING.md.
+Distribution uses verified GitHub release tarballs and the public npm package
+`@leracherry/flowlint`. The source repository is public. Token-based publishing
+with provenance is configured; Trusted Publishing remains an optional migration.
+See [RELEASING.md](RELEASING.md).
 
 ## v0.2.0
 
@@ -42,7 +41,7 @@ See RELEASING.md.
 - [x] Activity snapshot/delta validation, ownership replacement, history
       reconciliation, and bounded patch application across threads.
 
-## Next release (unreleased)
+## v1.0.0
 
 - [x] Reopened message/tool attributes, including normalized chunks, historical
       input, snapshots, and per-thread continuity.
@@ -63,6 +62,12 @@ See RELEASING.md.
 - [x] Node 22/24 CI on Linux/macOS/Windows, including packed installation and
       paths containing spaces.
 
-Remaining work toward 1.0: a release candidate and feedback on real integrations. FlowLint validates captures; consumer storage,
-provider restoration, metadata merging, and full protocol certification are not
-part of its current guarantees.
+## After 1.0
+
+- Collect feedback from real integrations and broaden the recorded producer corpus.
+- Extend real-producer coverage for patches, activities, encrypted artifacts,
+  and arbitrary parallel scheduling; these currently rely on authored regressions.
+- Maintain the published compatibility policy when adding or tightening rules.
+
+FlowLint validates captures. Consumer storage, provider restoration, metadata
+merging, and full protocol certification are not part of its guarantees.

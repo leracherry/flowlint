@@ -12,9 +12,8 @@ Before selecting a version, apply [COMPATIBILITY.md](COMPATIBILITY.md):
    features use minor releases; compatible corrections use patches.
 3. Record the classification and reason in the changelog. For breaking changes,
    include before/after examples and migration guidance. Check deprecation notices.
-   The current unreleased reopening checks require **0.3.0**, not **0.2.1**.
 4. Run the existing CLI/API regressions and offline producer corpus with
-   `pnpm check`, then verify the distributable with `pnpm verify:package`. Check
+   `pnpm check` and `pnpm stress`, then verify the distributable with `pnpm verify:package`. Check
    that COMPATIBILITY.md is included in the tarball. Do not change expected
    findings without reviewing their protocol basis.
 
@@ -27,8 +26,8 @@ Before selecting a version, apply [COMPATIBILITY.md](COMPATIBILITY.md):
 2. Commit to main and wait for CI. Create and push a matching version tag (replace the example with the new version):
 
    ```sh
-   git tag -a v0.2.0 -m "FlowLint v0.2.0"
-   git push origin v0.2.0
+   git tag -a v1.0.0 -m "FlowLint v1.0.0"
+   git push origin v1.0.0
    ```
 
 3. The release workflow repeats checks on Node 22/24, verifies the installable
@@ -65,6 +64,6 @@ After the package exists, its npm owner can configure a GitHub Trusted Publisher
 for owner `leracherry`, repository `flowlint`, workflow `npm-publish.yml`, with no
 environment. Follow the current
 [npm Trusted Publishing documentation](https://docs.npmjs.com/trusted-publishers/).
-Then update the workflow to grant `id-token: write`, remove token authentication
+Keep the existing `id-token: write` permission, remove token authentication
 and the token-based `npm whoami` step, and verify a new-version publication before
 removing the repository secret. Trusted Publishing has not been configured.

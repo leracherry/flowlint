@@ -28,12 +28,11 @@ change that lowers severity is a major release. Consumers must tolerate addition
 warnings and optional JSON fields in minor releases. If a project treats warnings
 as failures, it should pin exact versions and review upgrades.
 
-During **0.x**, a compatibility-breaking change requires a new minor version
-(`0.2.x` to `0.3.0`); patch releases preserve the contract within that minor line.
-Compatible features and new warnings also use minor releases. The unreleased
-reopening error checks therefore belong in **0.3.0**, not **0.2.1**. This policy
-establishes the 1.0 promise without declaring the current 0.x API stable across
-minor versions.
+**1.0.0 establishes the stable baseline.** The transition from 0.2.0 includes
+stricter checks and limits; see the [migration notes](CHANGELOG.md#upgrading-from-020).
+The pre-1.0 rule—breaking changes required a new 0.x minor version—does not permit
+breaking changes in stable minor releases. Future breaking changes require 2.0.0
+or a subsequent major version.
 
 Prereleases such as `1.0.0-rc.1` are evaluation builds and can change before stable
 release. Changelogs must still identify compatibility changes. Published versions,

@@ -1,0 +1,9 @@
+{"type":"RUN_STARTED","threadId":"id-1","runId":"id-2","protocolVersion":"1.0","input":{"threadId":"id-1","runId":"id-2","protocolVersion":"1.0","state":{},"messages":[{"id":"id-3","role":"user","content":"Hi, I am duaa"}],"tools":[{"name":"change_background","description":"Change the background color of the chat. Can be anything that the CSS background attribute accepts. Regular colors, linear of radial gradients etc.","parameters":{"type":"object","properties":{"background":{"type":"string","description":"The background. Prefer gradients. Only use when asked."}},"required":["background"]}}],"context":[{"description":"Name of the user","value":"Bob"}],"forwardedProps":{}}}
+{"type":"STATE_SNAPSHOT","snapshot":{}}
+{"type":"MESSAGES_SNAPSHOT","messages":[{"id":"id-3","role":"user","content":"Hi, I am duaa"}]}
+{"type":"TEXT_MESSAGE_START","messageId":"id-4","role":"assistant"}
+{"type":"TEXT_MESSAGE_CONTENT","messageId":"id-4","delta":"Hello duaa! How can "}
+{"type":"TEXT_MESSAGE_CONTENT","messageId":"id-4","delta":"I assist you today?"}
+{"type":"TEXT_MESSAGE_END","messageId":"id-4"}
+{"type":"MESSAGES_SNAPSHOT","messages":[{"id":"id-3","role":"user","content":"Hi, I am duaa"},{"id":"id-4","role":"assistant","content":"Hello duaa! How can I assist you today?"}]}
+{"type":"RUN_FINISHED","threadId":"id-1","runId":"id-2","outcome":{"type":"success"},"usage":[{"provider":"openai","model":"gpt-5.4","inputTokens":74,"outputTokens":10,"totalTokens":84}]}

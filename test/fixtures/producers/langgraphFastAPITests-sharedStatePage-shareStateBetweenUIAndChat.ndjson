@@ -1,0 +1,19 @@
+{"type":"RUN_STARTED","threadId":"id-1","runId":"id-2","protocolVersion":"1.0","input":{"threadId":"id-1","runId":"id-2","protocolVersion":"1.0","state":{"recipe":{"title":"Make Your Recipe","skill_level":"Intermediate","cooking_time":"45 min","special_preferences":[],"ingredients":[{"icon":"🥕","name":"Carrots","amount":"3 large, grated"},{"icon":"🌾","name":"All-Purpose Flour","amount":"2 cups"},{"icon":"🍴","name":"Potatoes","amount":"12"}],"instructions":["Preheat oven to 350°F (175°C)"]}},"messages":[{"id":"id-3","role":"user","content":"Give me all the ingredients, also list them in your message"}],"tools":[],"context":[],"forwardedProps":{}}}
+{"type":"STEP_STARTED","stepName":"start_node"}
+{"type":"STEP_FINISHED","stepName":"start_node"}
+{"type":"STEP_STARTED","stepName":"chat_node"}
+{"type":"TEXT_MESSAGE_START","messageId":"id-4","role":"assistant"}
+{"type":"TEXT_MESSAGE_CONTENT","messageId":"id-4","delta":"Here are the ingredi"}
+{"type":"TEXT_MESSAGE_CONTENT","messageId":"id-4","delta":"ents:\n- Pasta: 400g\n"}
+{"type":"TEXT_MESSAGE_CONTENT","messageId":"id-4","delta":"- Salt: 1 tsp\n- Oliv"}
+{"type":"TEXT_MESSAGE_CONTENT","messageId":"id-4","delta":"e Oil: 4 tbsp\n- Garl"}
+{"type":"TEXT_MESSAGE_CONTENT","messageId":"id-4","delta":"ic: 6 cloves\n- Tomat"}
+{"type":"TEXT_MESSAGE_CONTENT","messageId":"id-4","delta":"oes: 2 cups\n- Potato"}
+{"type":"TEXT_MESSAGE_CONTENT","messageId":"id-4","delta":"es: 12\n- Carrots: 3\n"}
+{"type":"TEXT_MESSAGE_CONTENT","messageId":"id-4","delta":"- All-Purpose Flour:"}
+{"type":"TEXT_MESSAGE_CONTENT","messageId":"id-4","delta":" 2 cups"}
+{"type":"TEXT_MESSAGE_END","messageId":"id-4"}
+{"type":"STEP_FINISHED","stepName":"chat_node"}
+{"type":"STATE_SNAPSHOT","snapshot":{"messages":[{"content":"Give me all the ingredients, also list them in your message","additional_kwargs":{},"response_metadata":{},"type":"human","name":null,"id":"id-3"},{"content":"Here are the ingredients:\n- Pasta: 400g\n- Salt: 1 tsp\n- Olive Oil: 4 tbsp\n- Garlic: 6 cloves\n- Tomatoes: 2 cups\n- Potatoes: 12\n- Carrots: 3\n- All-Purpose Flour: 2 cups","additional_kwargs":{},"response_metadata":{"finish_reason":"stop","model_name":"gpt-4.1-mini","model_provider":"openai"},"type":"ai","name":null,"id":"id-4","tool_calls":[],"invalid_tool_calls":[],"usage_metadata":null}],"recipe":{"title":"Make Your Recipe","skill_level":"Intermediate","cooking_time":"45 min","special_preferences":[],"ingredients":[{"icon":"🥕","name":"Carrots","amount":"3 large, grated"},{"icon":"🌾","name":"All-Purpose Flour","amount":"2 cups"},{"icon":"🍴","name":"Potatoes","amount":"12"}],"instructions":["Preheat oven to 350°F (175°C)"]},"tools":[]}}
+{"type":"MESSAGES_SNAPSHOT","messages":[{"id":"id-3","role":"user","content":"Give me all the ingredients, also list them in your message"},{"id":"id-4","role":"assistant","content":"Here are the ingredients:\n- Pasta: 400g\n- Salt: 1 tsp\n- Olive Oil: 4 tbsp\n- Garlic: 6 cloves\n- Tomatoes: 2 cups\n- Potatoes: 12\n- Carrots: 3\n- All-Purpose Flour: 2 cups"}]}
+{"type":"RUN_FINISHED","threadId":"id-1","runId":"id-2"}

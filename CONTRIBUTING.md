@@ -14,3 +14,7 @@ See [ROADMAP.md](ROADMAP.md) for completed phases and remaining gaps.
 Run `pnpm verify:package` to check the distributable in a fresh consumer project.
 See [RELEASING.md](RELEASING.md) for GitHub and npm release instructions.
 Include an entry in CHANGELOG.md for each release.
+
+The [recorded producer corpus](test/fixtures/producers/README.md) runs offline in
+normal CI. Keep source provenance and checksums when adding recordings. Review
+findings against the protocol; do not assume every upstream recording is valid.

@@ -1,0 +1,51 @@
+{"type":"RUN_STARTED","threadId":"id-1","runId":"id-2","protocolVersion":"1.0","input":{"threadId":"id-1","runId":"id-2","protocolVersion":"1.0","state":{},"messages":[{"id":"id-3","role":"user","content":"Please give me a pasta recipe of your choosing, but one of the ingredients should be \"Pasta\""}],"tools":[],"context":[],"forwardedProps":{}}}
+{"type":"STEP_STARTED","stepName":"start_node"}
+{"type":"CUSTOM","name":"manually_emit_intermediate_state","value":{"messages":[{"content":"Please give me a pasta recipe of your choosing, but one of the ingredients should be \"Pasta\"","additional_kwargs":{},"response_metadata":{},"type":"human","name":null,"id":"id-3"}],"tools":[],"recipe":{"skill_level":"Beginner","special_preferences":[],"cooking_time":"15 min","ingredients":[{"icon":"🍴","name":"Sample Ingredient","amount":"1 unit"}],"instructions":["First step instruction"]}}}
+{"type":"STEP_FINISHED","stepName":"start_node"}
+{"type":"STEP_STARTED","stepName":"chat_node"}
+{"type":"CUSTOM","name":"PredictState","value":[{"state_key":"recipe","tool":"generate_recipe","tool_argument":"recipe"}]}
+{"type":"TOOL_CALL_START","toolCallId":"id-4","toolCallName":"generate_recipe","parentMessageId":"id-5"}
+{"type":"TOOL_CALL_ARGS","toolCallId":"id-4","delta":"{\"recipe\":{\"title\":\""}
+{"type":"TOOL_CALL_ARGS","toolCallId":"id-4","delta":"Pasta Aglio e Olio\","}
+{"type":"TOOL_CALL_ARGS","toolCallId":"id-4","delta":"\"skill_level\":\"Inter"}
+{"type":"TOOL_CALL_ARGS","toolCallId":"id-4","delta":"mediate\",\"special_pr"}
+{"type":"TOOL_CALL_ARGS","toolCallId":"id-4","delta":"eferences\":[],\"cooki"}
+{"type":"TOOL_CALL_ARGS","toolCallId":"id-4","delta":"ng_time\":\"45 min\",\"i"}
+{"type":"TOOL_CALL_ARGS","toolCallId":"id-4","delta":"ngredients\":[{\"icon\""}
+{"type":"TOOL_CALL_ARGS","toolCallId":"id-4","delta":":\"🍝\",\"name\":\"Pasta\""}
+{"type":"TOOL_CALL_ARGS","toolCallId":"id-4","delta":",\"amount\":\"400g\"},{\""}
+{"type":"TOOL_CALL_ARGS","toolCallId":"id-4","delta":"icon\":\"🧂\",\"name\":\"S"}
+{"type":"TOOL_CALL_ARGS","toolCallId":"id-4","delta":"alt\",\"amount\":\"1 tsp"}
+{"type":"TOOL_CALL_ARGS","toolCallId":"id-4","delta":"\"},{\"icon\":\"🫒\",\"nam"}
+{"type":"TOOL_CALL_ARGS","toolCallId":"id-4","delta":"e\":\"Olive Oil\",\"amou"}
+{"type":"TOOL_CALL_ARGS","toolCallId":"id-4","delta":"nt\":\"4 tbsp\"},{\"icon"}
+{"type":"TOOL_CALL_ARGS","toolCallId":"id-4","delta":"\":\"🧄\",\"name\":\"Garli"}
+{"type":"TOOL_CALL_ARGS","toolCallId":"id-4","delta":"c\",\"amount\":\"6 clove"}
+{"type":"TOOL_CALL_ARGS","toolCallId":"id-4","delta":"s\"},{\"icon\":\"🍅\",\"na"}
+{"type":"TOOL_CALL_ARGS","toolCallId":"id-4","delta":"me\":\"Tomatoes\",\"amou"}
+{"type":"TOOL_CALL_ARGS","toolCallId":"id-4","delta":"nt\":\"2 cups\"}],\"inst"}
+{"type":"TOOL_CALL_ARGS","toolCallId":"id-4","delta":"ructions\":[\"Boil wat"}
+{"type":"TOOL_CALL_ARGS","toolCallId":"id-4","delta":"er and cook pasta un"}
+{"type":"TOOL_CALL_ARGS","toolCallId":"id-4","delta":"til al dente\",\"Slice"}
+{"type":"TOOL_CALL_ARGS","toolCallId":"id-4","delta":" garlic thinly and s"}
+{"type":"TOOL_CALL_ARGS","toolCallId":"id-4","delta":"auté in olive oil\",\""}
+{"type":"TOOL_CALL_ARGS","toolCallId":"id-4","delta":"Dice tomatoes and ad"}
+{"type":"TOOL_CALL_ARGS","toolCallId":"id-4","delta":"d to the pan\",\"Seaso"}
+{"type":"TOOL_CALL_ARGS","toolCallId":"id-4","delta":"n with salt to taste"}
+{"type":"TOOL_CALL_ARGS","toolCallId":"id-4","delta":"\",\"Toss pasta with t"}
+{"type":"TOOL_CALL_ARGS","toolCallId":"id-4","delta":"he sauce and serve\"]"}
+{"type":"TOOL_CALL_ARGS","toolCallId":"id-4","delta":",\"changes\":\"\"}}"}
+{"type":"TOOL_CALL_END","toolCallId":"id-4"}
+{"type":"CUSTOM","name":"manually_emit_intermediate_state","value":{"messages":[{"content":"Please give me a pasta recipe of your choosing, but one of the ingredients should be \"Pasta\"","additional_kwargs":{},"response_metadata":{},"type":"human","name":null,"id":"id-3"}],"recipe":{"skill_level":"Intermediate","special_preferences":[],"cooking_time":"45 min","ingredients":[{"icon":"🍝","name":"Pasta","amount":"400g"},{"icon":"🧂","name":"Salt","amount":"1 tsp"},{"icon":"🫒","name":"Olive Oil","amount":"4 tbsp"},{"icon":"🧄","name":"Garlic","amount":"6 cloves"},{"icon":"🍅","name":"Tomatoes","amount":"2 cups"}],"instructions":["Boil water and cook pasta until al dente","Slice garlic thinly and sauté in olive oil","Dice tomatoes and add to the pan","Season with salt to taste","Toss pasta with the sauce and serve"],"title":"Pasta Aglio e Olio","changes":""},"tools":[]}}
+{"type":"STEP_FINISHED","stepName":"chat_node"}
+{"type":"STEP_STARTED","stepName":"start_node"}
+{"type":"STEP_FINISHED","stepName":"start_node"}
+{"type":"STEP_STARTED","stepName":"chat_node"}
+{"type":"TEXT_MESSAGE_START","messageId":"id-6","role":"assistant"}
+{"type":"TEXT_MESSAGE_CONTENT","messageId":"id-6","delta":"Done! I've completed"}
+{"type":"TEXT_MESSAGE_CONTENT","messageId":"id-6","delta":" that for you."}
+{"type":"TEXT_MESSAGE_END","messageId":"id-6"}
+{"type":"STEP_FINISHED","stepName":"chat_node"}
+{"type":"STATE_SNAPSHOT","snapshot":{"messages":[{"content":"Please give me a pasta recipe of your choosing, but one of the ingredients should be \"Pasta\"","additional_kwargs":{},"response_metadata":{},"type":"human","name":null,"id":"id-3"},{"content":"","additional_kwargs":{},"response_metadata":{"finish_reason":"tool_calls","model_name":"gpt-4.1-mini","model_provider":"openai"},"type":"ai","name":null,"id":"id-5","tool_calls":[{"name":"generate_recipe","args":{"recipe":{"title":"Pasta Aglio e Olio","skill_level":"Intermediate","special_preferences":[],"cooking_time":"45 min","ingredients":[{"icon":"🍝","name":"Pasta","amount":"400g"},{"icon":"🧂","name":"Salt","amount":"1 tsp"},{"icon":"🫒","name":"Olive Oil","amount":"4 tbsp"},{"icon":"🧄","name":"Garlic","amount":"6 cloves"},{"icon":"🍅","name":"Tomatoes","amount":"2 cups"}],"instructions":["Boil water and cook pasta until al dente","Slice garlic thinly and sauté in olive oil","Dice tomatoes and add to the pan","Season with salt to taste","Toss pasta with the sauce and serve"],"changes":""}},"id":"id-4","type":"tool_call"}],"invalid_tool_calls":[],"usage_metadata":null},{"content":"Recipe generated.","additional_kwargs":{},"response_metadata":{},"type":"tool","name":null,"id":"id-7","tool_call_id":"id-4","artifact":null,"status":"success"},{"content":"Done! I've completed that for you.","additional_kwargs":{},"response_metadata":{"finish_reason":"stop","model_name":"gpt-4.1-mini","model_provider":"openai"},"type":"ai","name":null,"id":"id-6","tool_calls":[],"invalid_tool_calls":[],"usage_metadata":null}],"recipe":{"skill_level":"Intermediate","special_preferences":[],"cooking_time":"45 min","ingredients":[{"icon":"🍝","name":"Pasta","amount":"400g"},{"icon":"🧂","name":"Salt","amount":"1 tsp"},{"icon":"🫒","name":"Olive Oil","amount":"4 tbsp"},{"icon":"🧄","name":"Garlic","amount":"6 cloves"},{"icon":"🍅","name":"Tomatoes","amount":"2 cups"}],"instructions":["Boil water and cook pasta until al dente","Slice garlic thinly and sauté in olive oil","Dice tomatoes and add to the pan","Season with salt to taste","Toss pasta with the sauce and serve"],"title":"Pasta Aglio e Olio","changes":""},"tools":[]}}
+{"type":"MESSAGES_SNAPSHOT","messages":[{"id":"id-3","role":"user","content":"Please give me a pasta recipe of your choosing, but one of the ingredients should be \"Pasta\""},{"id":"id-5","role":"assistant","content":"","toolCalls":[{"id":"id-4","type":"function","function":{"name":"generate_recipe","arguments":"{\"recipe\": {\"title\": \"Pasta Aglio e Olio\", \"skill_level\": \"Intermediate\", \"special_preferences\": [], \"cooking_time\": \"45 min\", \"ingredients\": [{\"icon\": \"\\ud83c\\udf5d\", \"name\": \"Pasta\", \"amount\": \"400g\"}, {\"icon\": \"\\ud83e\\uddc2\", \"name\": \"Salt\", \"amount\": \"1 tsp\"}, {\"icon\": \"\\ud83e\\uded2\", \"name\": \"Olive Oil\", \"amount\": \"4 tbsp\"}, {\"icon\": \"\\ud83e\\uddc4\", \"name\": \"Garlic\", \"amount\": \"6 cloves\"}, {\"icon\": \"\\ud83c\\udf45\", \"name\": \"Tomatoes\", \"amount\": \"2 cups\"}], \"instructions\": [\"Boil water and cook pasta until al dente\", \"Slice garlic thinly and saut\\u00e9 in olive oil\", \"Dice tomatoes and add to the pan\", \"Season with salt to taste\", \"Toss pasta with the sauce and serve\"], \"changes\": \"\"}}"}}]},{"id":"id-7","role":"tool","content":"Recipe generated.","toolCallId":"id-4"},{"id":"id-6","role":"assistant","content":"Done! I've completed that for you."}]}
+{"type":"RUN_FINISHED","threadId":"id-1","runId":"id-2"}

@@ -50,7 +50,11 @@ See RELEASING.md.
       with snapshot withdrawal, opaque fingerprints, and warning-only handling
       of missing targets and unknown string subtypes.
 
-Remaining work toward 1.0: real-producer trace fixtures, compatibility policy,
+- [x] Pinned recorded producer corpus: 19 journeys / 918 events across Strands
+      Python, Strands TypeScript, and LangGraph/DeepAgents, with provenance and
+      exact diagnostic expectations. See test/fixtures/producers/README.md.
+
+Remaining work toward 1.0: compatibility policy,
 fuzz/property testing, resource/performance validation, cross-platform installation
 checks, and a release candidate. FlowLint validates captures; consumer storage,
 provider restoration, metadata merging, and full protocol certification are not

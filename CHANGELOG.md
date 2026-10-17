@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+- Validate against 19 upstream recorded producer journeys (918 events), with
+  reproducible imports, provenance, and offline CI regressions. Retain four
+  observed DeepAgents reopening findings across two resume journeys.
+
 - Check reopened message/tool attributes across explicit streams, chunks, history,
   and runs on the same thread.
 - Validate encrypted artifact targets and preservation in later recorded input,

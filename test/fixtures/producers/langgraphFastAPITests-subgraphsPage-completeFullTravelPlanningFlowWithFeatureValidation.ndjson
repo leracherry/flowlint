@@ -1,0 +1,88 @@
+{"type":"RUN_STARTED","threadId":"id-1","runId":"id-2","protocolVersion":"1.0","input":{"threadId":"id-1","runId":"id-2","protocolVersion":"1.0","state":{},"messages":[{"id":"id-3","role":"user","content":"Help me plan a trip to San Francisco"}],"tools":[],"context":[],"forwardedProps":{}}}
+{"type":"STEP_STARTED","stepName":"supervisor"}
+{"type":"TOOL_CALL_START","toolCallId":"id-4","toolCallName":"supervisor_response","parentMessageId":"id-5"}
+{"type":"TOOL_CALL_ARGS","toolCallId":"id-4","delta":"{\"answer\":\"Let me fi"}
+{"type":"TOOL_CALL_ARGS","toolCallId":"id-4","delta":"nd flights for you!\""}
+{"type":"TOOL_CALL_ARGS","toolCallId":"id-4","delta":",\"next_agent\":\"fligh"}
+{"type":"TOOL_CALL_ARGS","toolCallId":"id-4","delta":"ts_agent\"}"}
+{"type":"TOOL_CALL_END","toolCallId":"id-4"}
+{"type":"STATE_SNAPSHOT","snapshot":{"messages":[{"content":"Help me plan a trip to San Francisco","additional_kwargs":{},"response_metadata":{},"type":"human","name":null,"id":"id-3"}],"itinerary":{},"tools":[]}}
+{"type":"MESSAGES_SNAPSHOT","messages":[{"id":"id-3","role":"user","content":"Help me plan a trip to San Francisco"}]}
+{"type":"STEP_FINISHED","stepName":"supervisor"}
+{"type":"STEP_STARTED","stepName":"flights_agent"}
+{"type":"STEP_FINISHED","stepName":"flights_agent"}
+{"type":"STEP_STARTED","stepName":"flights_agent_chat_node"}
+{"type":"MESSAGES_SNAPSHOT","messages":[{"id":"id-3","role":"user","content":"Help me plan a trip to San Francisco"}]}
+{"type":"STEP_FINISHED","stepName":"flights_agent_chat_node"}
+{"type":"CUSTOM","name":"on_interrupt","value":"{\"message\": \"\\n        Found 2 flight options from Amsterdam to San Francisco.\\n        I recommend choosing the flight by KLM since it's known to be on time and cheaper.\\n        \", \"options\": [{\"airline\": \"KLM\", \"departure\": \"Amsterdam (AMS)\", \"arrival\": \"San Francisco (SFO)\", \"price\": \"$650\", \"duration\": \"11h 30m\"}, {\"airline\": \"United\", \"departure\": \"Amsterdam (AMS)\", \"arrival\": \"San Francisco (SFO)\", \"price\": \"$720\", \"duration\": \"12h 15m\"}], \"recommendation\": {\"airline\": \"KLM\", \"departure\": \"Amsterdam (AMS)\", \"arrival\": \"San Francisco (SFO)\", \"price\": \"$650\", \"duration\": \"11h 30m\"}, \"agent\": \"flights\"}"}
+{"type":"RUN_FINISHED","threadId":"id-1","runId":"id-2"}
+{"type":"RUN_STARTED","threadId":"id-1","runId":"id-6","protocolVersion":"1.0","input":{"threadId":"id-1","runId":"id-6","protocolVersion":"1.0","state":{"messages":[{"content":"Help me plan a trip to San Francisco","additional_kwargs":{},"response_metadata":{},"type":"human","name":null,"id":"id-3"}],"itinerary":{},"tools":[]},"messages":[],"tools":[],"context":[],"forwardedProps":{"command":{"resume":"{\"airline\":\"KLM\",\"departure\":\"Amsterdam (AMS)\",\"arrival\":\"San Francisco (SFO)\",\"price\":\"$650\",\"duration\":\"11h 30m\"}","interruptEvent":"{\"message\": \"\\n        Found 2 flight options from Amsterdam to San Francisco.\\n        I recommend choosing the flight by KLM since it's known to be on time and cheaper.\\n        \", \"options\": [{\"airline\": \"KLM\", \"departure\": \"Amsterdam (AMS)\", \"arrival\": \"San Francisco (SFO)\", \"price\": \"$650\", \"duration\": \"11h 30m\"}, {\"airline\": \"United\", \"departure\": \"Amsterdam (AMS)\", \"arrival\": \"San Francisco (SFO)\", \"price\": \"$720\", \"duration\": \"12h 15m\"}], \"recommendation\": {\"airline\": \"KLM\", \"departure\": \"Amsterdam (AMS)\", \"arrival\": \"San Francisco (SFO)\", \"price\": \"$650\", \"duration\": \"11h 30m\"}, \"agent\": \"flights\"}"}}}}
+{"type":"STATE_SNAPSHOT","snapshot":{"messages":[{"content":"Help me plan a trip to San Francisco","additional_kwargs":{},"response_metadata":{},"type":"human","name":null,"id":"id-3"}],"itinerary":{},"tools":[]}}
+{"type":"MESSAGES_SNAPSHOT","messages":[{"id":"id-3","role":"user","content":"Help me plan a trip to San Francisco"}]}
+{"type":"STEP_STARTED","stepName":"flights_agent"}
+{"type":"STEP_FINISHED","stepName":"flights_agent"}
+{"type":"STEP_STARTED","stepName":"flights_agent_chat_node"}
+{"type":"STEP_FINISHED","stepName":"flights_agent_chat_node"}
+{"type":"STEP_STARTED","stepName":"flights_agent"}
+{"type":"STATE_SNAPSHOT","snapshot":{"messages":[{"content":"Help me plan a trip to San Francisco","additional_kwargs":{},"response_metadata":{},"type":"human","name":null,"id":"id-3"},{"content":"Flights Agent: Great. I'll book you the KLM flight from Amsterdam (AMS) to San Francisco (SFO).","additional_kwargs":{},"response_metadata":{},"type":"ai","name":null,"id":"id-7","tool_calls":[],"invalid_tool_calls":[],"usage_metadata":null}],"itinerary":{"flight":{"airline":"KLM","departure":"Amsterdam (AMS)","arrival":"San Francisco (SFO)","price":"$650","duration":"11h 30m"}},"tools":[],"flights":[{"airline":"KLM","departure":"Amsterdam (AMS)","arrival":"San Francisco (SFO)","price":"$650","duration":"11h 30m"},{"airline":"United","departure":"Amsterdam (AMS)","arrival":"San Francisco (SFO)","price":"$720","duration":"12h 15m"}]}}
+{"type":"STEP_FINISHED","stepName":"flights_agent"}
+{"type":"STEP_STARTED","stepName":"supervisor"}
+{"type":"TOOL_CALL_START","toolCallId":"id-8","toolCallName":"supervisor_response","parentMessageId":"id-9"}
+{"type":"TOOL_CALL_ARGS","toolCallId":"id-8","delta":"{\"answer\":\"Great cho"}
+{"type":"TOOL_CALL_ARGS","toolCallId":"id-8","delta":"ice! Now let me find"}
+{"type":"TOOL_CALL_ARGS","toolCallId":"id-8","delta":" hotels for you.\",\"n"}
+{"type":"TOOL_CALL_ARGS","toolCallId":"id-8","delta":"ext_agent\":\"hotels_a"}
+{"type":"TOOL_CALL_ARGS","toolCallId":"id-8","delta":"gent\"}"}
+{"type":"TOOL_CALL_END","toolCallId":"id-8"}
+{"type":"MESSAGES_SNAPSHOT","messages":[{"id":"id-3","role":"user","content":"Help me plan a trip to San Francisco"},{"id":"id-7","role":"assistant","content":"Flights Agent: Great. I'll book you the KLM flight from Amsterdam (AMS) to San Francisco (SFO)."}]}
+{"type":"STEP_FINISHED","stepName":"supervisor"}
+{"type":"STEP_STARTED","stepName":"hotels_agent"}
+{"type":"STEP_FINISHED","stepName":"hotels_agent"}
+{"type":"STEP_STARTED","stepName":"hotels_agent_chat_node"}
+{"type":"MESSAGES_SNAPSHOT","messages":[{"id":"id-3","role":"user","content":"Help me plan a trip to San Francisco"},{"id":"id-7","role":"assistant","content":"Flights Agent: Great. I'll book you the KLM flight from Amsterdam (AMS) to San Francisco (SFO)."}]}
+{"type":"STEP_FINISHED","stepName":"hotels_agent_chat_node"}
+{"type":"CUSTOM","name":"on_interrupt","value":"{\"message\": \"\\n        Found 3 accommodation options in San Francisco.\\n        I recommend choosing the Hotel Zoe since it strikes the balance between rating, price, and location.\\n        \", \"options\": [{\"name\": \"Hotel Zephyr\", \"location\": \"Fisherman's Wharf\", \"price_per_night\": \"$280/night\", \"rating\": \"4.2 stars\"}, {\"name\": \"The Ritz-Carlton\", \"location\": \"Nob Hill\", \"price_per_night\": \"$550/night\", \"rating\": \"4.8 stars\"}, {\"name\": \"Hotel Zoe\", \"location\": \"Union Square\", \"price_per_night\": \"$320/night\", \"rating\": \"4.4 stars\"}], \"recommendation\": {\"name\": \"Hotel Zoe\", \"location\": \"Union Square\", \"price_per_night\": \"$320/night\", \"rating\": \"4.4 stars\"}, \"agent\": \"hotels\"}"}
+{"type":"RUN_FINISHED","threadId":"id-1","runId":"id-6"}
+{"type":"RUN_STARTED","threadId":"id-1","runId":"id-10","protocolVersion":"1.0","input":{"threadId":"id-1","runId":"id-10","protocolVersion":"1.0","state":{"messages":[{"content":"Help me plan a trip to San Francisco","additional_kwargs":{},"response_metadata":{},"type":"human","name":null,"id":"id-3"},{"content":"Flights Agent: Great. I'll book you the KLM flight from Amsterdam (AMS) to San Francisco (SFO).","additional_kwargs":{},"response_metadata":{},"type":"ai","name":null,"id":"id-7","tool_calls":[],"invalid_tool_calls":[],"usage_metadata":null}],"flights":[{"airline":"KLM","departure":"Amsterdam (AMS)","arrival":"San Francisco (SFO)","price":"$650","duration":"11h 30m"},{"airline":"United","departure":"Amsterdam (AMS)","arrival":"San Francisco (SFO)","price":"$720","duration":"12h 15m"}],"itinerary":{"flight":{"airline":"KLM","departure":"Amsterdam (AMS)","arrival":"San Francisco (SFO)","price":"$650","duration":"11h 30m"}},"tools":[]},"messages":[{"id":"id-7","role":"assistant","content":"Flights Agent: Great. I'll book you the KLM flight from Amsterdam (AMS) to San Francisco (SFO)."}],"tools":[],"context":[],"forwardedProps":{"command":{"resume":"{\"name\":\"Hotel Zoe\",\"location\":\"Union Square\",\"price_per_night\":\"$320/night\",\"rating\":\"4.4 stars\"}","interruptEvent":"{\"message\": \"\\n        Found 3 accommodation options in San Francisco.\\n        I recommend choosing the Hotel Zoe since it strikes the balance between rating, price, and location.\\n        \", \"options\": [{\"name\": \"Hotel Zephyr\", \"location\": \"Fisherman's Wharf\", \"price_per_night\": \"$280/night\", \"rating\": \"4.2 stars\"}, {\"name\": \"The Ritz-Carlton\", \"location\": \"Nob Hill\", \"price_per_night\": \"$550/night\", \"rating\": \"4.8 stars\"}, {\"name\": \"Hotel Zoe\", \"location\": \"Union Square\", \"price_per_night\": \"$320/night\", \"rating\": \"4.4 stars\"}], \"recommendation\": {\"name\": \"Hotel Zoe\", \"location\": \"Union Square\", \"price_per_night\": \"$320/night\", \"rating\": \"4.4 stars\"}, \"agent\": \"hotels\"}"}}}}
+{"type":"STATE_SNAPSHOT","snapshot":{"messages":[{"content":"Help me plan a trip to San Francisco","additional_kwargs":{},"response_metadata":{},"type":"human","name":null,"id":"id-3"},{"content":"Flights Agent: Great. I'll book you the KLM flight from Amsterdam (AMS) to San Francisco (SFO).","additional_kwargs":{},"response_metadata":{},"type":"ai","name":null,"id":"id-7","tool_calls":[],"invalid_tool_calls":[],"usage_metadata":null}],"flights":[{"airline":"KLM","departure":"Amsterdam (AMS)","arrival":"San Francisco (SFO)","price":"$650","duration":"11h 30m"},{"airline":"United","departure":"Amsterdam (AMS)","arrival":"San Francisco (SFO)","price":"$720","duration":"12h 15m"}],"itinerary":{"flight":{"airline":"KLM","departure":"Amsterdam (AMS)","arrival":"San Francisco (SFO)","price":"$650","duration":"11h 30m"}},"tools":[]}}
+{"type":"MESSAGES_SNAPSHOT","messages":[{"id":"id-3","role":"user","content":"Help me plan a trip to San Francisco"},{"id":"id-7","role":"assistant","content":"Flights Agent: Great. I'll book you the KLM flight from Amsterdam (AMS) to San Francisco (SFO)."}]}
+{"type":"STEP_STARTED","stepName":"hotels_agent"}
+{"type":"STEP_FINISHED","stepName":"hotels_agent"}
+{"type":"STEP_STARTED","stepName":"hotels_agent_chat_node"}
+{"type":"STEP_FINISHED","stepName":"hotels_agent_chat_node"}
+{"type":"STEP_STARTED","stepName":"hotels_agent"}
+{"type":"STATE_SNAPSHOT","snapshot":{"messages":[{"content":"Help me plan a trip to San Francisco","additional_kwargs":{},"response_metadata":{},"type":"human","name":null,"id":"id-3"},{"content":"Flights Agent: Great. I'll book you the KLM flight from Amsterdam (AMS) to San Francisco (SFO).","additional_kwargs":{},"response_metadata":{},"type":"ai","name":null,"id":"id-7","tool_calls":[],"invalid_tool_calls":[],"usage_metadata":null},{"content":"Hotels Agent: Excellent choice! You'll like Hotel Zoe.","additional_kwargs":{},"response_metadata":{},"type":"ai","name":null,"id":"id-11","tool_calls":[],"invalid_tool_calls":[],"usage_metadata":null}],"flights":[{"airline":"KLM","departure":"Amsterdam (AMS)","arrival":"San Francisco (SFO)","price":"$650","duration":"11h 30m"},{"airline":"United","departure":"Amsterdam (AMS)","arrival":"San Francisco (SFO)","price":"$720","duration":"12h 15m"}],"itinerary":{"flight":{"airline":"KLM","departure":"Amsterdam (AMS)","arrival":"San Francisco (SFO)","price":"$650","duration":"11h 30m"},"hotel":{"name":"Hotel Zoe","location":"Union Square","price_per_night":"$320/night","rating":"4.4 stars"}},"tools":[],"hotels":[{"name":"Hotel Zephyr","location":"Fisherman's Wharf","price_per_night":"$280/night","rating":"4.2 stars"},{"name":"The Ritz-Carlton","location":"Nob Hill","price_per_night":"$550/night","rating":"4.8 stars"},{"name":"Hotel Zoe","location":"Union Square","price_per_night":"$320/night","rating":"4.4 stars"}]}}
+{"type":"STEP_FINISHED","stepName":"hotels_agent"}
+{"type":"STEP_STARTED","stepName":"supervisor"}
+{"type":"TOOL_CALL_START","toolCallId":"id-12","toolCallName":"supervisor_response","parentMessageId":"id-13"}
+{"type":"TOOL_CALL_ARGS","toolCallId":"id-12","delta":"{\"answer\":\"Excellent"}
+{"type":"TOOL_CALL_ARGS","toolCallId":"id-12","delta":"! Now let me find so"}
+{"type":"TOOL_CALL_ARGS","toolCallId":"id-12","delta":"me experiences for y"}
+{"type":"TOOL_CALL_ARGS","toolCallId":"id-12","delta":"ou.\",\"next_agent\":\"e"}
+{"type":"TOOL_CALL_ARGS","toolCallId":"id-12","delta":"xperiences_agent\"}"}
+{"type":"TOOL_CALL_END","toolCallId":"id-12"}
+{"type":"MESSAGES_SNAPSHOT","messages":[{"id":"id-3","role":"user","content":"Help me plan a trip to San Francisco"},{"id":"id-7","role":"assistant","content":"Flights Agent: Great. I'll book you the KLM flight from Amsterdam (AMS) to San Francisco (SFO)."},{"id":"id-11","role":"assistant","content":"Hotels Agent: Excellent choice! You'll like Hotel Zoe."}]}
+{"type":"STEP_FINISHED","stepName":"supervisor"}
+{"type":"STEP_STARTED","stepName":"experiences_agent"}
+{"type":"STEP_FINISHED","stepName":"experiences_agent"}
+{"type":"STEP_STARTED","stepName":"experiences_agent_chat_node"}
+{"type":"TEXT_MESSAGE_START","messageId":"id-14","role":"assistant"}
+{"type":"TEXT_MESSAGE_CONTENT","messageId":"id-14","delta":"I've found some wond"}
+{"type":"TEXT_MESSAGE_CONTENT","messageId":"id-14","delta":"erful experiences fo"}
+{"type":"TEXT_MESSAGE_CONTENT","messageId":"id-14","delta":"r your trip to San F"}
+{"type":"TEXT_MESSAGE_CONTENT","messageId":"id-14","delta":"rancisco!"}
+{"type":"TEXT_MESSAGE_END","messageId":"id-14"}
+{"type":"STEP_FINISHED","stepName":"experiences_agent_chat_node"}
+{"type":"STEP_STARTED","stepName":"experiences_agent"}
+{"type":"STATE_SNAPSHOT","snapshot":{"messages":[{"content":"Help me plan a trip to San Francisco","additional_kwargs":{},"response_metadata":{},"type":"human","name":null,"id":"id-3"},{"content":"Flights Agent: Great. I'll book you the KLM flight from Amsterdam (AMS) to San Francisco (SFO).","additional_kwargs":{},"response_metadata":{},"type":"ai","name":null,"id":"id-7","tool_calls":[],"invalid_tool_calls":[],"usage_metadata":null},{"content":"Hotels Agent: Excellent choice! You'll like Hotel Zoe.","additional_kwargs":{},"response_metadata":{},"type":"ai","name":null,"id":"id-11","tool_calls":[],"invalid_tool_calls":[],"usage_metadata":null},{"content":"I've found some wonderful experiences for your trip to San Francisco!","additional_kwargs":{},"response_metadata":{"finish_reason":"stop","model_name":"gpt-4.1-mini","model_provider":"openai"},"type":"ai","name":null,"id":"id-14","tool_calls":[],"invalid_tool_calls":[],"usage_metadata":null}],"flights":[{"airline":"KLM","departure":"Amsterdam (AMS)","arrival":"San Francisco (SFO)","price":"$650","duration":"11h 30m"},{"airline":"United","departure":"Amsterdam (AMS)","arrival":"San Francisco (SFO)","price":"$720","duration":"12h 15m"}],"itinerary":{"flight":{"airline":"KLM","departure":"Amsterdam (AMS)","arrival":"San Francisco (SFO)","price":"$650","duration":"11h 30m"},"hotel":{"name":"Hotel Zoe","location":"Union Square","price_per_night":"$320/night","rating":"4.4 stars"}},"tools":[],"hotels":[{"name":"Hotel Zephyr","location":"Fisherman's Wharf","price_per_night":"$280/night","rating":"4.2 stars"},{"name":"The Ritz-Carlton","location":"Nob Hill","price_per_night":"$550/night","rating":"4.8 stars"},{"name":"Hotel Zoe","location":"Union Square","price_per_night":"$320/night","rating":"4.4 stars"}],"experiences":[{"name":"Swan Oyster Depot","type":"restaurant","description":"Historic seafood counter serving fresh oysters","location":"Polk Street"},{"name":"Tartine Bakery","type":"restaurant","description":"Artisanal bakery famous for bread and pastries","location":"Mission District"},{"name":"Pier 39","type":"activity","description":"Iconic waterfront destination with shops and sea lions","location":"Fisherman's Wharf"},{"name":"Golden Gate Bridge","type":"activity","description":"World-famous suspension bridge with stunning views","location":"Golden Gate"}]}}
+{"type":"STEP_FINISHED","stepName":"experiences_agent"}
+{"type":"STEP_STARTED","stepName":"supervisor"}
+{"type":"TOOL_CALL_START","toolCallId":"id-15","toolCallName":"supervisor_response","parentMessageId":"id-16"}
+{"type":"TOOL_CALL_ARGS","toolCallId":"id-15","delta":"{\"answer\":\"Your trav"}
+{"type":"TOOL_CALL_ARGS","toolCallId":"id-15","delta":"el plan is all set!\""}
+{"type":"TOOL_CALL_ARGS","toolCallId":"id-15","delta":",\"next_agent\":\"compl"}
+{"type":"TOOL_CALL_ARGS","toolCallId":"id-15","delta":"ete\"}"}
+{"type":"TOOL_CALL_END","toolCallId":"id-15"}
+{"type":"STEP_FINISHED","stepName":"supervisor"}
+{"type":"MESSAGES_SNAPSHOT","messages":[{"id":"id-3","role":"user","content":"Help me plan a trip to San Francisco"},{"id":"id-7","role":"assistant","content":"Flights Agent: Great. I'll book you the KLM flight from Amsterdam (AMS) to San Francisco (SFO)."},{"id":"id-11","role":"assistant","content":"Hotels Agent: Excellent choice! You'll like Hotel Zoe."},{"id":"id-14","role":"assistant","content":"I've found some wonderful experiences for your trip to San Francisco!"}]}
+{"type":"RUN_FINISHED","threadId":"id-1","runId":"id-10"}

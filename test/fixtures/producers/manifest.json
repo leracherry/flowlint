@@ -1,0 +1,176 @@
+{
+  "revision": "89cedd3fd549feeee41e50e1d7c6d373e549241a",
+  "traces": [
+    {
+      "file": "awsStrandsTests-agenticChatPage-agenticChatChangesBackgroundOnMessageAndReset.ndjson",
+      "producer": "awsStrandsTests",
+      "journey": "agenticChatChangesBackgroundOnMessageAndReset",
+      "source": "https://github.com/ag-ui-protocol/ag-ui/blob/89cedd3fd549feeee41e50e1d7c6d373e549241a/apps/dojo/e2e/tests/awsStrandsTests/agenticChatPage.event-trace.ts",
+      "sourceSha256": "d340e89c7dc8cd590aea3dfd0fc57d47fbd02501d12de7431a1dee27121a28e9",
+      "sha256": "d712946c4a9cd3b925038e2f8fdd0675d5a5d98a98b0887177cfe31d65568317",
+      "events": 36
+    },
+    {
+      "file": "awsStrandsTests-agenticChatPage-agenticChatRetainsMemoryOfUserMessagesDuringAConversation.ndjson",
+      "producer": "awsStrandsTests",
+      "journey": "agenticChatRetainsMemoryOfUserMessagesDuringAConversation",
+      "source": "https://github.com/ag-ui-protocol/ag-ui/blob/89cedd3fd549feeee41e50e1d7c6d373e549241a/apps/dojo/e2e/tests/awsStrandsTests/agenticChatPage.event-trace.ts",
+      "sourceSha256": "d340e89c7dc8cd590aea3dfd0fc57d47fbd02501d12de7431a1dee27121a28e9",
+      "sha256": "33c54b1843bbccb64369d86b2aa78ec5fc79e297638434a0394380cc48c1cd36",
+      "events": 57
+    },
+    {
+      "file": "awsStrandsTests-agenticChatPage-agenticChatSendsAndReceivesAMessage.ndjson",
+      "producer": "awsStrandsTests",
+      "journey": "agenticChatSendsAndReceivesAMessage",
+      "source": "https://github.com/ag-ui-protocol/ag-ui/blob/89cedd3fd549feeee41e50e1d7c6d373e549241a/apps/dojo/e2e/tests/awsStrandsTests/agenticChatPage.event-trace.ts",
+      "sourceSha256": "d340e89c7dc8cd590aea3dfd0fc57d47fbd02501d12de7431a1dee27121a28e9",
+      "sha256": "d4e83bc30c3bdce827cedefb57abfcd809363ba57d0f430f3a9d2624179705fc",
+      "events": 9
+    },
+    {
+      "file": "awsStrandsTests-agenticChatReasoningPage-shouldShowReasoningIndicatorAndThenTheResponse.ndjson",
+      "producer": "awsStrandsTests",
+      "journey": "shouldShowReasoningIndicatorAndThenTheResponse",
+      "source": "https://github.com/ag-ui-protocol/ag-ui/blob/89cedd3fd549feeee41e50e1d7c6d373e549241a/apps/dojo/e2e/tests/awsStrandsTests/agenticChatReasoningPage.event-trace.ts",
+      "sourceSha256": "917c305243f0cb5a2ef60a0b74391e81ef45ecd33ff3e072393cf6efa4b628f9",
+      "sha256": "8e6c62f366a885a095d47601ab6bb114ab618ee85ae49d644af9ed78e61f69c9",
+      "events": 39
+    },
+    {
+      "file": "awsStrandsTests-interruptPage-cancellingLeavesNothingScheduled.ndjson",
+      "producer": "awsStrandsTests",
+      "journey": "cancellingLeavesNothingScheduled",
+      "source": "https://github.com/ag-ui-protocol/ag-ui/blob/89cedd3fd549feeee41e50e1d7c6d373e549241a/apps/dojo/e2e/tests/awsStrandsTests/interruptPage.event-trace.ts",
+      "sourceSha256": "a0c8abb04981bd65f1eda4ea458757c5b1448ad0d35c37faf2406b99174ee598",
+      "sha256": "908acd3b4bdbb0a83d415a5ee502d8fa36f2c50d96af682e4afeb3d45b4668f9",
+      "events": 24
+    },
+    {
+      "file": "awsStrandsTests-interruptPage-pausesTheToolAndOffersTheUserATime.ndjson",
+      "producer": "awsStrandsTests",
+      "journey": "pausesTheToolAndOffersTheUserATime",
+      "source": "https://github.com/ag-ui-protocol/ag-ui/blob/89cedd3fd549feeee41e50e1d7c6d373e549241a/apps/dojo/e2e/tests/awsStrandsTests/interruptPage.event-trace.ts",
+      "sourceSha256": "a0c8abb04981bd65f1eda4ea458757c5b1448ad0d35c37faf2406b99174ee598",
+      "sha256": "908acd3b4bdbb0a83d415a5ee502d8fa36f2c50d96af682e4afeb3d45b4668f9",
+      "events": 24
+    },
+    {
+      "file": "awsStrandsTests-interruptPage-resumingCarriesTheChosenTimeIntoTheTool.ndjson",
+      "producer": "awsStrandsTests",
+      "journey": "resumingCarriesTheChosenTimeIntoTheTool",
+      "source": "https://github.com/ag-ui-protocol/ag-ui/blob/89cedd3fd549feeee41e50e1d7c6d373e549241a/apps/dojo/e2e/tests/awsStrandsTests/interruptPage.event-trace.ts",
+      "sourceSha256": "a0c8abb04981bd65f1eda4ea458757c5b1448ad0d35c37faf2406b99174ee598",
+      "sha256": "00b3bc6fcc91c3a6544ac4c55b044cf95b3c8282cfd69c4074b1dcba95e56b2a",
+      "events": 24
+    },
+    {
+      "file": "awsStrandsTypescriptTests-agenticChatPage-agenticChatChangesBackgroundOnMessageAndReset.ndjson",
+      "producer": "awsStrandsTypescriptTests",
+      "journey": "agenticChatChangesBackgroundOnMessageAndReset",
+      "source": "https://github.com/ag-ui-protocol/ag-ui/blob/89cedd3fd549feeee41e50e1d7c6d373e549241a/apps/dojo/e2e/tests/awsStrandsTypescriptTests/agenticChatPage.event-trace.ts",
+      "sourceSha256": "760dcd18aafedcfc2b6f6092daa75b11a2387a98d2e80950135b035af0241748",
+      "sha256": "bbe0db8fa34b752fb4f9a7f9faa0abb5f4178e8835ae72cb7c11bfe0d736e589",
+      "events": 34
+    },
+    {
+      "file": "awsStrandsTypescriptTests-agenticChatPage-agenticChatRetainsMemoryOfUserMessagesDuringAConversation.ndjson",
+      "producer": "awsStrandsTypescriptTests",
+      "journey": "agenticChatRetainsMemoryOfUserMessagesDuringAConversation",
+      "source": "https://github.com/ag-ui-protocol/ag-ui/blob/89cedd3fd549feeee41e50e1d7c6d373e549241a/apps/dojo/e2e/tests/awsStrandsTypescriptTests/agenticChatPage.event-trace.ts",
+      "sourceSha256": "760dcd18aafedcfc2b6f6092daa75b11a2387a98d2e80950135b035af0241748",
+      "sha256": "83c269bf48b2eaaf43ed41e116bc5d3e4faa6aef4ab76045a42f6af1674ee363",
+      "events": 57
+    },
+    {
+      "file": "awsStrandsTypescriptTests-agenticChatPage-agenticChatSendsAndReceivesAMessage.ndjson",
+      "producer": "awsStrandsTypescriptTests",
+      "journey": "agenticChatSendsAndReceivesAMessage",
+      "source": "https://github.com/ag-ui-protocol/ag-ui/blob/89cedd3fd549feeee41e50e1d7c6d373e549241a/apps/dojo/e2e/tests/awsStrandsTypescriptTests/agenticChatPage.event-trace.ts",
+      "sourceSha256": "760dcd18aafedcfc2b6f6092daa75b11a2387a98d2e80950135b035af0241748",
+      "sha256": "515c3b7063c4306cc9ea18a71a6cb6af9411d14f98b71fe328fcb56768857cd7",
+      "events": 9
+    },
+    {
+      "file": "langgraphFastAPITests-agenticChatReasoningPage-showReasoningIndicatorAndThenTheResponse.ndjson",
+      "producer": "langgraphFastAPITests",
+      "journey": "showReasoningIndicatorAndThenTheResponse",
+      "source": "https://github.com/ag-ui-protocol/ag-ui/blob/89cedd3fd549feeee41e50e1d7c6d373e549241a/apps/dojo/e2e/tests/langgraphFastAPITests/agenticChatReasoningPage.event-trace.ts",
+      "sourceSha256": "17bffc012984f15325200626123c781faf0f1060ae3e89d685da8bbda4896a93",
+      "sha256": "b59a38bc679dfaef3041ffd5d5b24f15492d7a42692b5e76f4ed0ccc1d315c8e",
+      "events": 40
+    },
+    {
+      "file": "langgraphFastAPITests-deepagentsSubagentsPage-approvesSubagentAnswer.ndjson",
+      "producer": "langgraphFastAPITests",
+      "journey": "approvesSubagentAnswer",
+      "source": "https://github.com/ag-ui-protocol/ag-ui/blob/89cedd3fd549feeee41e50e1d7c6d373e549241a/apps/dojo/e2e/tests/langgraphFastAPITests/deepagentsSubagentsPage.event-trace.ts",
+      "sourceSha256": "230d43c3c44bf617a54f23d56968613886aa7195e00f7ea760dd37e6f5551ebd",
+      "sha256": "40601a65d483431c5ab60389ff4d130bc6e2f83c177f443a2c4e43059dbf07a8",
+      "events": 72
+    },
+    {
+      "file": "langgraphFastAPITests-deepagentsSubagentsPage-rejectsSubagentAnswer.ndjson",
+      "producer": "langgraphFastAPITests",
+      "journey": "rejectsSubagentAnswer",
+      "source": "https://github.com/ag-ui-protocol/ag-ui/blob/89cedd3fd549feeee41e50e1d7c6d373e549241a/apps/dojo/e2e/tests/langgraphFastAPITests/deepagentsSubagentsPage.event-trace.ts",
+      "sourceSha256": "230d43c3c44bf617a54f23d56968613886aa7195e00f7ea760dd37e6f5551ebd",
+      "sha256": "e01f2cb5b5509e8d7c21aa377dee451fbef917b0e1caae2e99b4cb3b539e0111",
+      "events": 69
+    },
+    {
+      "file": "langgraphFastAPITests-predictiveStateUpdatePage-interactWithAgentAndApproveAskedChanges.ndjson",
+      "producer": "langgraphFastAPITests",
+      "journey": "interactWithAgentAndApproveAskedChanges",
+      "source": "https://github.com/ag-ui-protocol/ag-ui/blob/89cedd3fd549feeee41e50e1d7c6d373e549241a/apps/dojo/e2e/tests/langgraphFastAPITests/predictiveStateUpdatePage.event-trace.ts",
+      "sourceSha256": "16fbce7bcc5306edf426f55bb300f861f73620b349c4c44aced7a0f6e5801da8",
+      "sha256": "b6cc27112b4ceda1349d25c447f6061ce450699bdc8c5aa13c710dfd32b63f1a",
+      "events": 89
+    },
+    {
+      "file": "langgraphFastAPITests-predictiveStateUpdatePage-interactWithAgentAndRejectAskedChanges.ndjson",
+      "producer": "langgraphFastAPITests",
+      "journey": "interactWithAgentAndRejectAskedChanges",
+      "source": "https://github.com/ag-ui-protocol/ag-ui/blob/89cedd3fd549feeee41e50e1d7c6d373e549241a/apps/dojo/e2e/tests/langgraphFastAPITests/predictiveStateUpdatePage.event-trace.ts",
+      "sourceSha256": "16fbce7bcc5306edf426f55bb300f861f73620b349c4c44aced7a0f6e5801da8",
+      "sha256": "3fb455b1438feb653780966c69575d529a441a7732d1cd07ef57a62e037decf0",
+      "events": 89
+    },
+    {
+      "file": "langgraphFastAPITests-sharedStatePage-interactWithTheChatToGetARecipeOnPrompt.ndjson",
+      "producer": "langgraphFastAPITests",
+      "journey": "interactWithTheChatToGetARecipeOnPrompt",
+      "source": "https://github.com/ag-ui-protocol/ag-ui/blob/89cedd3fd549feeee41e50e1d7c6d373e549241a/apps/dojo/e2e/tests/langgraphFastAPITests/sharedStatePage.event-trace.ts",
+      "sourceSha256": "4fb3d30f40303d2da488844cdf13be254516873c1be0cd97898950133cef3532",
+      "sha256": "cf8e4a49fdfe4f973a4f3b56241c5edb5c1064917a3b9435dc3e4685aca71adf",
+      "events": 51
+    },
+    {
+      "file": "langgraphFastAPITests-sharedStatePage-shareStateBetweenUIAndChat.ndjson",
+      "producer": "langgraphFastAPITests",
+      "journey": "shareStateBetweenUIAndChat",
+      "source": "https://github.com/ag-ui-protocol/ag-ui/blob/89cedd3fd549feeee41e50e1d7c6d373e549241a/apps/dojo/e2e/tests/langgraphFastAPITests/sharedStatePage.event-trace.ts",
+      "sourceSha256": "4fb3d30f40303d2da488844cdf13be254516873c1be0cd97898950133cef3532",
+      "sha256": "3041170122c075340c8ec8dcfde607092a53546b27f241f4e8f87a7ba344ea66",
+      "events": 19
+    },
+    {
+      "file": "langgraphFastAPITests-subgraphsPage-completeFullTravelPlanningFlowWithFeatureValidation.ndjson",
+      "producer": "langgraphFastAPITests",
+      "journey": "completeFullTravelPlanningFlowWithFeatureValidation",
+      "source": "https://github.com/ag-ui-protocol/ag-ui/blob/89cedd3fd549feeee41e50e1d7c6d373e549241a/apps/dojo/e2e/tests/langgraphFastAPITests/subgraphsPage.event-trace.ts",
+      "sourceSha256": "5f7aeba2bd4bf771741d5b93b6cda61908ea201cd7c92ad793ae321ad8a0eb4e",
+      "sha256": "db9a894762a388ff54edcb7e31ebcc54f8b6ef526fe4e60ff63133d20a1110e9",
+      "events": 88
+    },
+    {
+      "file": "langgraphFastAPITests-subgraphsPage-handleDifferentSelectionsAndDemonstrateSupervisorRoutingPatterns.ndjson",
+      "producer": "langgraphFastAPITests",
+      "journey": "handleDifferentSelectionsAndDemonstrateSupervisorRoutingPatterns",
+      "source": "https://github.com/ag-ui-protocol/ag-ui/blob/89cedd3fd549feeee41e50e1d7c6d373e549241a/apps/dojo/e2e/tests/langgraphFastAPITests/subgraphsPage.event-trace.ts",
+      "sourceSha256": "5f7aeba2bd4bf771741d5b93b6cda61908ea201cd7c92ad793ae321ad8a0eb4e",
+      "sha256": "f1916dadc05df21a5228ecc8ffcbf94601ea0fd84649be8fc50f743409a4dcd0",
+      "events": 88
+    }
+  ]
+}

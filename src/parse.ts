@@ -1,4 +1,5 @@
 import { parseTree, getNodeValue, type ParseError } from "jsonc-parser";
+import { excessiveDepthOffset } from "./input-limits";
 import type { InputFormat, SourceEvent } from "./types";
 export const MAX_INPUT_BYTES = 10 * 1024 * 1024;
 export class TraceInputError extends Error {
@@ -30,7 +31,23 @@ export function parseTrace(
     if (text[i] === "\r") {
       if (text[i + 1] === "\n") i++;
       starts.push(i + 1);
-    } else if (text[i] === "\n") starts.push(i + 1);
+      if (starts.length > 100_000)
+        throw new TraceInputError(
+          "PARSE_LINES",
+          "Trace exceeds the 100,000-line limit",
+          100_001,
+          1,
+        );
+    } else if (text[i] === "\n") {
+      starts.push(i + 1);
+      if (starts.length > 100_000)
+        throw new TraceInputError(
+          "PARSE_LINES",
+          "Trace exceeds the 100,000-line limit",
+          100_001,
+          1,
+        );
+    }
   const location = (offset: number) => {
     let lo = 0,
       hi = starts.length;
@@ -41,11 +58,7 @@ export function parseTrace(
     }
     return { line: lo + 1, column: offset - starts[lo]! + 1 };
   };
-  const firstLine =
-    text
-      .replace(/^\uFEFF/, "")
-      .split(/\r\n|\r|\n/)
-      .find((line) => line.length > 0) ?? "";
+  const firstLine = text.replace(/^\uFEFF/, "").match(/[^\r\n]+/)?.[0] ?? "";
   if (
     format === "sse" ||
     (format === "auto" &&
@@ -53,6 +66,16 @@ export function parseTrace(
   )
     return parseSse(text, location);
   const parse = (input: string, offset: number) => {
+    const depthOffset = excessiveDepthOffset(input);
+    if (depthOffset !== undefined) {
+      const at = location(offset + depthOffset);
+      throw new TraceInputError(
+        "PARSE_DEPTH",
+        "JSON nesting exceeds the 256-level limit",
+        at.line,
+        at.column,
+      );
+    }
     const errors: ParseError[] = [];
     const tree = parseTree(input, errors, {
       disallowComments: true,
@@ -85,10 +108,11 @@ export function parseTrace(
     }));
   }
   const records: SourceEvent[] = [];
-  for (const start of starts) {
-    const next = text.slice(start).search(/[\r\n]/);
-    const end = next < 0 ? -1 : start + next;
-    const line = text.slice(start, end === -1 ? text.length : end);
+  for (let i = 0; i < starts.length; i++) {
+    const start = starts[i]!;
+    const line = text
+      .slice(start, starts[i + 1] ?? text.length)
+      .replace(/[\r\n]+$/, "");
     if (!line.trim()) continue;
     const tree = parse(line, start);
     records.push({
@@ -122,6 +146,16 @@ function parseSse(
       const part = parts[lo]!;
       return part.source + Math.min(part.value.length, offset - part.joined);
     };
+    const depthOffset = excessiveDepthOffset(data);
+    if (depthOffset !== undefined) {
+      const at = location(sourceOffset(depthOffset));
+      throw new TraceInputError(
+        "PARSE_DEPTH",
+        "JSON nesting exceeds the 256-level limit",
+        at.line,
+        at.column,
+      );
+    }
     const errors: ParseError[] = [];
     const tree = parseTree(data, errors, {
       disallowComments: true,

@@ -1,8 +1,11 @@
 import { execFileSync, spawnSync } from "node:child_process";
-import { beforeAll, expect, it } from "vitest";
+import { beforeAll, expect, it, vi } from "vitest";
+vi.setConfig({ testTimeout: 20000 });
 beforeAll(() => {
-  execFileSync("pnpm", ["build"], { stdio: "pipe" });
-}, 30000);
+  execFileSync(process.execPath, ["node_modules/tsup/dist/cli-default.js"], {
+    stdio: "pipe",
+  });
+}, 60000);
 const cli = (...args: string[]) =>
   spawnSync(process.execPath, ["dist/cli.js", ...args], { encoding: "utf8" });
 it("prints help and version", () => {

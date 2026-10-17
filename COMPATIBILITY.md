@@ -108,12 +108,12 @@ an unchanged protocol label does not make that upgrade automatically compatible.
 Future protocol support must be opt-in before it can replace an existing default.
 
 The package currently declares **Node.js >=22** and CI verifies Node **22 and 24**
-on Linux. Other matching Node versions are accepted by the package engine range;
+on Linux, macOS, and Windows, including fresh package installation. Other matching Node versions are accepted by the package engine range;
 this is not a claim that every version or operating system has been tested.
 Dropping a declared supported Node version is breaking. Packaged TypeScript
 consumers are currently verified with TypeScript 5.9; introducing declarations
-that require a newer compiler is breaking for that tested baseline. Cross-platform
-installation coverage remains a 1.0 readiness task, not an existing certification.
+that require a newer compiler is breaking for that tested baseline. This CI matrix covers those runner environments; it is not certification of
+every operating-system version or architecture.
 
 ## Deprecation and maintenance
 

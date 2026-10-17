@@ -8,10 +8,12 @@ permissions:
   contents: read
 jobs:
   check:
-    runs-on: ubuntu-24.04
+    runs-on: ${{ matrix.os }}
     strategy:
+      fail-fast: false
       matrix:
         node: [22, 24]
+        os: [ubuntu-24.04, macos-14, windows-2022]
     steps:
       - uses: actions/checkout@v7
       - uses: pnpm/action-setup@v6
@@ -21,8 +23,11 @@ jobs:
           cache: pnpm
       - run: pnpm install --frozen-lockfile
       - run: pnpm check
+      - run: pnpm stress
+      - run: pnpm verify:package
       - run: node dist/cli.js check examples/valid.ndjson
       - name: Verify lint findings fail CI with exit code 1
+        shell: bash
         run: |
           set +e
           node dist/cli.js check examples/invalid.ndjson --format json

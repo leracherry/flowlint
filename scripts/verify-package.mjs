@@ -1,4 +1,12 @@
-import { execFileSync, spawnSync } from "node:child_process";
+import spawn from "cross-spawn";
+const spawnSync = spawn.sync;
+function execFileSync(command, args, options = {}) {
+  const result = spawnSync(command, args, options);
+  if (result.error) throw result.error;
+  if (result.status !== 0)
+    throw new Error(`${command} failed: ${result.stderr?.toString() ?? ""}`);
+  return result.stdout;
+}
 import {
   readFileSync,
   writeFileSync,
@@ -38,7 +46,7 @@ for (const path of [
 ])
   assert(paths.includes(path), `Missing ${path}`);
 const tarball = join(destination, packed.filename);
-const consumer = mkdtempSync(join(tmpdir(), "flowlint-package-"));
+const consumer = mkdtempSync(join(tmpdir(), "flowlint package "));
 try {
   writeFileSync(
     join(consumer, "package.json"),

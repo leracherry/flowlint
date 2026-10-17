@@ -57,8 +57,12 @@ See RELEASING.md.
 - [x] Compatibility policy for CLI/API/JSON, rule severity and acceptance changes,
       protocol/schema updates, runtime support, and release classification.
 
-Remaining work toward 1.0:
-fuzz/property testing, resource/performance validation, cross-platform installation
-checks, and a release candidate. FlowLint validates captures; consumer storage,
+- [x] Seeded parser/patch/chunk property tests, nesting/cycle/node limits, and
+      patch work accounting on failed attempts.
+- [x] Bounded subprocess stress checks for 25,002 events in NDJSON/JSON/SSE.
+- [x] Node 22/24 CI on Linux/macOS/Windows, including packed installation and
+      paths containing spaces.
+
+Remaining work toward 1.0: a release candidate and feedback on real integrations. FlowLint validates captures; consumer storage,
 provider restoration, metadata merging, and full protocol certification are not
 part of its current guarantees.

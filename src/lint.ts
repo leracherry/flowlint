@@ -1,3 +1,4 @@
+import { eventWithinLimits } from "./input-limits";
 import { EventSchemas } from "@ag-ui/core/schemas";
 import { Conversation } from "./conversation";
 import { ActivityPatches } from "./activity-patches";
@@ -129,6 +130,14 @@ export function lintEvents(
     }
   };
   for (const record of records) {
+    if (!eventWithinLimits(record.event)) {
+      emit(
+        record,
+        "LIMIT_EVENT",
+        "Event exceeds the nesting/node limit or contains a cycle; event skipped",
+      );
+      continue;
+    }
     const raw = record.event;
     if (
       raw &&

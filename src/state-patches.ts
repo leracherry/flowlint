@@ -1,3 +1,4 @@
+import { eventWithinLimits } from "./input-limits";
 import type { Event } from "@ag-ui/core";
 import type { Diagnostic, SourceEvent } from "./types";
 import { MAX_INPUT_BYTES } from "./parse";
@@ -137,6 +138,8 @@ export class StatePatches {
         );
         return;
       }
+      // Charge the baseline copy even when the first operation fails.
+      this.budget.work += bytes(this.current.value);
       if (this.budget.work > MAX_INPUT_BYTES * 20) {
         this.invalidate(record);
         return;
@@ -186,6 +189,10 @@ export class StatePatches {
               value = write(value, path, "add", moved);
               break;
             }
+          }
+          if (!eventWithinLimits(value)) {
+            this.invalidate(record);
+            return;
           }
           const size = bytes(value);
           this.budget.work += size;

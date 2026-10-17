@@ -2,6 +2,13 @@
 
 ## Unreleased
 
+- Harden recursive parsing and direct API input with nesting, node, cycle, and
+  physical-line bounds. Charge failed patch baseline copies to the work budget
+  and bound patch-generated structures. These stricter limits require 0.3.0.
+- Add deterministic randomized parser/patch/chunk tests and bounded subprocess
+  stress checks; check fresh package installation on Linux, macOS, and Windows
+  with Node 22/24. Preserve fixture bytes across platform checkouts.
+
 - Adopt and ship a compatibility policy: default error additions and stricter
   acceptance require a major release after 1.0, or a minor release during 0.x.
   The new reopening checks therefore require 0.3.0 rather than 0.2.1.

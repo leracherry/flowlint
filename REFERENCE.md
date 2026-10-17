@@ -51,6 +51,29 @@ failure. Warnings do not cause failure. Reads are limited to 10 MiB and diagnost
 to 1,000 findings plus a limit notice. Diagnostics omit message bodies and tool
 arguments; message identifiers remain visible. Checks run offline after installation.
 
+## Resource limits
+
+Unreleased hardening for 0.3.0 adds structured failures instead of recursive
+parser crashes: JSON nesting is limited to 256 containers (`PARSE_DEPTH`), and
+captures to 100,000 physical lines, counting a trailing empty line
+(`PARSE_LINES`). These are input errors and CLI exit 2. The 10 MiB byte limit
+continues to apply, including multibyte UTF-8 input.
+
+Before schema validation, each supplied event is bounded to 256 container levels
+and 100,000 visited values (including the root and sparse array slots), with a
+10 MiB budget for string values and keys. Cycles and excessive alias
+expansion in direct API calls are rejected as `LIMIT_EVENT`; the event is skipped
+and checking continues. These are error diagnostics, so the CLI exits 1. Shared
+references are accepted within the traversal budget. This protects JSON-compatible
+data; arbitrary executable getters or proxies are not a supported input format.
+
+Patch results are subject to the same structural limits. Exceeding them produces
+`STATE_LIMIT` or `ACTIVITY_LIMIT` warnings and invalidates that baseline. The
+200 MiB work budget counts baseline copies as well as intermediate results, so
+failed patches cannot bypass it. New limits and stricter budget accounting are
+compatibility changes for 0.3.0; very deeply nested captures should be simplified
+or split at legitimate capture boundaries rather than bypassing the safeguards.
+
 ## Library
 
 ```ts

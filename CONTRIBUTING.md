@@ -22,3 +22,11 @@ Include an entry in CHANGELOG.md for each release.
 The [recorded producer corpus](test/fixtures/producers/README.md) runs offline in
 normal CI. Keep source provenance and checksums when adding recordings. Review
 findings against the protocol; do not assume every upstream recording is valid.
+
+Run `pnpm stress` for bounded subprocess checks of NDJSON, JSON, and SSE (25,002
+records each, a 256 MiB V8 old-space ceiling, and 30-second process timeouts).
+The output reports elapsed time and end-of-run heap usage, not a performance SLA
+or peak memory. Seeded randomized tests run within `pnpm check`; failures are
+reproducible. CI runs checks, stress cases, and package installation on Node 22/24
+across Linux, macOS, and Windows. Keep `.gitattributes` line-ending rules so pinned
+producer fixture hashes remain identical across checkouts.

@@ -27,8 +27,10 @@ remain outstanding.
 
 ## Next: capture integration
 
-- [ ] Demonstrate faithful capture in one real integration, preserving event order,
-      cancellation, source provenance, and content-handling boundaries.
+- [x] Add Node HttpAgent capture with raw SSE, bounded retention, cancellation,
+      provenance manifests, a runnable example, and controlled integration tests.
+- [ ] Validate capture-to-CI onboarding and overhead with an independent application
+      maintainer. See [capture integration](docs/capture.md).
 
 ## After integration feedback
 

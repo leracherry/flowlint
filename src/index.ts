@@ -12,3 +12,6 @@ export type {
 export { formatPretty, formatJson } from "./reporters";
 
 export { RULES } from "./rules";
+
+export { createHttpCapture } from "./capture";
+export type { CaptureManifest, HttpCaptureOptions } from "./capture";

@@ -68,8 +68,8 @@ transport parsing correction, uses the breaking-change version rule above.
 
 The public library surface is the package-root ESM exports and their shipped
 TypeScript declarations: `lintEvents`, `parseTrace`, `formatJson`, `formatPretty`,
-`TraceInputError`, `MAX_INPUT_BYTES`, `SUPPORTED_RULES`, `RULES`, and the exported types
-`Diagnostic`, `DiagnosticLocation`, `InputFormat`, `LintOptions`, `LintResult`, and `SourceEvent`.
+`TraceInputError`, `MAX_INPUT_BYTES`, `SUPPORTED_RULES`, `RULES`, `createHttpCapture`, and the exported types
+`Diagnostic`, `DiagnosticLocation`, `InputFormat`, `LintOptions`, `LintResult`, `SourceEvent`, `CaptureManifest`, and `HttpCaptureOptions`.
 Deep imports, source modules, internal classes, build filenames, and source maps
 are not supported APIs. CommonJS and browser runtimes are not currently promised.
 
@@ -137,3 +137,11 @@ coverage/severity and supported environments, and pass the release checks in
 [RELEASING.md](RELEASING.md). A breaking release needs a concrete before/after
 example and migration guidance. Regression expectations must be reviewed against
 the protocol rather than silently updated to accept new failures.
+
+## Capture artifacts
+
+`createHttpCapture` is an additive Node API. Its options and version-1 manifest
+are documented in the [capture guide](https://github.com/leracherry/flowlint/blob/main/docs/capture.md).
+The manifest SHA-256 describes stored response-body bytes, not complete network
+traffic. Treat additional optional fields as compatible and do not assume a
+complete capture is protocol-valid. Skipped captures do not have persisted files.

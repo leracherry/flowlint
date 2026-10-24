@@ -482,3 +482,86 @@ retains its existing identifiers and order. Neither includes every input/parser
 error code. Severity is contextual, so the registry does not claim a universal
 severity for each rule. `DiagnosticLocation` describes a related source location;
 indices are zero-based and lines/columns are one-based.
+
+## Trace suites
+
+The new `suite` command checks files independently and emits one aggregate report:
+
+```sh
+flowlint suite "traces/**/*.ndjson" "traces/**/*.sse"
+flowlint suite trace.json other.ndjson --format json
+flowlint suite "traces/**/*.{json,ndjson,sse}" --format github
+flowlint suite "traces/**/*.ndjson" --format markdown >> "$GITHUB_STEP_SUMMARY"
+```
+
+This command is unreleased on main; the published 1.0.0 package does not include
+it. Build the repository to try `node dist/cli.js suite ...`. Once released,
+install an exact package version and commit your lockfile before using `npm ci`
+and `npx --no-install flowlint suite ...` in a consumer project's CI.
+
+Quote globs so matching is consistent across shells. Literal files are tried
+first, including names with brackets. Globs support `*`, `**`, and braces; use
+forward slashes in patterns. Dotfiles and symlinks discovered by globs are excluded.
+Explicit file paths may resolve through symlinks. Directories, stdin (`-`), and
+negated patterns are rejected; use positive patterns describing the intended
+corpus. There are no implicit extension or node_modules exclusions.
+
+Resolved absolute paths are deduplicated and sorted lexically before checking.
+Reported paths are relative to the working directory with forward slashes.
+Symlink aliases and hard links with different resolved path names remain distinct.
+Each unmatched input is an error even if other inputs match. An input discovery,
+read, or parse failure does not stop checks of other discovered files. Discovered
+files are processed sequentially with the existing per-file limits and isolated
+validation state. Aggregate results are retained in memory; suites are not a
+constant-memory streaming API. Prefer focused globs over an entire filesystem.
+
+Options are `--input auto|ndjson|json|sse`, `--allow-partial`, and
+`--format pretty|json|github|markdown`. Warnings do not fail a suite. Exit status is
+2 if any input/discovery/parse/usage failure occurred, otherwise 1 if any file has
+lint errors, otherwise 0. An empty match is never success. The existing `check`
+command and its JSON result shape are unchanged.
+
+### Aggregate JSON contract
+
+Suite JSON has `schemaVersion: 1`, `valid`, `exitCode`, `files`, `problems`, and
+`summary`. Each file entry has `path`, `exitCode`, and the existing `LintResult`
+as `result`. `problems` contains discovery or usage failures as `{ input,
+diagnostic }`. `summary` counts checked files, supplied events, error diagnostics,
+and warning diagnostics, including discovery errors. Parse failures count as a
+checked file with zero checked events. `valid` means exit code 0, not exhaustive
+protocol coverage. Usage failures requested as JSON use the same envelope.
+
+`SUITE_INPUT` rejects unsupported inputs, `SUITE_NO_MATCH` identifies empty matches,
+and `SUITE_DISCOVERY` reports a discovery failure. Existing parser/read codes are
+retained for individual files. File diagnostic order is unchanged; files and
+input problems are ordered lexically. Consumers should tolerate optional fields.
+Suite helpers are internal modules, not new package-root library exports.
+
+### GitHub Actions
+
+`github` prints escaped workflow commands for error and warning annotations,
+followed by a count summary. Trace messages and file paths cannot inject additional
+workflow commands through percent signs, commas, colons, or line breaks. Related
+locations remain available in JSON/pretty output; annotations identify the primary
+finding. GitHub may limit the annotations it displays, so retain JSON when a full
+report is needed. `markdown` prints a small per-file table with escaped paths.
+Neither format writes to GitHub APIs or automatically appends to summary files.
+
+The repository's CI runs suite checks on its valid examples on Node 22/24 across
+Linux, macOS, and Windows. A consumer with a lockfile pinning a suite-capable
+release can use the following steps in its ordinary `pull_request` workflow with
+`permissions: { contents: read }`, after checkout and Node setup:
+
+```yaml
+- run: npm ci
+- name: Check recorded traces
+  run: npx --no-install flowlint suite "traces/**/*.ndjson" --format github
+- name: Write trace summary
+  if: always()
+  shell: bash
+  run: npx --no-install flowlint suite "traces/**/*.ndjson" --format markdown >> "$GITHUB_STEP_SUMMARY"
+```
+
+Both steps preserve nonzero exit codes. They read the same recordings twice;
+keep captures stable during the job. Capture integration and executable config
+files are not part of suite checking.

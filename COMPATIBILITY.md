@@ -48,10 +48,14 @@ The `flowlint` executable and documented commands/options in
 - `--format pretty|json`, defaulting to `pretty`.
 - `--allow-partial`, with complete-capture checking as the default.
 - `--help` and `--version`.
+- `suite <patterns...>` with `--input`, `--allow-partial`, and
+  `--format pretty|json|github|markdown`; see the separate versioned
+  [suite JSON contract](REFERENCE.md#aggregate-json-contract).
 
 Exit **0** means no error diagnostics; warnings may exist. Exit **1** means schema
 or lint errors. Exit **2** means input, parsing, or usage failure. Help/version exit
 0; invoking the executable without a command exits 2. Reports go to stdout.
+The suite command uses its documented aggregate envelope.
 `check --format json` produces one JSON result, including reported input/usage
 failures; help/version remain text. Automation should parse JSON and exit status,
 not pretty output, help prose, or diagnostic message wording.

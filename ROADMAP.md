@@ -19,13 +19,16 @@ See [coverage and validation](docs/coverage.md). Engineering progress does not
 establish demand: interviews, design partners, and confirmed upstream findings
 remain outstanding.
 
-## Next: make recorded regression suites easy to adopt
+## Implemented: recorded regression suites
 
-- Add a separate suite command with deterministic file discovery and aggregate
-  results, retaining the existing single-file check contract.
-- Provide escaped GitHub annotations and a sample CI integration.
-- Demonstrate faithful capture in one real integration, preserving event order,
-  cancellation, source provenance, and content-handling boundaries.
+- [x] Add a separate suite command with deterministic file discovery and aggregate
+      results, retaining the existing single-file check contract.
+- [x] Provide escaped GitHub annotations and a sample CI integration.
+
+## Next: capture integration
+
+- [ ] Demonstrate faithful capture in one real integration, preserving event order,
+      cancellation, source provenance, and content-handling boundaries.
 
 ## After integration feedback
 

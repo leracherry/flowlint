@@ -96,6 +96,18 @@ try {
   ]);
   assert.equal(invalid.status, 1);
   assert.equal(JSON.parse(invalid.stdout).diagnostics[0].ruleId, "FL002");
+  const suite = run([
+    "suite",
+    join(root, "examples", "{valid,interleaved,chunks}.ndjson").replaceAll(
+      "\\",
+      "/",
+    ),
+    "--format",
+    "json",
+  ]);
+  assert.equal(suite.status, 0, suite.stderr || suite.stdout);
+  assert.equal(JSON.parse(suite.stdout).schemaVersion, 1);
+  assert.equal(JSON.parse(suite.stdout).summary.files, 3);
   writeFileSync(
     join(consumer, "consumer.mts"),
     `import { lintEvents, parseTrace, formatJson, formatPretty, RULES, SUPPORTED_RULES, type DiagnosticLocation, type LintResult } from '${pkg.name}';\nconst result: LintResult = lintEvents(parseTrace('[{"type":"RUN_ERROR","message":"example"}]'));\nif (!result.valid || !formatJson(result) || !formatPretty(result, '-')) throw new Error('Invalid library result');\nconst first: 'FL001' = SUPPORTED_RULES[0];\nconst location: DiagnosticLocation = { eventIndex: 0, line: 1, column: 1 };\nif (RULES[0].id !== first || location.eventIndex !== 0) throw new Error('Invalid metadata');\n`,

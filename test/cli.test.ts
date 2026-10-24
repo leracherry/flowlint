@@ -276,3 +276,44 @@ it("keeps unappliable state patches nonfatal in the CLI", () => {
   });
   expect(result.stdout).not.toContain("PRIVATE");
 });
+
+it("checks a suite with versioned JSON and lint failure exit status", () => {
+  const result = cli(
+    "suite",
+    "examples/valid.ndjson",
+    "examples/invalid.ndjson",
+    "--format",
+    "json",
+  );
+  expect(result.status).toBe(1);
+  const suite = JSON.parse(result.stdout);
+  expect(suite.schemaVersion).toBe(1);
+  expect(suite.summary.files).toBe(2);
+  expect(suite.files.map((f: { path: string }) => f.path)).toEqual([
+    "examples/invalid.ndjson",
+    "examples/valid.ndjson",
+  ]);
+});
+it("reports suite usage errors in the aggregate JSON envelope", () => {
+  for (const args of [
+    ["suite", "--format", "json"],
+    ["suite", "examples/valid.ndjson", "--bad", "--format=json"],
+  ]) {
+    const result = cli(...args);
+    expect(result.status).toBe(2);
+    expect(JSON.parse(result.stdout)).toMatchObject({
+      schemaVersion: 1,
+      valid: false,
+      exitCode: 2,
+      problems: [{ diagnostic: { ruleId: "CLI_USAGE" } }],
+    });
+  }
+});
+it("reports no glob matches and produces GitHub annotations", () => {
+  expect(cli("suite", "missing-directory/**/*.ndjson").status).toBe(2);
+  const result = cli("suite", "examples/invalid.ndjson", "--format", "github");
+  expect(result.status).toBe(1);
+  expect(result.stdout).toContain(
+    "::error title=FL002,file=examples/invalid.ndjson",
+  );
+});

@@ -39,6 +39,10 @@ A diagnostic looks like this:
 2:1  error  FL002  TEXT_MESSAGE_CONTENT refers to unopened text message "m-2"
 ```
 
+Reopening findings also point to the earlier event that established the conflicting
+attributes, including attributes from recorded input and snapshots. See
+[diagnostic evidence](REFERENCE.md#diagnostic-evidence) for JSON fields and limits.
+
 Exit codes: **0** passed · **1** lint errors · **2** invalid input or usage.
 Warnings do not fail a check, making FlowLint easy to use in CI.
 

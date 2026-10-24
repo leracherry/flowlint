@@ -429,3 +429,134 @@ it("activity creation replaces a same-ID non-activity target", () =>
       encrypted(),
     ),
   ).toMatchObject([{ ruleId: "ENCRYPTED_TARGET" }]));
+
+it("links reopening evidence to the original opener without attribute values", () => {
+  const diagnostics = run(text({ name: "PRIVATE_NAME" }), end, text(), end);
+  expect(diagnostics).toEqual([
+    {
+      ruleId: "ITEM_REOPEN",
+      severity: "error",
+      message: "Reopened message conflicts with established name",
+      eventIndex: 3,
+      line: 4,
+      column: 1,
+      context: { entityKind: "message", entityId: "m", fields: ["name"] },
+      related: [
+        {
+          eventIndex: 1,
+          line: 2,
+          column: 1,
+          message: "Attributes established here",
+        },
+      ],
+    },
+  ]);
+  expect(JSON.stringify(diagnostics)).not.toContain("PRIVATE_NAME");
+});
+
+it("updates evidence when a snapshot replaces established attributes", () => {
+  const diagnostics = run(
+    text(),
+    end,
+    snapshot([message({ name: "replacement" })]),
+    text(),
+    end,
+  );
+  expect(diagnostics).toMatchObject([
+    {
+      context: { fields: ["name"] },
+      related: [{ eventIndex: 3, line: 4, column: 1 }],
+    },
+  ]);
+});
+
+it("locates attributes in recorded input rather than a synthetic opener", () => {
+  const diagnostics = lint([
+    next([message({ name: "recorded" })]),
+    text(),
+    end,
+    nextEnd,
+  ]).diagnostics;
+  expect(diagnostics).toMatchObject([
+    {
+      ruleId: "ITEM_REOPEN",
+      related: [{ eventIndex: 0, line: 1, column: 1 }],
+    },
+  ]);
+});
+
+it("keeps original evidence after multiple contradictory reopenings", () => {
+  const diagnostics = run(
+    tool(),
+    toolEnd,
+    tool({ toolCallName: "changed" }),
+    toolEnd,
+    tool({ toolCallName: "again" }),
+    toolEnd,
+  );
+  expect(diagnostics).toHaveLength(2);
+  expect(diagnostics.map((d) => d.related?.[0]?.eventIndex)).toEqual([1, 1]);
+});
+
+it("points normalized chunk evidence to the physical input event", () => {
+  const diagnostics = run(
+    {
+      type: "TEXT_MESSAGE_CHUNK",
+      messageId: "m",
+      role: "assistant",
+      name: "initial",
+      delta: "PRIVATE_BODY",
+    },
+    tool(),
+    toolEnd,
+    text(),
+    end,
+  );
+  expect(diagnostics).toMatchObject([
+    {
+      ruleId: "ITEM_REOPEN",
+      related: [{ eventIndex: 1, line: 2, column: 1 }],
+    },
+  ]);
+  expect(JSON.stringify(diagnostics)).not.toContain("PRIVATE_BODY");
+});
+
+it("retains observed evidence in partial captures without inventing an opener", () => {
+  const diagnostics = lint(
+    [text(), end, text({ role: "user" }), end],
+    true,
+  ).diagnostics;
+  expect(diagnostics.find((d) => d.ruleId === "ITEM_REOPEN")).toMatchObject({
+    severity: "error",
+    related: [{ eventIndex: 0, line: 1, column: 1 }],
+  });
+  expect(lint([text(), end], true).diagnostics.some((d) => d.related)).toBe(
+    false,
+  );
+});
+
+it("keeps related source coordinates through JSON and SSE input", () => {
+  const events = [
+    start,
+    tool(),
+    toolEnd,
+    tool({ toolCallName: "changed" }),
+    toolEnd,
+    finish,
+  ];
+  for (const source of [
+    JSON.stringify(events, null, 2),
+    events.map((e) => `data: ${JSON.stringify(e)}\n\n`).join(""),
+  ]) {
+    const records = parseTrace(source);
+    const diagnostic = lintEvents(records).diagnostics[0]!;
+    expect(diagnostic.related).toEqual([
+      {
+        eventIndex: records[1]!.eventIndex,
+        line: records[1]!.line,
+        column: records[1]!.column,
+        message: "Attributes established here",
+      },
+    ]);
+  }
+});

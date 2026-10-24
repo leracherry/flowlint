@@ -34,6 +34,19 @@ describe("recorded producer journeys", () => {
           ...d,
           line: d.eventIndex + 1,
           column: 1,
+          context: {
+            entityKind: "toolCall",
+            entityId: d.eventIndex === 38 ? "id-7" : "id-4",
+            fields: ["parentMessageId"],
+          },
+          related: [
+            {
+              eventIndex: 35,
+              line: 36,
+              column: 1,
+              message: "Attributes established here",
+            },
+          ],
         })),
       );
       expect(result.valid).toBe(expected(trace.journey).length === 0);

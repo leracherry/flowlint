@@ -1,9 +1,16 @@
 import { createHash } from "node:crypto";
 import type { Event, Message } from "@ag-ui/core";
-import type { SourceEvent } from "./types";
+import type { DiagnosticLocation, SourceEvent } from "./types";
 import type { Emit } from "./state-patches";
 
+const sourceLocation = ({
+  eventIndex,
+  line,
+  column,
+}: SourceEvent): DiagnosticLocation => ({ eventIndex, line, column });
+
 type Item = {
+  source?: DiagnosticLocation;
   attributes: Record<string, string | undefined>;
   encrypted?: string;
   parent?: string;
@@ -47,10 +54,11 @@ export class Conversation {
       this.current.children.set(item.parent, children);
     }
   }
-  private load(messages: Message[]) {
+  private load(messages: Message[], record: SourceEvent) {
     for (const m of messages) {
       this.removeMessage(m.id);
       this.current.messages.set(m.id, {
+        source: sourceLocation(record),
         attributes: {
           role: m.role,
           name: "name" in m ? m.name : undefined,
@@ -61,6 +69,7 @@ export class Conversation {
       if (m.role === "assistant")
         for (const t of m.toolCalls ?? [])
           this.storeTool(t.id, {
+            source: sourceLocation(record),
             attributes: {
               toolCallName: t.function.name,
               parentMessageId: m.id,
@@ -106,7 +115,7 @@ export class Conversation {
               );
           }
         // Input is authoritative for included IDs. Client-only messages can be absent.
-        this.load(event.input.messages);
+        this.load(event.input.messages, record);
       }
       return;
     }
@@ -129,7 +138,7 @@ export class Conversation {
       // Calls without an explicit parent still belong to producer history.
       for (const [id, tool] of this.current.tools)
         if (tool.parent === undefined) this.current.tools.delete(id);
-      this.load(event.messages);
+      this.load(event.messages, record);
       return;
     }
     if (event.type === "ACTIVITY_SNAPSHOT") {
@@ -140,6 +149,7 @@ export class Conversation {
       ) {
         this.removeMessage(event.messageId);
         this.current.messages.set(event.messageId, {
+          source: sourceLocation(record),
           attributes: { role: "activity", owner: event.subagentRunId },
         });
       }
@@ -162,6 +172,7 @@ export class Conversation {
     if (event.type === "TOOL_CALL_RESULT") {
       this.removeMessage(event.messageId);
       this.current.messages.set(event.messageId, {
+        source: sourceLocation(record),
         attributes: { role: "tool", owner: event.subagentRunId },
       });
       return;
@@ -206,12 +217,31 @@ export class Conversation {
           record,
           "ITEM_REOPEN",
           `Reopened ${tool ? "tool call" : "message"} conflicts with established ${fields.join(", ")}`,
+          "error",
+          {
+            context: {
+              entityKind: tool ? "toolCall" : "message",
+              entityId: id,
+              fields,
+            },
+            ...(prior.source
+              ? {
+                  related: [
+                    { ...prior.source, message: "Attributes established here" },
+                  ],
+                }
+              : {}),
+          },
         );
     }
     if (!prior) {
       if (tool)
-        this.storeTool(id, { attributes, parent: event.parentMessageId });
-      else items.set(id, { attributes });
+        this.storeTool(id, {
+          attributes,
+          parent: event.parentMessageId,
+          source: sourceLocation(record),
+        });
+      else items.set(id, { attributes, source: sourceLocation(record) });
     }
     open.add(id);
   }

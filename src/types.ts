@@ -1,4 +1,9 @@
 export type InputFormat = "auto" | "ndjson" | "json" | "sse";
+export type DiagnosticLocation = {
+  eventIndex: number;
+  line: number;
+  column: number;
+};
 export type Diagnostic = {
   ruleId: string;
   severity: "error" | "warning";
@@ -6,6 +11,12 @@ export type Diagnostic = {
   eventIndex?: number;
   line?: number;
   column?: number;
+  related?: (DiagnosticLocation & { message: string })[];
+  context?: {
+    entityKind: "message" | "toolCall";
+    entityId: string;
+    fields: string[];
+  };
 };
 export type SourceEvent = {
   event: unknown;

@@ -1,5 +1,17 @@
 # Changelog
 
+## Unreleased
+
+### Added
+
+- Related source locations and structured context for reopening findings, including
+  snapshots, recorded input, and normalized chunks. Terminal output shows the
+  establishing event without including attribute values.
+- Public `RULES` metadata and `DiagnosticLocation` type. Existing acceptance, rule
+  identifiers, diagnostic ordering, and exit codes remain unchanged. These additive
+  exports and optional diagnostic fields are intended for a minor release.
+- Outcome-based roadmap and documented producer coverage gaps.
+
 ## 1.0.0 — 2026-10-17
 
 First stable release. FlowLint’s CLI, TypeScript API, JSON diagnostics, and lint

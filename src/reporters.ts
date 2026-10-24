@@ -16,6 +16,7 @@ export function formatPretty(
     severity: d.severity,
     rule: d.ruleId,
     message: d.message,
+    related: d.related,
   }));
   const width = (key: "location" | "severity" | "rule") =>
     rows.reduce((max, row) => Math.max(max, row[key].length), 0);
@@ -27,10 +28,15 @@ export function formatPretty(
     `AG-UI 1.0; FlowLint supported rules: ${result.supportedRules.length} (${result.supportedRules.join(", ")})`,
   ];
   if (rows.length) lines.push("");
-  for (const row of rows)
+  for (const row of rows) {
     lines.push(
       `  ${row.location.padEnd(locationWidth)}  ${paint(row.severity.padEnd(severityWidth), row.severity === "error" ? 31 : 33)}  ${row.rule.padEnd(ruleWidth)}  ${row.message}`,
     );
+    for (const related of row.related ?? [])
+      lines.push(
+        `    ${related.line}:${related.column}  ${related.message} (event ${related.eventIndex})`,
+      );
+  }
   const errors = rows.filter((row) => row.severity === "error").length;
   const warnings = rows.length - errors;
   const summary = `${errors} ${errors === 1 ? "error" : "errors"}, ${warnings} ${warnings === 1 ? "warning" : "warnings"} (${result.checkedEvents} ${result.checkedEvents === 1 ? "event" : "events"} checked)`;

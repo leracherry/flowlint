@@ -7,48 +7,9 @@ import { Attribution } from "./attribution";
 import { ChunkNormalizer } from "./normalize-chunks";
 import { createState, createItemState } from "./state";
 import type { Diagnostic, LintOptions, LintResult, SourceEvent } from "./types";
+import { SUPPORTED_RULES } from "./rules";
 const MAX_DIAGNOSTICS = 1000;
-export const SUPPORTED_RULES = [
-  "FL001",
-  "FL002",
-  "FL003",
-  "FL004",
-  "FL005",
-  "FL006",
-  "FL007",
-  "FL008",
-  "FL009",
-  "FL010",
-  "FL011",
-  "FL012",
-  "RUN_TRANSITION",
-  "RUN_IDENTITY",
-  "SUBAGENT_START",
-  "SUBAGENT_END",
-  "SUBAGENT_PARENT",
-  "SUBAGENT_OPEN",
-  "ATTRIBUTION",
-  "REASONING_SPAN_START",
-  "REASONING_SPAN_END",
-  "REASONING_SPAN_OPEN",
-  "REASONING_MESSAGE_START",
-  "REASONING_MESSAGE_MISSING",
-  "REASONING_MESSAGE_OPEN",
-  "STEP_START",
-  "STEP_END",
-  "STEP_OPEN",
-  "STATE_PATCH",
-  "STATE_BASELINE",
-  "STATE_LIMIT",
-  "ACTIVITY_PATCH",
-  "ACTIVITY_BASELINE",
-  "ACTIVITY_LIMIT",
-  "ACTIVITY_CONTENT",
-  "ITEM_REOPEN",
-  "ENCRYPTED_TARGET",
-  "ENCRYPTED_PRESERVATION",
-  "ENCRYPTED_SUBTYPE",
-] as const;
+export { SUPPORTED_RULES } from "./rules";
 export function lintEvents(
   records: readonly SourceEvent[],
   options: LintOptions = {},
@@ -64,13 +25,22 @@ export function lintEvents(
     ruleId: string,
     message: string,
     severity: Diagnostic["severity"] = "error",
+    details?: Pick<Diagnostic, "related" | "context">,
   ) => {
     if (diagnostics.length >= MAX_DIAGNOSTICS) {
       capped = true;
       return;
     }
     const { eventIndex, line, column } = record;
-    diagnostics.push({ ruleId, severity, message, eventIndex, line, column });
+    diagnostics.push({
+      ruleId,
+      severity,
+      message,
+      eventIndex,
+      line,
+      column,
+      ...details,
+    });
   };
   const conversation = new Conversation(emit);
   const activityPatches = new ActivityPatches(emit);

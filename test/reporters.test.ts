@@ -64,3 +64,26 @@ it("formats a clean single-event result and unknown locations", () => {
     ),
   ).toContain("?:?");
 });
+
+it("renders related evidence beneath its finding and preserves it in JSON", () => {
+  const enriched: LintResult = {
+    ...result,
+    diagnostics: [
+      {
+        ...result.diagnostics[0]!,
+        related: [
+          {
+            eventIndex: 0,
+            line: 1,
+            column: 3,
+            message: "Attributes established here",
+          },
+        ],
+      },
+    ],
+  };
+  expect(formatPretty(enriched, "trace")).toContain(
+    "    1:3  Attributes established here (event 0)",
+  );
+  expect(JSON.parse(formatJson(enriched))).toEqual(enriched);
+});

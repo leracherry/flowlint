@@ -431,3 +431,54 @@ jobs:
 
 In another project, run `npm install --save-dev @leracherry/flowlint` and
 `npx flowlint check path/to/trace.ndjson`. The npm package, source repository, and GitHub release assets are public.
+
+## Diagnostic evidence
+
+`ITEM_REOPEN` findings include optional `context` and `related` fields. `context`
+identifies the message or tool call and the names of conflicting attributes.
+`related` contains source locations and a short explanation. Attribute values,
+message bodies, tool arguments, and encrypted values are not copied into evidence.
+Entity identifiers remain visible, as they are in other lifecycle diagnostics.
+
+For example, a changed tool name can produce:
+
+```json
+{
+  "ruleId": "ITEM_REOPEN",
+  "severity": "error",
+  "message": "Reopened tool call conflicts with established toolCallName",
+  "eventIndex": 3,
+  "line": 4,
+  "column": 1,
+  "context": {
+    "entityKind": "toolCall",
+    "entityId": "c",
+    "fields": ["toolCallName"]
+  },
+  "related": [
+    {
+      "eventIndex": 1,
+      "line": 2,
+      "column": 1,
+      "message": "Attributes established here"
+    }
+  ]
+}
+```
+
+The related location is the event that established the current attributes. It can
+be an explicit opener, a physical chunk, a message snapshot, or run input. For
+nested history, it points to the containing event, not an individual JSON field.
+Authoritative snapshots replace both attributes and their evidence. Contradictory
+reopenings do not overwrite the original evidence. Partial captures can establish
+evidence from observed events, but missing openers are never invented.
+
+Matching attributes produce no reopening finding. A duplicate start while an item
+is still open continues to use its lifecycle rule instead. Related evidence does
+not change severity, acceptance, capture-boundary behavior, or diagnostic ordering.
+
+`RULES` exports rule IDs and descriptions for integrations. `SUPPORTED_RULES`
+retains its existing identifiers and order. Neither includes every input/parser
+error code. Severity is contextual, so the registry does not claim a universal
+severity for each rule. `DiagnosticLocation` describes a related source location;
+indices are zero-based and lines/columns are one-based.

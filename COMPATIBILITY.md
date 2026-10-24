@@ -64,8 +64,8 @@ transport parsing correction, uses the breaking-change version rule above.
 
 The public library surface is the package-root ESM exports and their shipped
 TypeScript declarations: `lintEvents`, `parseTrace`, `formatJson`, `formatPretty`,
-`TraceInputError`, `MAX_INPUT_BYTES`, `SUPPORTED_RULES`, and the exported types
-`Diagnostic`, `InputFormat`, `LintOptions`, `LintResult`, and `SourceEvent`.
+`TraceInputError`, `MAX_INPUT_BYTES`, `SUPPORTED_RULES`, `RULES`, and the exported types
+`Diagnostic`, `DiagnosticLocation`, `InputFormat`, `LintOptions`, `LintResult`, and `SourceEvent`.
 Deep imports, source modules, internal classes, build filenames, and source maps
 are not supported APIs. CommonJS and browser runtimes are not currently promised.
 
@@ -84,7 +84,10 @@ The JSON report has the same public shape as `LintResult`:
 - `supportedRules`: the implemented lint-rule IDs; not an exhaustive list of
   input, schema, or diagnostic-limit codes. Treat it as a set, not a fixed tuple.
 - `diagnostics`: records with `ruleId`, `severity`, and human-readable `message`,
-  plus optional `eventIndex`, `line`, and `column`.
+  plus optional `eventIndex`, `line`, and `column`. Reopening findings also include
+  optional `context` (entity kind, ID, conflicting field names) and `related` source
+  locations with explanatory messages. Consumers must tolerate additional evidence
+  and must not parse explanatory prose as a stable identifier.
 
 Event indices are zero-based; lines/columns are one-based. Locations may be absent
 where no event location exists. Diagnostic ordering follows source event index,

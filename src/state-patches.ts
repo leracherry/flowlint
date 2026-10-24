@@ -7,6 +7,7 @@ export type Emit = (
   rule: string,
   message: string,
   severity?: Diagnostic["severity"],
+  details?: Pick<Diagnostic, "related" | "context">,
 ) => void;
 type Baseline = { known: boolean; value?: unknown };
 export type PatchBudget = { work: number; retained: number };

@@ -58,6 +58,13 @@ node dist/cli.js suite "traces/**/*.{ndjson,json,sse}" --format github
 Files are checked independently. Empty matches and unreadable files fail the suite,
 while JSON and Markdown output support CI reports. See [trace suites](REFERENCE.md#trace-suites).
 
+## Record an agent interaction
+
+Main also includes `createHttpCapture`, a Node HttpAgent integration that records
+SSE bytes and provenance for later suite checks. See the
+[capture guide](https://github.com/leracherry/flowlint/blob/main/docs/capture.md)
+for the runnable example, retention limits, and content-handling boundaries.
+
 ## What it checks
 
 - Event shapes against the official AG-UI schemas.

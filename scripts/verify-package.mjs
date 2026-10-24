@@ -32,7 +32,7 @@ const paths = packed.files.map((file) => file.path);
 for (const path of paths)
   assert.match(
     path,
-    /^(dist\/[^/]+\.(?:js|js\.map|d\.ts)|examples\/[^/]+\.(?:ndjson|sse)|package\.json|README\.md|REFERENCE\.md|COMPATIBILITY\.md|LICENSE|CHANGELOG\.md|RELEASING\.md)$/,
+    /^(dist\/[^/]+\.(?:js|js\.map|d\.ts)|examples\/[^/]+\.(?:ndjson|sse|mjs)|package\.json|README\.md|REFERENCE\.md|COMPATIBILITY\.md|LICENSE|CHANGELOG\.md|RELEASING\.md)$/,
   );
 for (const path of [
   "dist/cli.js",
@@ -110,7 +110,7 @@ try {
   assert.equal(JSON.parse(suite.stdout).summary.files, 3);
   writeFileSync(
     join(consumer, "consumer.mts"),
-    `import { lintEvents, parseTrace, formatJson, formatPretty, RULES, SUPPORTED_RULES, type DiagnosticLocation, type LintResult } from '${pkg.name}';\nconst result: LintResult = lintEvents(parseTrace('[{"type":"RUN_ERROR","message":"example"}]'));\nif (!result.valid || !formatJson(result) || !formatPretty(result, '-')) throw new Error('Invalid library result');\nconst first: 'FL001' = SUPPORTED_RULES[0];\nconst location: DiagnosticLocation = { eventIndex: 0, line: 1, column: 1 };\nif (RULES[0].id !== first || location.eventIndex !== 0) throw new Error('Invalid metadata');\n`,
+    `import { lintEvents, parseTrace, formatJson, formatPretty, RULES, SUPPORTED_RULES, createHttpCapture, type DiagnosticLocation, type LintResult } from '${pkg.name}';\nconst result: LintResult = lintEvents(parseTrace('[{"type":"RUN_ERROR","message":"example"}]'));\nif (!result.valid || !formatJson(result) || !formatPretty(result, '-')) throw new Error('Invalid library result');\nconst first: 'FL001' = SUPPORTED_RULES[0];\nconst location: DiagnosticLocation = { eventIndex: 0, line: 1, column: 1 };\nif (RULES[0].id !== first || location.eventIndex !== 0) throw new Error('Invalid metadata');\nconst capture = createHttpCapture({ directory: '.', producer: { name: 'verification', version: '1' }, fetch: async () => new Response('not SSE') });\nawait capture.fetch('https://example.com');\nif ((await capture.flush())[0]?.outcome !== 'skipped') throw new Error('Invalid capture export');\n`,
   );
   execFileSync(
     process.execPath,

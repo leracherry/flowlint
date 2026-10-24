@@ -4,6 +4,10 @@
 
 ### Added
 
+- Node HttpAgent SSE capture with bounded retention, provenance manifests, explicit
+  outcomes, and a runnable integration example. Capture errors remain separate from
+  application results; original request metadata is not recorded.
+
 - `suite` command with deterministic file/glob discovery, isolated checks, versioned
   aggregate JSON, escaped GitHub annotations, and Markdown summaries. Empty matches
   and input errors fail with exit code 2 while other files are still checked.

@@ -1,34 +1,16 @@
 #!/usr/bin/env node
 import { Command, CommanderError, Option } from "commander";
-import { createReadStream } from "node:fs";
+import { readInput } from "./read-input";
+import { runSuite, formatSuite, suiteFailure } from "./suite";
 import {
   lintEvents,
   SUPPORTED_RULES,
   parseTrace,
   TraceInputError,
-  MAX_INPUT_BYTES,
 } from "./index";
 import type { Diagnostic, InputFormat, LintResult } from "./types";
 import { formatJson, formatPretty } from "./reporters";
 import packageJson from "../package.json";
-async function readInput(file: string): Promise<string> {
-  const stream = file === "-" ? process.stdin : createReadStream(file);
-  const chunks: Buffer[] = [];
-  let bytes = 0;
-  for await (const chunk of stream) {
-    const buffer = Buffer.isBuffer(chunk) ? chunk : Buffer.from(chunk);
-    bytes += buffer.length;
-    if (bytes > MAX_INPUT_BYTES) {
-      stream.destroy();
-      throw new TraceInputError(
-        "PARSE_LIMIT",
-        "Trace exceeds the 10 MiB input limit",
-      );
-    }
-    chunks.push(buffer);
-  }
-  return Buffer.concat(chunks).toString("utf8");
-}
 function report(result: LintResult, format: string, file: string): void {
   console.log(
     format === "json"
@@ -110,6 +92,30 @@ const checkCommand = program
       }
     },
   );
+program
+  .command("suite")
+  .argument("<patterns...>", "files or quoted globs (no stdin)")
+  .addOption(
+    new Option("--input <format>", "input encoding")
+      .choices(["auto", "ndjson", "json", "sse"])
+      .default("auto"),
+  )
+  .addOption(
+    new Option("--format <format>", "output format")
+      .choices(["pretty", "json", "github", "markdown"])
+      .default("pretty"),
+  )
+  .option("--allow-partial", "Allow incomplete capture boundaries")
+  .action(
+    async (
+      patterns: string[],
+      options: { input: InputFormat; format: string; allowPartial?: boolean },
+    ) => {
+      const result = await runSuite(patterns, options);
+      console.log(formatSuite(result, options.format));
+      process.exitCode = result.exitCode;
+    },
+  );
 if (process.argv.length === 2) {
   program.outputHelp();
   process.exitCode = 2;
@@ -128,15 +134,29 @@ if (process.argv.length === 2) {
             arg === "--format=json" ||
             (arg === "--format" && args[i + 1] === "json"),
         );
-        reportFailure(
-          {
-            ruleId: "CLI_USAGE",
-            severity: "error",
-            message: error.message.replace(/^error: /, ""),
-          },
-          jsonRequested ? "json" : "pretty",
-          checkCommand.args[0] ?? "flowlint",
-        );
+        const diagnostic: Diagnostic = {
+          ruleId: "CLI_USAGE",
+          severity: "error",
+          message: error.message.replace(/^error: /, ""),
+        };
+        if (args[0] === "suite") {
+          console.log(
+            formatSuite(
+              suiteFailure(diagnostic),
+              jsonRequested ? "json" : "pretty",
+            ),
+          );
+          process.exitCode = 2;
+        } else
+          reportFailure(
+            {
+              ruleId: "CLI_USAGE",
+              severity: "error",
+              message: error.message.replace(/^error: /, ""),
+            },
+            jsonRequested ? "json" : "pretty",
+            checkCommand.args[0] ?? "flowlint",
+          );
       }
     } else throw error;
   }

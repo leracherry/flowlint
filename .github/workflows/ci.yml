@@ -34,3 +34,8 @@ jobs:
           trace_status=$?
           set -e
           test "$trace_status" -eq 1
+      - name: Check a corpus with GitHub annotations
+        run: node dist/cli.js suite "examples/{valid,interleaved,chunks,reasoning,state,activity,preservation}.ndjson" --format github
+      - name: Write corpus summary
+        shell: bash
+        run: node dist/cli.js suite "examples/{valid,interleaved,chunks,reasoning,state,activity,preservation}.ndjson" --format markdown >> "$GITHUB_STEP_SUMMARY"

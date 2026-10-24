@@ -46,6 +46,18 @@ attributes, including attributes from recorded input and snapshots. See
 Exit codes: **0** passed · **1** lint errors · **2** invalid input or usage.
 Warnings do not fail a check, making FlowLint easy to use in CI.
 
+## Check a regression corpus
+
+On main (not yet in the published 1.0.0 package), build and run:
+
+```sh
+pnpm build
+node dist/cli.js suite "traces/**/*.{ndjson,json,sse}" --format github
+```
+
+Files are checked independently. Empty matches and unreadable files fail the suite,
+while JSON and Markdown output support CI reports. See [trace suites](REFERENCE.md#trace-suites).
+
 ## What it checks
 
 - Event shapes against the official AG-UI schemas.

@@ -4,6 +4,10 @@
 
 ### Added
 
+- `suite` command with deterministic file/glob discovery, isolated checks, versioned
+  aggregate JSON, escaped GitHub annotations, and Markdown summaries. Empty matches
+  and input errors fail with exit code 2 while other files are still checked.
+
 - Related source locations and structured context for reopening findings, including
   snapshots, recorded input, and normalized chunks. Terminal output shows the
   establishing event without including attribute values.

@@ -34,7 +34,9 @@ remain outstanding.
 
 ## After integration feedback
 
-- Extract incremental validation with batch-equivalence tests and explicit limits.
+- [x] Add incremental sessions and NDJSON/SSE byte parsing with equivalence tests,
+      explicit limits, and retained-history/patch/subagent stress workloads. See
+      [incremental validation](docs/incremental.md).
 - Generate a local HTML report focused on diagnostic evidence.
 - Reduce selected lifecycle failures while preserving their original cause and
   required context.

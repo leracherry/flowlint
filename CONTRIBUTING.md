@@ -30,3 +30,9 @@ or peak memory. Seeded randomized tests run within `pnpm check`; failures are
 reproducible. CI runs checks, stress cases, and package installation on Node 22/24
 across Linux, macOS, and Windows. Keep `.gitattributes` line-ending rules so pinned
 producer fixture hashes remain identical across checkouts.
+
+Incremental validation also runs NDJSON/SSE stress workers that generate events
+as they go, covering retained history, patches, and interleaved agents. These
+report OS peak RSS as well as end-of-run heap. When changing session or parser
+behavior, preserve batch results, source coordinates, and byte-partition
+equivalence; see [incremental validation](docs/incremental.md).

@@ -32,3 +32,12 @@ export type LintResult = {
   supportedRules: string[];
   diagnostics: Diagnostic[];
 };
+
+export type LintSessionOptions = LintOptions & { maxEvents?: number };
+export type LintSession = {
+  readonly status: "active" | "finished" | "cancelled";
+  push(record: SourceEvent): void;
+  snapshot(): LintResult;
+  finish(): LintResult;
+  cancel(): LintResult;
+};

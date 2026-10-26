@@ -1,10 +1,12 @@
-export { lintEvents, SUPPORTED_RULES } from "./lint";
+export { lintEvents, createLintSession, SUPPORTED_RULES } from "./lint";
 export { parseTrace, TraceInputError, MAX_INPUT_BYTES } from "./parse";
 export type {
   Diagnostic,
   DiagnosticLocation,
   InputFormat,
   LintOptions,
+  LintSession,
+  LintSessionOptions,
   LintResult,
   SourceEvent,
 } from "./types";
@@ -15,3 +17,5 @@ export { RULES } from "./rules";
 
 export { createHttpCapture } from "./capture";
 export type { CaptureManifest, HttpCaptureOptions } from "./capture";
+
+export { parseTraceStream, lintTraceStream } from "./parse-stream";

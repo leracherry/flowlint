@@ -65,6 +65,13 @@ SSE bytes and provenance for later suite checks. See the
 [capture guide](https://github.com/leracherry/flowlint/blob/main/docs/capture.md)
 for the runnable example, retention limits, and content-handling boundaries.
 
+## Validate incrementally
+
+Main includes `createLintSession`, `parseTraceStream`, and `lintTraceStream` for
+checking events as they arrive. EOF checks run on explicit finalization. See
+[incremental validation](https://github.com/leracherry/flowlint/blob/main/docs/incremental.md)
+for cancellation, source locations, and resource limits. These APIs are unreleased.
+
 ## What it checks
 
 - Event shapes against the official AG-UI schemas.

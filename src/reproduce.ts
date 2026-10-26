@@ -1,8 +1,8 @@
+import { normalizeJsonTrace, serializeJsonRecords } from "./json-trace";
 import { createHash } from "node:crypto";
 import { setImmediate } from "node:timers/promises";
-import { eventWithinLimits } from "./input-limits";
 import { lintEvents } from "./lint";
-import { parseTrace, TraceInputError, MAX_INPUT_BYTES } from "./parse";
+import { parseTrace, TraceInputError } from "./parse";
 import type { Diagnostic, LintOptions, LintResult, SourceEvent } from "./types";
 import packageJson from "../package.json";
 
@@ -19,26 +19,8 @@ const supported = new Set([
 ]);
 const sha256 = (text: string) =>
   createHash("sha256").update(text).digest("hex");
-const serialize = (records: readonly SourceEvent[]): string => {
-  const lines: string[] = [];
-  let bytes = 0;
-  for (const record of records) {
-    const line = JSON.stringify(record.event);
-    if (line === undefined)
-      throw new TraceInputError(
-        "REPRO_INPUT",
-        "Reproducer input must contain JSON-compatible events",
-      );
-    bytes += Buffer.byteLength(line) + (lines.length ? 1 : 0);
-    if (bytes > MAX_INPUT_BYTES)
-      throw new TraceInputError(
-        "PARSE_LIMIT",
-        "Reproducer serialization exceeds the 10 MiB input limit",
-      );
-    lines.push(line);
-  }
-  return lines.join("\n");
-};
+const serialize = (records: readonly SourceEvent[]) =>
+  serializeJsonRecords(records, "Reproducer");
 // Ignore encoding-dependent line/column values, retaining original event identity.
 const signature = (d: Diagnostic) =>
   JSON.stringify({
@@ -100,97 +82,12 @@ export type Reproducer = {
     maxDurationMs: number;
   };
 };
-function jsonCompatible(root: unknown): boolean {
-  const pending = [root];
-  while (pending.length) {
-    const value = pending.pop();
-    if (
-      value === null ||
-      typeof value === "string" ||
-      typeof value === "boolean"
-    )
-      continue;
-    if (typeof value === "number") {
-      if (!Number.isFinite(value) || Object.is(value, -0)) return false;
-      continue;
-    }
-    if (typeof value !== "object") return false;
-    const array = Array.isArray(value);
-    if (
-      !array &&
-      Object.getPrototypeOf(value) !== Object.prototype &&
-      Object.getPrototypeOf(value) !== null
-    )
-      return false;
-    if (Object.getOwnPropertySymbols(value).length) return false;
-    if (array) {
-      const keys = Object.keys(value);
-      if (
-        keys.length !== value.length ||
-        keys.some((key, i) => key !== String(i))
-      )
-        return false;
-    }
-    for (const [key, descriptor] of Object.entries(
-      Object.getOwnPropertyDescriptors(value),
-    )) {
-      if (array && key === "length") continue;
-      if (!("value" in descriptor) || !descriptor.enumerable) return false;
-      pending.push(descriptor.value);
-    }
-  }
-  return true;
-}
 function prepare(input: readonly SourceEvent[], options: LintOptions) {
-  if (input.length > 100_000)
-    throw new TraceInputError(
-      "REPRO_INPUT",
-      "Reproducer input exceeds the 100,000-event limit",
-    );
-  const indices = new Set<number>();
-  for (const record of input) {
-    if (
-      !Number.isSafeInteger(record.eventIndex) ||
-      record.eventIndex < 0 ||
-      indices.has(record.eventIndex) ||
-      !Number.isSafeInteger(record.line) ||
-      record.line < 1 ||
-      !Number.isSafeInteger(record.column) ||
-      record.column < 1
-    )
-      throw new TraceInputError(
-        "REPRO_INPUT",
-        "Reproducer records require unique event indices and positive source coordinates",
-      );
-    indices.add(record.eventIndex);
-  }
-  if (input.some((r) => !eventWithinLimits(r.event)))
-    throw new TraceInputError(
-      "REPRO_INPUT",
-      "Reproducer events exceed input limits or contain cycles",
-    );
-  if (input.some((r) => !jsonCompatible(r.event)))
-    throw new TraceInputError(
-      "REPRO_INPUT",
-      "Reproducer input must contain plain JSON values",
-    );
-  let ndjson: string;
-  try {
-    ndjson = serialize(input);
-  } catch (error) {
-    if (error instanceof TraceInputError) throw error;
-    throw new TraceInputError(
-      "REPRO_INPUT",
-      "Reproducer input must contain JSON-compatible events",
-    );
-  }
-  const parsed = input.length ? parseTrace(ndjson, { format: "ndjson" }) : [];
-  if (parsed.length !== input.length)
-    throw new TraceInputError(
-      "REPRO_INPUT",
-      "Reproducer input must preserve one JSON event per record",
-    );
-  const records = parsed.map((r, i) => ({ ...input[i]!, event: r.event }));
+  const { records, text: ndjson } = normalizeJsonTrace(
+    input,
+    "REPRO_INPUT",
+    "Reproducer",
+  );
   const validation = lintEvents(records, options);
   let reason: string | undefined;
   if (

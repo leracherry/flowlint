@@ -4,6 +4,10 @@
 
 ### Added
 
+- Versioned adapter-upgrade trace comparison with scoped identity mapping, adjacent
+  chunk normalization, ownership checks, final shared-state digests, bounded source
+  diffs, and explicit incomparable outcomes. Includes CLI and TypeScript APIs.
+
 - Conservative lifecycle/reopening reproducer generation with versioned finding
   identities, pinned context, no-new-diagnostic verification, cooperative budgets,
   progress/cancellation, source mappings, and a human-reviewable artifact bundle.

@@ -1,0 +1,6 @@
+{"type":"RUN_STARTED","threadId":"t","runId":"r"}
+{"type":"TEXT_MESSAGE_START","messageId":"m"}
+{"type":"TEXT_MESSAGE_CONTENT","messageId":"m","delta":"He"}
+{"type":"TEXT_MESSAGE_CONTENT","messageId":"m","delta":"llo"}
+{"type":"TEXT_MESSAGE_END","messageId":"m"}
+{"type":"RUN_FINISHED","threadId":"t","runId":"r"}

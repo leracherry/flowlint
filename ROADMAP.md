@@ -44,8 +44,11 @@ remain outstanding.
       verified finding identity, source mappings, budgets, and reviewed artifact
       bundles. Chunk/patch/encrypted-history reduction remains unsupported. See
       [reproducers](docs/reproducers.md).
-- Compare adapter upgrades using explicit policies that preserve ownership and
-  meaningful ordering, reporting ambiguity rather than assuming equivalence.
+- [x] Compare adapter upgrades using versioned policies that preserve ownership and
+      arrival order, reporting ambiguity rather than assuming equivalence. See
+      [semantic comparison](docs/comparison.md).
+- [ ] Validate a real adapter upgrade with an independent maintainer; controlled
+      derived recordings are regression evidence, not an external upgrade trial.
 
 Each feature must have independently verifiable acceptance criteria. New
 protocols, hosted dashboards, and automatic event repairs are outside this sequence.

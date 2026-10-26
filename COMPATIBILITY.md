@@ -181,3 +181,14 @@ Fingerprints bind the input and diagnostic semantics of the producing version;
 they are not guaranteed to remain equal across changes to validation or wording.
 No existing check/suite/report exit meaning changes. Additional optional manifest
 fields are compatible; ignore unknown fields.
+
+## Trace comparisons
+
+`compareTraces`, `formatComparison`, and the compare command are additive and
+unreleased. The [comparison guide](https://github.com/leracherry/flowlint/blob/main/docs/comparison.md)
+defines `adapter-upgrade/v1` and version-1 result semantics. A change to identity
+scope, ignored fields, or equivalence rules requires a new policy name. Optional
+result fields may be added. No existing validation acceptance or command exit
+meaning changes. Comparison exit 3 represents uncertainty and must not be treated
+as passing. Policy equality describes recorded observations, not application or
+model equivalence.

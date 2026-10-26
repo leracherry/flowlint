@@ -467,3 +467,66 @@ it("rejects missing minimize options, unknown IDs, and malformed input", () => {
     "No findings",
   );
 });
+
+it("compares traces with separate equality, change, and uncertainty exits", () => {
+  const directory = mkdtempSync(path.join(tmpdir(), "flowlint compare "));
+  const before = path.join(directory, "before.ndjson");
+  const after = path.join(directory, "after.ndjson");
+  const events = [
+    { type: "RUN_STARTED", threadId: "t", runId: "r" },
+    { type: "TEXT_MESSAGE_START", messageId: "m" },
+    { type: "TEXT_MESSAGE_CONTENT", messageId: "m", delta: "PRIVATE_BODY" },
+    { type: "TEXT_MESSAGE_END", messageId: "m" },
+    { type: "RUN_FINISHED", threadId: "t", runId: "r" },
+  ];
+  try {
+    writeFileSync(before, JSON.stringify(events));
+    writeFileSync(after, JSON.stringify(events));
+    const equal = cli("compare", before, after, "--format", "json");
+    expect(equal.status).toBe(0);
+    expect(JSON.parse(equal.stdout).policy).toBe("adapter-upgrade/v1");
+    events[2]!.delta = "CHANGED_PRIVATE_BODY";
+    writeFileSync(after, JSON.stringify(events));
+    const changed = cli("compare", before, after, "--format", "json");
+    expect(changed.status).toBe(1);
+    expect(JSON.parse(changed.stdout).status).toBe("changed");
+    expect(changed.stdout).not.toContain("PRIVATE_BODY");
+    expect(cli("compare", before, after).stdout).toContain('"delta"');
+    writeFileSync(after, JSON.stringify(events.slice(1)));
+    const uncertain = cli("compare", before, after, "--format", "json");
+    expect(uncertain.status).toBe(3);
+    expect(JSON.parse(uncertain.stdout).issues[0].code).toBe(
+      "partial-boundary",
+    );
+    const stdin = spawnSync(
+      process.execPath,
+      ["dist/cli.js", "compare", "-", before],
+      { input: readFileSync(before), encoding: "utf8" },
+    );
+    expect(stdin.status).toBe(0);
+  } finally {
+    rmSync(directory, { recursive: true, force: true });
+  }
+});
+it("rejects invalid comparison inputs and options", () => {
+  expect(cli("compare", "-", "-").status).toBe(2);
+  expect(cli("compare", "missing", "examples/valid.ndjson").status).toBe(2);
+  expect(
+    cli(
+      "compare",
+      "examples/valid.ndjson",
+      "examples/valid.ndjson",
+      "--policy",
+      "unknown",
+    ).status,
+  ).toBe(2);
+  expect(
+    cli(
+      "compare",
+      "examples/valid.ndjson",
+      "examples/valid.ndjson",
+      "--max-differences",
+      "0",
+    ).status,
+  ).toBe(2);
+});

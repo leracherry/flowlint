@@ -30,3 +30,14 @@ export type {
   ReproOptions,
   Reproducer,
 } from "./reproduce";
+
+export { compareTraces } from "./compare";
+export type {
+  CompareOptions,
+  ComparisonIssue,
+  EntityMapping,
+  StateOutcome,
+  TraceDifference,
+  TraceComparison,
+} from "./compare";
+export { formatComparison } from "./compare-report";

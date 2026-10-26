@@ -46,3 +46,12 @@ Reproducer changes must preserve the selected original event, reason, severity,
 related evidence, and dependency context. Verify retained values and serialized
 output against the original mapping; do not accept a different error with the same
 rule ID. Check budget/cancellation outcomes and keep unsupported cases explicit.
+
+Comparison changes need both equal and changed regressions, including ownership,
+arrival order, and uncertainty. Keep unknown/opaque cases incomparable rather than
+broadening normalization. Test the packaged CLI and public types; preserve the
+versioned policy contract in [comparison](docs/comparison.md). Derived producer
+recordings must remain clearly identified and leave original fixture bytes intact.
+
+Comparison stress workers cover concurrent entity mapping, many thread outcomes,
+and rechunked content with the same process budget as the batch stress checks.

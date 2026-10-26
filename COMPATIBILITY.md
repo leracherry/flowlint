@@ -48,6 +48,8 @@ The `flowlint` executable and documented commands/options in
 - `--format pretty|json`, defaulting to `pretty`.
 - `--allow-partial`, with complete-capture checking as the default.
 - `--help` and `--version`.
+- `report <file> --output <file>` with `--input`, `--allow-partial`, and
+  `--max-events` (default 2000; 1–10000). Existing output files are not overwritten.
 - `suite <patterns...>` with `--input`, `--allow-partial`, and
   `--format pretty|json|github|markdown`; see the separate versioned
   [suite JSON contract](REFERENCE.md#aggregate-json-contract).
@@ -69,8 +71,8 @@ transport parsing correction, uses the breaking-change version rule above.
 The public library surface is the package-root ESM exports and their shipped
 TypeScript declarations: `lintEvents`, `parseTrace`, `formatJson`, `formatPretty`,
 `TraceInputError`, `MAX_INPUT_BYTES`, `SUPPORTED_RULES`, `RULES`, `createHttpCapture`, `createLintSession`, `parseTraceStream`,
-`lintTraceStream`, and the exported types
-`Diagnostic`, `DiagnosticLocation`, `InputFormat`, `LintOptions`, `LintResult`, `SourceEvent`, `CaptureManifest`, `HttpCaptureOptions`, `LintSession`, and `LintSessionOptions`.
+`lintTraceStream`, `generateHtmlReport`, and the exported types
+`Diagnostic`, `DiagnosticLocation`, `InputFormat`, `LintOptions`, `LintResult`, `SourceEvent`, `CaptureManifest`, `HttpCaptureOptions`, `LintSession`, `LintSessionOptions`, and `HtmlReportOptions`.
 Deep imports, source modules, internal classes, build filenames, and source maps
 are not supported APIs. CommonJS and browser runtimes are not currently promised.
 
@@ -155,3 +157,12 @@ Snapshots are provisional. Only explicit finalization after a clean source EOF
 adds capture-boundary checks. New streaming/session limits do not change existing
 batch acceptance. Streaming errors are reported on arrival, so inputs with several
 different errors may have a different first failure than whole-input parsing.
+
+## HTML artifacts
+
+`generateHtmlReport` and the report command are additive interfaces documented in
+the [HTML guide](https://github.com/leracherry/flowlint/blob/main/docs/html-reports.md).
+The CLI preserves check exit meanings: lint errors can produce a report with exit
+1, while input/output failures use 2. Payload fields are omitted; metadata and
+diagnostic messages remain visible. HTML styling and DOM structure are not stable
+automation interfaces. Use JSON diagnostics for machine-readable integrations.

@@ -39,3 +39,15 @@ jobs:
       - name: Write corpus summary
         shell: bash
         run: node dist/cli.js suite "examples/{valid,interleaved,chunks,reasoning,state,activity,preservation}.ndjson" --format markdown >> "$GITHUB_STEP_SUMMARY"
+  html-report:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v7
+      - uses: pnpm/action-setup@v6
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 24
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm exec playwright install --with-deps chromium
+      - run: pnpm test:html

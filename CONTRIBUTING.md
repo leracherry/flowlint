@@ -36,3 +36,8 @@ as they go, covering retained history, patches, and interleaved agents. These
 report OS peak RSS as well as end-of-run heap. When changing session or parser
 behavior, preserve batch results, source coordinates, and byte-partition
 equivalence; see [incremental validation](docs/incremental.md).
+
+When changing HTML reports, run `pnpm exec playwright install chromium` and
+`pnpm test:html` to check the real browser behavior, restrictive policy, keyboard
+navigation, offline use, and large-trace rendering. Unit tests also verify
+payload omission and artifact limits. The separate HTML CI job runs Chromium.

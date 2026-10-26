@@ -140,3 +140,7 @@ The 19 pinned producer recordings are checked for self-comparison consistency;
 a derived Strands TypeScript recording tests ID renaming and rechunking without
 editing the fixture. These controlled transformations are not real upgrade
 captures. An independent maintainer trial on a real adapter upgrade remains open.
+
+`pnpm stress` also compares large concurrent tool sets, many retained thread states,
+and adjacent content fragments in isolated workers (256 MiB V8 old-space limit,
+30-second timeout). These are regression guards, not a performance SLA.

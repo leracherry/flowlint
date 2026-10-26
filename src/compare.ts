@@ -243,7 +243,22 @@ function project(
     });
   };
   const rows: Row[] = [];
-  const open = new Map<string, { id: unknown; shape: string }[]>();
+  const open = new Map<
+    string,
+    {
+      identities: Map<unknown, string>;
+      shapes: Map<string, Set<unknown>>;
+    }
+  >();
+  const close = (group: string, identity: unknown) => {
+    const items = open.get(group);
+    const shape = items?.identities.get(identity);
+    if (shape === undefined) return;
+    items!.identities.delete(identity);
+    const matches = items!.shapes.get(shape)!;
+    matches.delete(identity);
+    if (!matches.size) items!.shapes.delete(shape);
+  };
   const emit = (raw: Json, record: SourceEvent) => {
     const type = String(raw.type);
     if (type === "RUN_STARTED") {
@@ -405,20 +420,24 @@ function project(
       delete fields.toolCallId;
       if (group === "agent") delete fields.subagentRunId;
       const shape = stable(fields);
-      const others = open.get(group) ?? [];
-      if (others.some((item) => item.id !== identity && item.shape === shape))
+      const items = open.get(group) ?? {
+        identities: new Map<unknown, string>(),
+        shapes: new Map<string, Set<unknown>>(),
+      };
+      // Replace a duplicate opening without retaining stale ambiguity evidence.
+      close(group, identity);
+      const matches = items.shapes.get(shape) ?? new Set<unknown>();
+      if (matches.size)
         issue(
           "ambiguous-entities",
           "Concurrent entities have indistinguishable opening attributes; this policy cannot prove a unique correspondence",
           record,
         );
-      others.push({ id: identity, shape });
-      open.set(group, others);
-    } else if (group && end)
-      open.set(
-        group,
-        (open.get(group) ?? []).filter((item) => item.id !== identity),
-      );
+      matches.add(identity);
+      items.shapes.set(shape, matches);
+      items.identities.set(identity, shape);
+      open.set(group, items);
+    } else if (group && end) close(group, identity);
     const merge =
       [
         "TEXT_MESSAGE_CONTENT",

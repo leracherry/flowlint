@@ -38,7 +38,7 @@
     "typecheck": "tsc --noEmit",
     "test": "vitest run",
     "test:html": "pnpm build && node scripts/verify-html.mjs",
-    "stress": "pnpm build && node scripts/stress.mjs && node scripts/stress-stream.mjs",
+    "stress": "pnpm build && node scripts/stress.mjs && node scripts/stress-stream.mjs && node scripts/stress-compare.mjs",
     "check": "pnpm lint && pnpm typecheck && pnpm test && pnpm build",
     "prepack": "pnpm build",
     "verify:package": "pnpm build && node scripts/verify-package.mjs"

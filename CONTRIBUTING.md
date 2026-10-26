@@ -52,3 +52,6 @@ arrival order, and uncertainty. Keep unknown/opaque cases incomparable rather th
 broadening normalization. Test the packaged CLI and public types; preserve the
 versioned policy contract in [comparison](docs/comparison.md). Derived producer
 recordings must remain clearly identified and leave original fixture bytes intact.
+
+Comparison stress workers cover concurrent entity mapping, many thread outcomes,
+and rechunked content with the same process budget as the batch stress checks.

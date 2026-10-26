@@ -99,6 +99,20 @@ attachment. Retained payloads are not redacted. See
 [reproducers](https://github.com/leracherry/flowlint/blob/main/docs/reproducers.md)
 for supported rules, budgets, and fidelity limits. This feature is unreleased.
 
+## Compare an adapter upgrade
+
+On main (not yet published), build and compare two recordings:
+
+```sh
+pnpm build
+node dist/cli.js compare before.ndjson after.ndjson --format json
+```
+
+The versioned policy tolerates generated ID changes, root timestamps, and adjacent
+text/argument rechunking. It preserves ordering and ownership and reports uncertain
+cases as incomparable. Exit codes are 0 equal, 1 changed, 2 input failure, and
+3 incomparable. See the [comparison guide](docs/comparison.md) for scope and limits.
+
 ## What it checks
 
 - Event shapes against the official AG-UI schemas.

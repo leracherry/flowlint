@@ -1,0 +1,7 @@
+{"type":"RUN_STARTED","threadId":"t","runId":"r"}
+{"type":"TEXT_MESSAGE_START","messageId":"m"}
+{"type":"TEXT_MESSAGE_START","messageId":"n"}
+{"type":"TEXT_MESSAGE_CONTENT","messageId":"m","delta":"Hello"}
+{"type":"TEXT_MESSAGE_END","messageId":"m"}
+{"type":"TEXT_MESSAGE_END","messageId":"n"}
+{"type":"RUN_FINISHED","threadId":"t","runId":"r"}

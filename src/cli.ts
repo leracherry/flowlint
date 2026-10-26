@@ -5,6 +5,8 @@ import {
   Option,
   InvalidArgumentError,
 } from "commander";
+import { compareTraces } from "./compare";
+import { formatComparison } from "./compare-report";
 import { getReproFindings, minimizeTrace } from "./reproduce";
 import { writeReproArtifacts } from "./repro-artifacts";
 import { writeFile } from "node:fs/promises";
@@ -320,6 +322,90 @@ program
         );
       } finally {
         process.removeListener("SIGINT", interrupt);
+      }
+    },
+  );
+program
+  .command("compare")
+  .allowExcessArguments(false)
+  .argument("<before>", "original trace file, or - for stdin")
+  .argument("<after>", "updated trace file, or - for stdin")
+  .addOption(
+    new Option("--policy <name>", "comparison policy")
+      .choices(["adapter-upgrade/v1"])
+      .default("adapter-upgrade/v1"),
+  )
+  .addOption(
+    new Option("--format <format>", "output format")
+      .choices(["pretty", "json"])
+      .default("pretty"),
+  )
+  .option("--allow-partial", "Retain partial-capture uncertainty")
+  .option(
+    "--max-differences <count>",
+    "difference details to retain (1–1000)",
+    (value: string) => {
+      const count = Number(value);
+      if (!Number.isSafeInteger(count) || count < 1 || count > 1000)
+        throw new InvalidArgumentError(
+          "Expected an integer between 1 and 1000",
+        );
+      return count;
+    },
+    50,
+  )
+  .action(
+    async (
+      before: string,
+      after: string,
+      options: {
+        policy: "adapter-upgrade/v1";
+        format: string;
+        allowPartial?: boolean;
+        maxDifferences: number;
+      },
+    ) => {
+      if (before === "-" && after === "-") {
+        reportFailure(
+          {
+            ruleId: "CLI_USAGE",
+            severity: "error",
+            message: "At most one comparison input may use stdin",
+          },
+          options.format,
+          "compare",
+        );
+        return;
+      }
+      try {
+        const a = parseTrace(await readInput(before));
+        const b = parseTrace(await readInput(after));
+        const result = compareTraces(a, b, options);
+        console.log(
+          options.format === "json"
+            ? JSON.stringify(result, null, 2)
+            : formatComparison(result),
+        );
+        process.exitCode =
+          result.status === "equal" ? 0 : result.status === "changed" ? 1 : 3;
+      } catch (error) {
+        reportFailure(
+          error instanceof TraceInputError
+            ? {
+                ruleId: error.code,
+                severity: "error",
+                message: error.message,
+                line: error.line,
+                column: error.column,
+              }
+            : {
+                ruleId: "COMPARE_INPUT",
+                severity: "error",
+                message: "Unable to compare trace inputs",
+              },
+          options.format,
+          "compare",
+        );
       }
     },
   );

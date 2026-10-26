@@ -227,6 +227,18 @@ export class StatePatches {
       }
     }
   }
+  /** Detached final baselines; clone retained state once, rather than per run. */
+  snapshots(): { threadId?: string; known: boolean; value?: unknown }[] {
+    const entries: [string | undefined, Baseline][] = [
+      ...this.threads.entries(),
+    ];
+    if (this.thread === undefined) entries.push([undefined, this.current]);
+    return entries.map(([threadId, baseline]) => ({
+      threadId,
+      known: baseline.known,
+      ...(baseline.known ? { value: structuredClone(baseline.value) } : {}),
+    }));
+  }
   private replace(value: unknown, record: SourceEvent) {
     const size = bytes(value);
     const previous = this.current.known ? bytes(this.current.value) : 0;

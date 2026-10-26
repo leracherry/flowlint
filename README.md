@@ -72,6 +72,19 @@ checking events as they arrive. EOF checks run on explicit finalization. See
 [incremental validation](https://github.com/leracherry/flowlint/blob/main/docs/incremental.md)
 for cancellation, source locations, and resource limits. These APIs are unreleased.
 
+## Inspect a local report
+
+On main, build and generate a standalone HTML report:
+
+```sh
+node dist/cli.js report trace.ndjson --output report.html
+```
+
+Findings link to their event evidence. Search and run/agent groups help navigate
+the trace, while raw payload fields are omitted. See
+[HTML reports](https://github.com/leracherry/flowlint/blob/main/docs/html-reports.md)
+for limits, privacy boundaries, and CI artifacts. This feature is unreleased.
+
 ## What it checks
 
 - Event shapes against the official AG-UI schemas.

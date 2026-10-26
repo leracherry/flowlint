@@ -108,9 +108,18 @@ try {
   assert.equal(suite.status, 0, suite.stderr || suite.stdout);
   assert.equal(JSON.parse(suite.stdout).schemaVersion, 1);
   assert.equal(JSON.parse(suite.stdout).summary.files, 3);
+  const reportPath = join(consumer, "trace report.html");
+  const report = run([
+    "report",
+    join(root, "examples/valid.ndjson"),
+    "--output",
+    reportPath,
+  ]);
+  assert.equal(report.status, 0, report.stderr || report.stdout);
+  assert(readFileSync(reportPath, "utf8").startsWith("<!doctype html>"));
   writeFileSync(
     join(consumer, "consumer.mts"),
-    `import { lintEvents, parseTrace, formatJson, formatPretty, RULES, SUPPORTED_RULES, createHttpCapture, createLintSession, parseTraceStream, lintTraceStream, type DiagnosticLocation, type LintResult } from '${pkg.name}';\nconst result: LintResult = lintEvents(parseTrace('[{"type":"RUN_ERROR","message":"example"}]'));\nif (!result.valid || !formatJson(result) || !formatPretty(result, '-')) throw new Error('Invalid library result');\nconst first: 'FL001' = SUPPORTED_RULES[0];\nconst location: DiagnosticLocation = { eventIndex: 0, line: 1, column: 1 };\nif (RULES[0].id !== first || location.eventIndex !== 0) throw new Error('Invalid metadata');\nconst capture = createHttpCapture({ directory: '.', producer: { name: 'verification', version: '1' }, fetch: async () => new Response('not SSE') });\nawait capture.fetch('https://example.com');\nif ((await capture.flush())[0]?.outcome !== 'skipped') throw new Error('Invalid capture export');\nconst session = createLintSession();\nasync function* chunks() { yield new TextEncoder().encode(JSON.stringify({ type: 'RUN_ERROR', message: 'example' }) + String.fromCharCode(10)); }\nfor await (const record of parseTraceStream(chunks())) session.push(record);\nif (!session.finish().valid || !(await lintTraceStream(chunks())).valid) throw new Error('Invalid session export');\n`,
+    `import { lintEvents, parseTrace, formatJson, formatPretty, RULES, SUPPORTED_RULES, createHttpCapture, createLintSession, parseTraceStream, lintTraceStream, generateHtmlReport, type DiagnosticLocation, type LintResult } from '${pkg.name}';\nconst result: LintResult = lintEvents(parseTrace('[{"type":"RUN_ERROR","message":"example"}]'));\nif (!result.valid || !formatJson(result) || !formatPretty(result, '-')) throw new Error('Invalid library result');\nconst first: 'FL001' = SUPPORTED_RULES[0];\nconst location: DiagnosticLocation = { eventIndex: 0, line: 1, column: 1 };\nif (RULES[0].id !== first || location.eventIndex !== 0) throw new Error('Invalid metadata');\nconst capture = createHttpCapture({ directory: '.', producer: { name: 'verification', version: '1' }, fetch: async () => new Response('not SSE') });\nawait capture.fetch('https://example.com');\nif ((await capture.flush())[0]?.outcome !== 'skipped') throw new Error('Invalid capture export');\nconst session = createLintSession();\nasync function* chunks() { yield new TextEncoder().encode(JSON.stringify({ type: 'RUN_ERROR', message: 'example' }) + String.fromCharCode(10)); }\nfor await (const record of parseTraceStream(chunks())) session.push(record);\nif (!session.finish().valid || !(await lintTraceStream(chunks())).valid) throw new Error('Invalid session export');\nif (!generateHtmlReport(parseTrace('[{\"type\":\"RUN_ERROR\",\"message\":\"example\"}]')).startsWith('<!doctype html>')) throw new Error('Invalid HTML export');\n`,
   );
   execFileSync(
     process.execPath,

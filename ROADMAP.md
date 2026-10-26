@@ -37,7 +37,9 @@ remain outstanding.
 - [x] Add incremental sessions and NDJSON/SSE byte parsing with equivalence tests,
       explicit limits, and retained-history/patch/subagent stress workloads. See
       [incremental validation](docs/incremental.md).
-- Generate a local HTML report focused on diagnostic evidence.
+- [x] Generate a local HTML report with evidence navigation, metadata filtering,
+      bounded timelines, payload omission, and offline browser verification. See
+      [HTML reports](docs/html-reports.md).
 - Reduce selected lifecycle failures while preserving their original cause and
   required context.
 - Compare adapter upgrades using explicit policies that preserve ownership and

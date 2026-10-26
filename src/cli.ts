@@ -1,5 +1,12 @@
 #!/usr/bin/env node
-import { Command, CommanderError, Option } from "commander";
+import {
+  Command,
+  CommanderError,
+  Option,
+  InvalidArgumentError,
+} from "commander";
+import { writeFile } from "node:fs/promises";
+import { formatHtmlReport } from "./html-report";
 import { readInput } from "./read-input";
 import { runSuite, formatSuite, suiteFailure } from "./suite";
 import {
@@ -114,6 +121,90 @@ program
       const result = await runSuite(patterns, options);
       console.log(formatSuite(result, options.format));
       process.exitCode = result.exitCode;
+    },
+  );
+program
+  .command("report")
+  .allowExcessArguments(false)
+  .argument("<file>", "trace file, or - for stdin")
+  .requiredOption(
+    "--output <file>",
+    "new HTML file (existing files are not overwritten)",
+  )
+  .addOption(
+    new Option("--input <format>", "input encoding")
+      .choices(["auto", "ndjson", "json", "sse"])
+      .default("auto"),
+  )
+  .option("--allow-partial", "Allow incomplete capture boundaries")
+  .option(
+    "--max-events <count>",
+    "timeline rows to render (1–10000)",
+    (value: string) => {
+      const count = Number(value);
+      if (!Number.isSafeInteger(count) || count < 1 || count > 10000)
+        throw new InvalidArgumentError(
+          "Expected an integer between 1 and 10000",
+        );
+      return count;
+    },
+    2000,
+  )
+  .action(
+    async (
+      file: string,
+      options: {
+        output: string;
+        input: InputFormat;
+        allowPartial?: boolean;
+        maxEvents: number;
+      },
+    ) => {
+      let records;
+      try {
+        records = parseTrace(await readInput(file), { format: options.input });
+      } catch (error) {
+        reportFailure(
+          error instanceof TraceInputError
+            ? {
+                ruleId: error.code,
+                severity: "error",
+                message: error.message,
+                line: error.line,
+                column: error.column,
+              }
+            : {
+                ruleId: "INPUT_READ",
+                severity: "error",
+                message: "Unable to read trace input",
+              },
+          "pretty",
+          file,
+        );
+        return;
+      }
+      try {
+        const result = lintEvents(records, options);
+        const html = formatHtmlReport(records, result, {
+          source: file,
+          allowPartial: options.allowPartial,
+          maxEvents: options.maxEvents,
+        });
+        await writeFile(options.output, html, { flag: "wx", mode: 0o600 });
+        console.log(`Report written to ${JSON.stringify(options.output)}`);
+        process.exitCode = result.valid ? 0 : 1;
+      } catch {
+        reportFailure(
+          {
+            ruleId: "REPORT_WRITE",
+            severity: "error",
+            message:
+              "Unable to create report; output must be a new writable file",
+          },
+          "pretty",
+          file,
+        );
+      }
     },
   );
 if (process.argv.length === 2) {

@@ -19,3 +19,6 @@ export { createHttpCapture } from "./capture";
 export type { CaptureManifest, HttpCaptureOptions } from "./capture";
 
 export { parseTraceStream, lintTraceStream } from "./parse-stream";
+
+export { generateHtmlReport } from "./html-report";
+export type { HtmlReportOptions } from "./html-report";

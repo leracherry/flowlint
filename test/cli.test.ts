@@ -1,3 +1,12 @@
+import {
+  mkdtempSync,
+  readFileSync,
+  rmSync,
+  writeFileSync,
+  existsSync,
+} from "node:fs";
+import { tmpdir } from "node:os";
+import path from "node:path";
 import { execFileSync, spawnSync } from "node:child_process";
 import { beforeAll, expect, it, vi } from "vitest";
 vi.setConfig({ testTimeout: 20000 });
@@ -316,4 +325,68 @@ it("reports no glob matches and produces GitHub annotations", () => {
   expect(result.stdout).toContain(
     "::error title=FL002,file=examples/invalid.ndjson",
   );
+});
+
+it("writes HTML reports for passing and failing traces with matching exit codes", () => {
+  const directory = mkdtempSync(path.join(tmpdir(), "flowlint report "));
+  try {
+    for (const [file, status] of [
+      ["valid.ndjson", 0],
+      ["invalid.ndjson", 1],
+    ] as const) {
+      const output = path.join(directory, file + ".html");
+      const result = cli("report", "examples/" + file, "--output", output);
+      expect(result.status).toBe(status);
+      expect(readFileSync(output, "utf8")).toContain("<!doctype html>");
+    }
+  } finally {
+    rmSync(directory, { recursive: true, force: true });
+  }
+});
+it("never overwrites an existing report or its input", () => {
+  const directory = mkdtempSync(path.join(tmpdir(), "flowlint report "));
+  const output = path.join(directory, "existing.html");
+  writeFileSync(output, "keep existing");
+  try {
+    const result = cli("report", "examples/valid.ndjson", "--output", output);
+    expect(result.status).toBe(2);
+    expect(result.stdout).toContain("REPORT_WRITE");
+    expect(readFileSync(output, "utf8")).toBe("keep existing");
+  } finally {
+    rmSync(directory, { recursive: true, force: true });
+  }
+});
+it("accepts stdin and rejects malformed input without creating an artifact", () => {
+  const directory = mkdtempSync(path.join(tmpdir(), "flowlint report "));
+  try {
+    for (const [source, status] of [
+      ['{"type":"RUN_ERROR","message":"example"}', 0],
+      ['{"secret":"PRIVATE_BODY",}', 2],
+    ] as const) {
+      const output = path.join(directory, status + ".html");
+      const result = spawnSync(
+        process.execPath,
+        ["dist/cli.js", "report", "-", "--output", output],
+        { input: source, encoding: "utf8" },
+      );
+      expect(result.status).toBe(status);
+      expect(existsSync(output)).toBe(status === 0);
+      expect(result.stdout).not.toContain("PRIVATE_BODY");
+    }
+  } finally {
+    rmSync(directory, { recursive: true, force: true });
+  }
+});
+it("requires an output and validates report row limits", () => {
+  expect(cli("report", "examples/valid.ndjson").status).toBe(2);
+  expect(
+    cli(
+      "report",
+      "examples/valid.ndjson",
+      "--output",
+      "unused.html",
+      "--max-events",
+      "0",
+    ).status,
+  ).toBe(2);
 });

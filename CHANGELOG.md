@@ -4,6 +4,10 @@
 
 ### Added
 
+- Standalone HTML reports with finding/evidence links, bounded run/agent timelines,
+  metadata search, keyboard navigation, and payload omission. Includes the report
+  CLI and library API, restrictive policy hashes, and offline Chromium checks.
+
 - Incremental lint sessions with detached snapshots, explicit finish/cancel status,
   and a configurable event-count budget. Existing batch acceptance is preserved.
 - NDJSON/SSE byte-stream parsing and linting with source locations, bounded input,

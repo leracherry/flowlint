@@ -90,8 +90,10 @@ counted or processed. Discard or inspect the cancelled session; it is not comple
 the supplied array length. It does not gain a new 100,000-event restriction. The
 normal parser's byte, depth, node, and line limits still apply where documented.
 
-`parseTraceStream` retains at most the pending physical line or SSE frame, together
-with UTF-8 decoder state. It does not retain emitted events or the entire trace.
+`parseTraceStream` retains the pending physical line or SSE frame and UTF-8
+decoder state, in addition to the current source chunk and its decoded text.
+A caller can supply a large chunk; prefer ordinary bounded read sizes. The parser
+does not accumulate previously emitted events or earlier chunks.
 Pending segments are combined geometrically, avoiding an array entry for every
 one-byte chunk. SSE framing is interpreted with original physical source lines
 and columns; output records do not expose raw bytes. Use capture for raw provenance.

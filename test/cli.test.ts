@@ -390,3 +390,80 @@ it("requires an output and validates report row limits", () => {
     ).status,
   ).toBe(2);
 });
+
+it("lists and writes a verified reproducer bundle without overwriting it", () => {
+  const directory = mkdtempSync(path.join(tmpdir(), "flowlint repro "));
+  const input = path.join(directory, "trace.ndjson");
+  const output = path.join(directory, "bundle");
+  writeFileSync(
+    input,
+    [
+      { type: "RUN_STARTED", threadId: "t", runId: "r" },
+      ...Array.from({ length: 10 }, () => ({ type: "RAW", event: {} })),
+      { type: "TEXT_MESSAGE_START", messageId: "m" },
+      { type: "TEXT_MESSAGE_START", messageId: "m" },
+      { type: "TEXT_MESSAGE_END", messageId: "m" },
+      { type: "RUN_FINISHED", threadId: "t", runId: "r" },
+    ]
+      .map((e) => JSON.stringify(e))
+      .join("\n"),
+  );
+  try {
+    const listed = cli("minimize", input, "--list");
+    expect(listed.status).toBe(0);
+    const id = listed.stdout.match(/repro-v1:[a-f0-9]+/)![0];
+    const result = cli(
+      "minimize",
+      input,
+      "--finding",
+      id,
+      "--output",
+      output,
+      "--progress",
+    );
+    expect(result.status).toBe(0);
+    expect(result.stderr).toContain("checks");
+    const manifest = JSON.parse(
+      readFileSync(path.join(output, "manifest.json"), "utf8"),
+    );
+    expect(manifest.schemaVersion).toBe(1);
+    expect(manifest.changed).toBe(true);
+    expect(manifest.ndjson).toBeUndefined();
+    expect(manifest.finding.id).toBe(id);
+    expect(
+      manifest.validation.diagnostics.map((d: { ruleId: string }) => d.ruleId),
+    ).toEqual(["FL008"]);
+    expect(cli("check", path.join(output, "repro.ndjson")).status).toBe(1);
+    expect(readFileSync(path.join(output, "issue.md"), "utf8")).toContain(
+      "not a globally minimal example or a redacted trace",
+    );
+    expect(
+      cli("minimize", input, "--finding", id, "--output", output).status,
+    ).toBe(2);
+    expect(
+      JSON.parse(readFileSync(path.join(output, "manifest.json"), "utf8")),
+    ).toEqual(manifest);
+  } finally {
+    rmSync(directory, { recursive: true, force: true });
+  }
+});
+it("rejects missing minimize options, unknown IDs, and malformed input", () => {
+  expect(cli("minimize", "examples/valid.ndjson").status).toBe(2);
+  expect(
+    cli("minimize", "examples/valid.ndjson", "--list", "--output", "unused")
+      .status,
+  ).toBe(2);
+  expect(
+    cli(
+      "minimize",
+      "examples/invalid.ndjson",
+      "--finding",
+      "unknown",
+      "--output",
+      "unused",
+    ).status,
+  ).toBe(2);
+  expect(cli("minimize", "examples/valid.ndjson", "--list").stdout).toContain(
+    "No findings",
+  );
+});

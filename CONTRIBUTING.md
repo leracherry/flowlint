@@ -41,3 +41,8 @@ When changing HTML reports, run `pnpm exec playwright install chromium` and
 `pnpm test:html` to check the real browser behavior, restrictive policy, keyboard
 navigation, offline use, and large-trace rendering. Unit tests also verify
 payload omission and artifact limits. The separate HTML CI job runs Chromium.
+
+Reproducer changes must preserve the selected original event, reason, severity,
+related evidence, and dependency context. Verify retained values and serialized
+output against the original mapping; do not accept a different error with the same
+rule ID. Check budget/cancellation outcomes and keep unsupported cases explicit.

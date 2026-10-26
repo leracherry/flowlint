@@ -117,9 +117,32 @@ try {
   ]);
   assert.equal(report.status, 0, report.stderr || report.stdout);
   assert(readFileSync(reportPath, "utf8").startsWith("<!doctype html>"));
+  const listed = run([
+    "minimize",
+    join(root, "examples/invalid.ndjson"),
+    "--list",
+  ]);
+  assert.equal(listed.status, 0, listed.stderr || listed.stdout);
+  const findingId = listed.stdout.match(/repro-v1:[a-f0-9]+/)?.[0];
+  assert(findingId);
+  const reproDirectory = join(consumer, "reproducer bundle");
+  const minimized = run([
+    "minimize",
+    join(root, "examples/invalid.ndjson"),
+    "--finding",
+    findingId,
+    "--output",
+    reproDirectory,
+  ]);
+  assert.equal(minimized.status, 0, minimized.stderr || minimized.stdout);
+  assert.equal(
+    JSON.parse(readFileSync(join(reproDirectory, "manifest.json"), "utf8"))
+      .finding.id,
+    findingId,
+  );
   writeFileSync(
     join(consumer, "consumer.mts"),
-    `import { lintEvents, parseTrace, formatJson, formatPretty, RULES, SUPPORTED_RULES, createHttpCapture, createLintSession, parseTraceStream, lintTraceStream, generateHtmlReport, type DiagnosticLocation, type LintResult } from '${pkg.name}';\nconst result: LintResult = lintEvents(parseTrace('[{"type":"RUN_ERROR","message":"example"}]'));\nif (!result.valid || !formatJson(result) || !formatPretty(result, '-')) throw new Error('Invalid library result');\nconst first: 'FL001' = SUPPORTED_RULES[0];\nconst location: DiagnosticLocation = { eventIndex: 0, line: 1, column: 1 };\nif (RULES[0].id !== first || location.eventIndex !== 0) throw new Error('Invalid metadata');\nconst capture = createHttpCapture({ directory: '.', producer: { name: 'verification', version: '1' }, fetch: async () => new Response('not SSE') });\nawait capture.fetch('https://example.com');\nif ((await capture.flush())[0]?.outcome !== 'skipped') throw new Error('Invalid capture export');\nconst session = createLintSession();\nasync function* chunks() { yield new TextEncoder().encode(JSON.stringify({ type: 'RUN_ERROR', message: 'example' }) + String.fromCharCode(10)); }\nfor await (const record of parseTraceStream(chunks())) session.push(record);\nif (!session.finish().valid || !(await lintTraceStream(chunks())).valid) throw new Error('Invalid session export');\nif (!generateHtmlReport(parseTrace('[{\"type\":\"RUN_ERROR\",\"message\":\"example\"}]')).startsWith('<!doctype html>')) throw new Error('Invalid HTML export');\n`,
+    `import { lintEvents, parseTrace, formatJson, formatPretty, RULES, SUPPORTED_RULES, createHttpCapture, createLintSession, parseTraceStream, lintTraceStream, generateHtmlReport, getReproFindings, minimizeTrace, type DiagnosticLocation, type LintResult } from '${pkg.name}';\nconst result: LintResult = lintEvents(parseTrace('[{"type":"RUN_ERROR","message":"example"}]'));\nif (!result.valid || !formatJson(result) || !formatPretty(result, '-')) throw new Error('Invalid library result');\nconst first: 'FL001' = SUPPORTED_RULES[0];\nconst location: DiagnosticLocation = { eventIndex: 0, line: 1, column: 1 };\nif (RULES[0].id !== first || location.eventIndex !== 0) throw new Error('Invalid metadata');\nconst capture = createHttpCapture({ directory: '.', producer: { name: 'verification', version: '1' }, fetch: async () => new Response('not SSE') });\nawait capture.fetch('https://example.com');\nif ((await capture.flush())[0]?.outcome !== 'skipped') throw new Error('Invalid capture export');\nconst session = createLintSession();\nasync function* chunks() { yield new TextEncoder().encode(JSON.stringify({ type: 'RUN_ERROR', message: 'example' }) + String.fromCharCode(10)); }\nfor await (const record of parseTraceStream(chunks())) session.push(record);\nif (!session.finish().valid || !(await lintTraceStream(chunks())).valid) throw new Error('Invalid session export');\nif (!generateHtmlReport(parseTrace('[{\"type\":\"RUN_ERROR\",\"message\":\"example\"}]')).startsWith('<!doctype html>')) throw new Error('Invalid HTML export');\nconst reproRecords = parseTrace(JSON.stringify([{ type: 'RUN_STARTED', threadId: 't', runId: 'r' }, { type: 'TEXT_MESSAGE_END', messageId: 'm' }, { type: 'RUN_FINISHED', threadId: 't', runId: 'r' }]));\nconst candidate = getReproFindings(reproRecords).find(f => f.supported)!;\nconst repro = await minimizeTrace(reproRecords, { findingId: candidate.id });\nif (!repro.validation.diagnostics.some(d => d.ruleId === 'FL002')) throw new Error('Invalid reproducer export');\n`,
   );
   execFileSync(
     process.execPath,

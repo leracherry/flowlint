@@ -5,6 +5,8 @@ import {
   Option,
   InvalidArgumentError,
 } from "commander";
+import { getReproFindings, minimizeTrace } from "./reproduce";
+import { writeReproArtifacts } from "./repro-artifacts";
 import { writeFile } from "node:fs/promises";
 import { formatHtmlReport } from "./html-report";
 import { readInput } from "./read-input";
@@ -204,6 +206,120 @@ program
           "pretty",
           file,
         );
+      }
+    },
+  );
+program
+  .command("minimize")
+  .allowExcessArguments(false)
+  .argument("<file>", "trace file, or - for stdin")
+  .option("--list", "list finding IDs and reduction eligibility")
+  .option("--finding <id>", "finding ID from --list")
+  .option("--output <directory>", "new output directory (parent must exist)")
+  .option(
+    "--allow-partial",
+    "Use the same partial capture mode when listing and reducing",
+  )
+  .option("--progress", "write candidate progress to stderr")
+  .option("--max-checks <count>", "candidate check budget (1–10000)", "200")
+  .option(
+    "--max-duration-ms <count>",
+    "cooperative time budget (1–60000 ms)",
+    "5000",
+  )
+  .action(
+    async (
+      file: string,
+      options: {
+        list?: boolean;
+        finding?: string;
+        output?: string;
+        allowPartial?: boolean;
+        progress?: boolean;
+        maxChecks: string;
+        maxDurationMs: string;
+      },
+    ) => {
+      if (
+        (options.list && (options.finding || options.output)) ||
+        (!options.list && (!options.finding || !options.output))
+      ) {
+        reportFailure(
+          {
+            ruleId: "CLI_USAGE",
+            severity: "error",
+            message:
+              "Use --list alone, or provide both --finding and a new --output directory",
+          },
+          "pretty",
+          file,
+        );
+        return;
+      }
+      const controller = new AbortController();
+      const interrupt = () => controller.abort();
+      try {
+        const records = parseTrace(await readInput(file));
+        if (options.list) {
+          const findings = getReproFindings(records, options);
+          console.log(
+            findings.length
+              ? findings
+                  .map(
+                    (f) =>
+                      `${f.id}  ${f.diagnostic.ruleId} at event ${f.diagnostic.eventIndex ?? "?"}  ${f.supported ? "eligible" : f.reason}`,
+                  )
+                  .join("\n")
+              : "No findings",
+          );
+          return;
+        }
+        process.once("SIGINT", interrupt);
+        const result = await minimizeTrace(records, {
+          findingId: options.finding!,
+          allowPartial: options.allowPartial,
+          maxChecks: Number(options.maxChecks),
+          maxDurationMs: Number(options.maxDurationMs),
+          signal: controller.signal,
+          onProgress: options.progress
+            ? (p) =>
+                console.error(
+                  `${p.checks} checks; ${p.retainedEvents} events retained; ${p.elapsedMs} ms`,
+                )
+            : undefined,
+        });
+        process.removeListener("SIGINT", interrupt);
+        await writeReproArtifacts(result, options.output!);
+        if (!result.finding.supported) console.error(result.finding.reason);
+        console.log(
+          `${result.stats.retainedEvents}/${result.stats.originalEvents} events retained; ${result.stats.checks} checks; ${result.stats.elapsedMs} ms; ${result.stopReason}. Bundle written to ${JSON.stringify(options.output)}`,
+        );
+        process.exitCode =
+          result.stopReason === "cancelled"
+            ? 130
+            : result.stopReason === "unsupported"
+              ? 2
+              : 0;
+      } catch (error) {
+        reportFailure(
+          {
+            ruleId:
+              error instanceof TraceInputError
+                ? error.code
+                : error instanceof RangeError
+                  ? "REPRO_BUDGET"
+                  : "REPRO_FAILURE",
+            severity: "error",
+            message:
+              error instanceof TraceInputError || error instanceof RangeError
+                ? error.message
+                : "Unable to create reproducer; output must be a new directory with an existing writable parent",
+          },
+          "pretty",
+          file,
+        );
+      } finally {
+        process.removeListener("SIGINT", interrupt);
       }
     },
   );

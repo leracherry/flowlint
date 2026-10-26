@@ -22,3 +22,11 @@ export { parseTraceStream, lintTraceStream } from "./parse-stream";
 
 export { generateHtmlReport } from "./html-report";
 export type { HtmlReportOptions } from "./html-report";
+
+export { getReproFindings, minimizeTrace } from "./reproduce";
+export type {
+  ReproFinding,
+  ReproProgress,
+  ReproOptions,
+  Reproducer,
+} from "./reproduce";

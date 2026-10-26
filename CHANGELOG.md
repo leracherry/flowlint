@@ -4,6 +4,12 @@
 
 ### Added
 
+- Incremental lint sessions with detached snapshots, explicit finish/cancel status,
+  and a configurable event-count budget. Existing batch acceptance is preserved.
+- NDJSON/SSE byte-stream parsing and linting with source locations, bounded input,
+  source cleanup, and split UTF-8/line-ending handling.
+- Streaming stress checks for raw events, retained history, patches, and subagents.
+
 - Node HttpAgent SSE capture with bounded retention, provenance manifests, explicit
   outcomes, and a runnable integration example. Capture errors remain separate from
   application results; original request metadata is not recorded.

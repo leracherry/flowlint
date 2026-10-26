@@ -6,19 +6,44 @@ import { StatePatches } from "./state-patches";
 import { Attribution } from "./attribution";
 import { ChunkNormalizer } from "./normalize-chunks";
 import { createState, createItemState } from "./state";
-import type { Diagnostic, LintOptions, LintResult, SourceEvent } from "./types";
+import type {
+  Diagnostic,
+  LintOptions,
+  LintResult,
+  SourceEvent,
+  LintSession,
+  LintSessionOptions,
+} from "./types";
 import { SUPPORTED_RULES } from "./rules";
+import { TraceInputError } from "./parse";
 const MAX_DIAGNOSTICS = 1000;
 export { SUPPORTED_RULES } from "./rules";
 export function lintEvents(
   records: readonly SourceEvent[],
   options: LintOptions = {},
 ): LintResult {
+  const session = createLintSession({
+    ...options,
+    maxEvents: Math.max(1, records.length),
+  });
+  for (const record of records) session.push(record);
+  return session.finish();
+}
+
+export function createLintSession(
+  options: LintSessionOptions = {},
+): LintSession {
+  options = { ...options };
+  const maxEvents = options.maxEvents ?? 100_000;
+  if (!Number.isSafeInteger(maxEvents) || maxEvents < 1)
+    throw new RangeError("Session maxEvents must be a positive safe integer");
   if (options.protocol && options.protocol !== "ag-ui/1.0")
     throw new Error("Unsupported protocol");
   const diagnostics: Diagnostic[] = [];
   const state = createState();
   let capped = false;
+  let checkedEvents = 0;
+  let status: LintSession["status"] = "active";
   let lastValid: SourceEvent | undefined;
   const emit = (
     record: SourceEvent,
@@ -99,14 +124,26 @@ export function lintEvents(
       }
     }
   };
-  for (const record of records) {
+  const push = (record: SourceEvent) => {
+    if (status !== "active")
+      throw new Error("Cannot push to a closed lint session");
+    if (checkedEvents >= maxEvents) {
+      status = "cancelled";
+      throw new TraceInputError(
+        "LIMIT_SESSION",
+        "Lint session event limit reached",
+        record.line,
+        record.column,
+      );
+    }
+    checkedEvents++;
     if (!eventWithinLimits(record.event)) {
       emit(
         record,
         "LIMIT_EVENT",
         "Event exceeds the nesting/node limit or contains a cycle; event skipped",
       );
-      continue;
+      return;
     }
     const raw = record.event;
     if (
@@ -126,7 +163,7 @@ export function lintEvents(
           "Unrecognized encrypted artifact subtype; event skipped",
           "warning",
         );
-        continue;
+        return;
       }
     }
     const parsed = EventSchemas.safeParse(record.event);
@@ -136,14 +173,19 @@ export function lintEvents(
         "SCHEMA_EVENT",
         "Event does not match the pinned AG-UI 1.0 schema",
       );
-      continue;
+      return;
     }
-    lastValid = record;
+    lastValid = {
+      event: undefined,
+      eventIndex: record.eventIndex,
+      line: record.line,
+      column: record.column,
+    };
     const original = parsed.data;
     // Reject invalid run transitions before they mutate attribution/chunk state.
     if (original.type === "RUN_STARTED" && state.status === "active") {
       emit(record, "FL006", "RUN_STARTED while a run is active");
-      continue;
+      return;
     }
     if (
       original.type === "RUN_FINISHED" &&
@@ -156,7 +198,7 @@ export function lintEvents(
         "RUN_IDENTITY",
         "RUN_FINISHED identifiers do not match the active run",
       );
-      continue;
+      return;
     }
     if (
       (state.status === "finished" || state.status === "errored") &&
@@ -168,7 +210,7 @@ export function lintEvents(
         "RUN_TRANSITION",
         `${original.type} arrives after the run closed`,
       );
-      continue;
+      return;
     }
     if (original.type === "RUN_STARTED" || original.type === "RUN_ERROR") {
       normalizer = new ChunkNormalizer(emit);
@@ -197,9 +239,9 @@ export function lintEvents(
       (owner === undefined ||
         (!state.subagents.has(owner) && !state.closedSubagents.has(owner)));
     const activity = activityPatches.observe(original, record);
-    if (!activity) continue;
+    if (!activity) return;
     const resolved = attribution.resolve(activity, record, allowUnseenStep);
-    if (!resolved) continue;
+    if (!resolved) return;
     if (
       "subagentRunId" in resolved &&
       typeof resolved.subagentRunId === "string" &&
@@ -477,38 +519,59 @@ export function lintEvents(
           break;
       }
     }
-  }
-  if (
-    lastValid &&
-    (state.status === "active" ||
-      state.status === "excerpt" ||
-      state.messages.open.size ||
-      state.tools.open.size ||
-      state.subagents.size)
-  ) {
-    emit(
-      lastValid,
-      "FL012",
-      "Capture ends without a run terminal event or with open items",
-      options.allowPartial ? "warning" : "error",
+  };
+  const finish = () => {
+    if (status !== "active") return snapshot();
+    status = "finished";
+
+    if (
+      lastValid &&
+      (state.status === "active" ||
+        state.status === "excerpt" ||
+        state.messages.open.size ||
+        state.tools.open.size ||
+        state.subagents.size)
+    ) {
+      emit(
+        lastValid,
+        "FL012",
+        "Capture ends without a run terminal event or with open items",
+        options.allowPartial ? "warning" : "error",
+      );
+    }
+    return snapshot();
+  };
+  const snapshot = (): LintResult => {
+    const findings = structuredClone(diagnostics);
+    if (capped)
+      findings.push({
+        ruleId: "LIMIT_DIAGNOSTICS",
+        severity: "error",
+        message: "Diagnostic limit reached; additional findings omitted",
+      });
+    findings.sort(
+      (a, b) =>
+        (a.eventIndex ?? checkedEvents) - (b.eventIndex ?? checkedEvents) ||
+        (a.ruleId < b.ruleId ? -1 : a.ruleId > b.ruleId ? 1 : 0),
     );
-  }
-  if (capped)
-    diagnostics.push({
-      ruleId: "LIMIT_DIAGNOSTICS",
-      severity: "error",
-      message: "Diagnostic limit reached; additional findings omitted",
-    });
-  diagnostics.sort(
-    (a, b) =>
-      (a.eventIndex ?? records.length) - (b.eventIndex ?? records.length) ||
-      (a.ruleId < b.ruleId ? -1 : a.ruleId > b.ruleId ? 1 : 0),
-  );
+    return {
+      valid: !findings.some((d) => d.severity === "error"),
+      protocol: "ag-ui/1.0",
+      checkedEvents,
+      supportedRules: [...SUPPORTED_RULES],
+      diagnostics: findings,
+    };
+  };
   return {
-    valid: !diagnostics.some((d) => d.severity === "error"),
-    protocol: "ag-ui/1.0",
-    checkedEvents: records.length,
-    supportedRules: [...SUPPORTED_RULES],
-    diagnostics,
+    get status() {
+      return status;
+    },
+    push,
+    snapshot,
+    finish,
+    cancel() {
+      if (status === "active") status = "cancelled";
+      return snapshot();
+    },
   };
 }

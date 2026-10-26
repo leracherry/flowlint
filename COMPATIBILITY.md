@@ -68,8 +68,9 @@ transport parsing correction, uses the breaking-change version rule above.
 
 The public library surface is the package-root ESM exports and their shipped
 TypeScript declarations: `lintEvents`, `parseTrace`, `formatJson`, `formatPretty`,
-`TraceInputError`, `MAX_INPUT_BYTES`, `SUPPORTED_RULES`, `RULES`, `createHttpCapture`, and the exported types
-`Diagnostic`, `DiagnosticLocation`, `InputFormat`, `LintOptions`, `LintResult`, `SourceEvent`, `CaptureManifest`, and `HttpCaptureOptions`.
+`TraceInputError`, `MAX_INPUT_BYTES`, `SUPPORTED_RULES`, `RULES`, `createHttpCapture`, `createLintSession`, `parseTraceStream`,
+`lintTraceStream`, and the exported types
+`Diagnostic`, `DiagnosticLocation`, `InputFormat`, `LintOptions`, `LintResult`, `SourceEvent`, `CaptureManifest`, `HttpCaptureOptions`, `LintSession`, and `LintSessionOptions`.
 Deep imports, source modules, internal classes, build filenames, and source maps
 are not supported APIs. CommonJS and browser runtimes are not currently promised.
 
@@ -145,3 +146,12 @@ are documented in the [capture guide](https://github.com/leracherry/flowlint/blo
 The manifest SHA-256 describes stored response-body bytes, not complete network
 traffic. Treat additional optional fields as compatible and do not assume a
 complete capture is protocol-valid. Skipped captures do not have persisted files.
+
+## Incremental validation
+
+The additive session and byte-stream APIs are described in the
+[incremental guide](https://github.com/leracherry/flowlint/blob/main/docs/incremental.md).
+Snapshots are provisional. Only explicit finalization after a clean source EOF
+adds capture-boundary checks. New streaming/session limits do not change existing
+batch acceptance. Streaming errors are reported on arrival, so inputs with several
+different errors may have a different first failure than whole-input parsing.

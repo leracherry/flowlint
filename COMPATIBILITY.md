@@ -48,6 +48,8 @@ The `flowlint` executable and documented commands/options in
 - `--format pretty|json`, defaulting to `pretty`.
 - `--allow-partial`, with complete-capture checking as the default.
 - `--help` and `--version`.
+- `minimize <file> --list`, or `--finding <id> --output <new-directory>`, with
+  `--allow-partial`, `--progress`, `--max-checks`, and `--max-duration-ms`.
 - `report <file> --output <file>` with `--input`, `--allow-partial`, and
   `--max-events` (default 2000; 1–10000). Existing output files are not overwritten.
 - `suite <patterns...>` with `--input`, `--allow-partial`, and
@@ -71,8 +73,10 @@ transport parsing correction, uses the breaking-change version rule above.
 The public library surface is the package-root ESM exports and their shipped
 TypeScript declarations: `lintEvents`, `parseTrace`, `formatJson`, `formatPretty`,
 `TraceInputError`, `MAX_INPUT_BYTES`, `SUPPORTED_RULES`, `RULES`, `createHttpCapture`, `createLintSession`, `parseTraceStream`,
-`lintTraceStream`, `generateHtmlReport`, and the exported types
-`Diagnostic`, `DiagnosticLocation`, `InputFormat`, `LintOptions`, `LintResult`, `SourceEvent`, `CaptureManifest`, `HttpCaptureOptions`, `LintSession`, `LintSessionOptions`, and `HtmlReportOptions`.
+`lintTraceStream`, `generateHtmlReport`, `getReproFindings`, `minimizeTrace`,
+and the exported types
+`Diagnostic`, `DiagnosticLocation`, `InputFormat`, `LintOptions`, `LintResult`, `SourceEvent`, `CaptureManifest`, `HttpCaptureOptions`, `LintSession`, `LintSessionOptions`, `HtmlReportOptions`, `ReproFinding`, `ReproProgress`,
+`ReproOptions`, and `Reproducer`.
 Deep imports, source modules, internal classes, build filenames, and source maps
 are not supported APIs. CommonJS and browser runtimes are not currently promised.
 
@@ -166,3 +170,14 @@ The CLI preserves check exit meanings: lint errors can produce a report with exi
 1, while input/output failures use 2. Payload fields are omitted; metadata and
 diagnostic messages remain visible. HTML styling and DOM structure are not stable
 automation interfaces. Use JSON diagnostics for machine-readable integrations.
+
+## Reproducer artifacts
+
+The additive minimizer uses the separate CLI exit meanings documented in the
+[reproducer guide](https://github.com/leracherry/flowlint/blob/main/docs/reproducers.md).
+Creating a verified bundle can exit 0 even though its trace intentionally has lint
+findings. The manifest and fingerprint formats are versioned independently.
+Fingerprints bind the input and diagnostic semantics of the producing version;
+they are not guaranteed to remain equal across changes to validation or wording.
+No existing check/suite/report exit meaning changes. Additional optional manifest
+fields are compatible; ignore unknown fields.

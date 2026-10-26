@@ -85,6 +85,20 @@ the trace, while raw payload fields are omitted. See
 [HTML reports](https://github.com/leracherry/flowlint/blob/main/docs/html-reports.md)
 for limits, privacy boundaries, and CI artifacts. This feature is unreleased.
 
+## Reduce a failing trace
+
+On main, list eligible findings and create a verified event-deletion reproducer:
+
+```sh
+node dist/cli.js minimize trace.ndjson --list
+node dist/cli.js minimize trace.ndjson --finding <id-from-list> --output ./repro-bundle
+```
+
+The bundle includes retained events, source mapping, verification, and an issue
+attachment. Retained payloads are not redacted. See
+[reproducers](https://github.com/leracherry/flowlint/blob/main/docs/reproducers.md)
+for supported rules, budgets, and fidelity limits. This feature is unreleased.
+
 ## What it checks
 
 - Event shapes against the official AG-UI schemas.

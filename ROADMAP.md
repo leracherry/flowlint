@@ -40,8 +40,10 @@ remain outstanding.
 - [x] Generate a local HTML report with evidence navigation, metadata filtering,
       bounded timelines, payload omission, and offline browser verification. See
       [HTML reports](docs/html-reports.md).
-- Reduce selected lifecycle failures while preserving their original cause and
-  required context.
+- [x] Reduce selected explicit lifecycle/reopening failures with pinned context,
+      verified finding identity, source mappings, budgets, and reviewed artifact
+      bundles. Chunk/patch/encrypted-history reduction remains unsupported. See
+      [reproducers](docs/reproducers.md).
 - Compare adapter upgrades using explicit policies that preserve ownership and
   meaningful ordering, reporting ambiguity rather than assuming equivalence.
 

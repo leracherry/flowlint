@@ -4,6 +4,10 @@
 
 ### Added
 
+- Conservative lifecycle/reopening reproducer generation with versioned finding
+  identities, pinned context, no-new-diagnostic verification, cooperative budgets,
+  progress/cancellation, source mappings, and a human-reviewable artifact bundle.
+
 - Standalone HTML reports with finding/evidence links, bounded run/agent timelines,
   metadata search, keyboard navigation, and payload omission. Includes the report
   CLI and library API, restrictive policy hashes, and offline Chromium checks.

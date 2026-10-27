@@ -494,10 +494,9 @@ flowlint suite "traces/**/*.{json,ndjson,sse}" --format github
 flowlint suite "traces/**/*.ndjson" --format markdown >> "$GITHUB_STEP_SUMMARY"
 ```
 
-This command is unreleased on main; the published 1.0.0 package does not include
-it. Build the repository to try `node dist/cli.js suite ...`. Once released,
-install an exact package version and commit your lockfile before using `npm ci`
-and `npx --no-install flowlint suite ...` in a consumer project's CI.
+Available in 1.1.0 and later. Install an exact package version and commit your
+lockfile before using `npm ci` and `npx --no-install flowlint suite ...` in a
+consumer project's CI.
 
 Quote globs so matching is consistent across shells. Literal files are tried
 first, including names with brackets. Globs support `*`, `**`, and braces; use

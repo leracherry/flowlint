@@ -1,14 +1,12 @@
 # Local HTML reports
 
-The report command and `generateHtmlReport` API are unreleased on main. Build a
-checkout to try them; the published 1.0.0 package does not include this feature.
+The report command and `generateHtmlReport` API are available from 1.1.0.
 
 ```sh
-pnpm install --frozen-lockfile
-pnpm build
-node dist/cli.js report trace.ndjson --output report.html
-node dist/cli.js report stream.sse --output stream-report.html --allow-partial
-node dist/cli.js report trace.json --output small-report.html --max-events 500
+npm install --save-dev --save-exact @leracherry/flowlint@1.1.0
+npx flowlint report trace.ndjson --output report.html
+npx flowlint report stream.sse --output stream-report.html --allow-partial
+npx flowlint report trace.json --output small-report.html --max-events 500
 ```
 
 Open the generated HTML file directly in your browser. It contains its own styles

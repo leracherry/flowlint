@@ -9,7 +9,7 @@ to their source locations. No agent runtime or model calls are required.
 Requires Node.js 22+. Tested on Linux, macOS, and Windows.
 
 ```sh
-npm install --save-dev --save-exact @leracherry/flowlint@1.0.0
+npm install --save-dev --save-exact @leracherry/flowlint@1.1.0
 npx flowlint check trace.ndjson
 ```
 
@@ -32,7 +32,7 @@ The [90-second walkthrough](https://github.com/leracherry/flowlint/blob/main/doc
 shows diagnosis, evidence, a reduced reproducer, and a regression check:
 
 ```sh
-git clone https://github.com/leracherry/flowlint.git
+git clone --branch v1.1.0 https://github.com/leracherry/flowlint.git
 cd flowlint
 pnpm install --frozen-lockfile
 pnpm demo
@@ -44,8 +44,7 @@ verified in CI; it does not claim an upstream fix or independent adoption.
 
 ## From a trace to a regression check
 
-The published **1.0.0** package provides `check` and the batch TypeScript API.
-The following capabilities are implemented on main and **not yet published**:
+**1.1.0** includes the checker, batch TypeScript API, and these opt-in workflows:
 
 | Task                                                   | Guide                                                                                          |
 | ------------------------------------------------------ | ---------------------------------------------------------------------------------------------- |
@@ -56,9 +55,9 @@ The following capabilities are implemented on main and **not yet published**:
 | Reduce a selected failure while retaining its evidence | [Reproducers](https://github.com/leracherry/flowlint/blob/main/docs/reproducers.md)            |
 | Compare adapter recordings with explicit uncertainty   | [Comparison](https://github.com/leracherry/flowlint/blob/main/docs/comparison.md)              |
 
-These commands have their own documented exit meanings and coverage limits. Build
-a source checkout to try them. Record the exact commit when evaluating unreleased
-features. See [first integration and adoption evidence](https://github.com/leracherry/flowlint/blob/main/docs/adoption.md).
+These commands have their own documented exit meanings and coverage limits.
+Install an exact version and commit your lockfile for reproducible CI. The demo
+and maintenance scripts require a repository checkout. See [first integration and adoption evidence](https://github.com/leracherry/flowlint/blob/main/docs/adoption.md).
 
 ## Coverage
 

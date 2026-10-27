@@ -1,14 +1,12 @@
 # Faithful reproducer generation
 
-The minimizer is unreleased on main. Build a checkout to try it; the published
-1.0.0 package does not include it.
+The minimizer is available from 1.1.0.
 
 ```sh
-pnpm install --frozen-lockfile
-pnpm build
-node dist/cli.js minimize trace.ndjson --list
-node dist/cli.js minimize trace.ndjson --finding <id-from-list> --output ./repro-bundle
-node dist/cli.js check ./repro-bundle/repro.ndjson
+npm install --save-dev --save-exact @leracherry/flowlint@1.1.0
+npx flowlint minimize trace.ndjson --list
+npx flowlint minimize trace.ndjson --finding <id-from-list> --output ./repro-bundle
+npx flowlint check ./repro-bundle/repro.ndjson
 ```
 
 Replace `<id-from-list>` with the complete `repro-v1:` identifier printed by the

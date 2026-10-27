@@ -5,15 +5,22 @@ of an adapter, model, consumer, or complete application.
 
 ## Reproducible baseline
 
-The 1.0 source revision `08ed308c82ae9a5b7319d52efe6bbbdc327d592a` passed 475 tests
-across 13 files in a local Node 24.22.1 check on October 24, 2026. Type checking,
-building, and the existing stress script also passed. These local observations do
-not substitute for the repository's Node 22/24 operating-system CI matrix.
+The pinned corpus has 19 journeys and 918 events, with exact fixture hashes and
+four expected reopening findings. Required CI replays it offline on Node 22/24
+across Linux, macOS, and Windows. This is recorded integration-test evidence,
+not a production-load or adapter certification claim.
 
-The stress script checks 25,002 events in each input format under a subprocess
-heap ceiling and timeout. Its RAW-event workload is not a benchmark of patch
-history, many retained entities, or arbitrary concurrent scheduling. Reported
-heap is end-of-run usage, not peak memory.
+Before this maintenance milestone, main at
+`f682fab6fd6bcde18ccec6e96e0d86aff9d9ff63` passed 698 tests and seven CI jobs.
+Current counts are reported by CI rather than treated as a coverage percentage.
+Batch, streaming, and comparison stress checks use isolated subprocess budgets;
+streaming workers also report peak RSS. These measurements are workload-specific.
+
+The separate [producer compatibility workflow](maintenance.md) watches pinned
+source paths at a newly resolved immutable upstream revision. It reports source,
+journey, and diagnostic changes without updating fixtures or executing upstream
+code. Network/parser failures leave coverage unavailable. It does not discover
+new producer paths or run live adapters.
 
 ## Evidence matrix
 
@@ -38,6 +45,18 @@ All tests are in [test/](../test/). Recorded inputs and exact finding expectatio
 are unchanged by the evidence feature; diagnostics now also identify the event
 that established the conflicting attributes.
 
+## Feature evidence
+
+| Capability           | Automated evidence                                                                     | External gap                             |
+| -------------------- | -------------------------------------------------------------------------------------- | ---------------------------------------- |
+| Diagnostic evidence  | Exact source/related coordinates and pinned recorded findings                          | Independent interpretation review        |
+| Capture              | Controlled HttpAgent SSE, cancellation, limits, provenance                             | Real application overhead and onboarding |
+| Incremental checks   | Batch equivalence, byte partitions, cancellation, stress                               | Production load patterns                 |
+| Local HTML reports   | Offline Chromium navigation, filtering, CSP, payload omission                          | Observed maintainer debugging tasks      |
+| Reproducers          | Selected-finding fidelity, retained values, no new errors, recorded snapshot case      | Maintainer use of a shared reproducer    |
+| Comparison           | Renaming/rechunking, ownership/state changes, explicit uncertainty, derived recordings | A real external before/after upgrade     |
+| Demo and maintenance | Exact recorded finding/counterfactual assertions, offline watcher regressions          | External retained CI usage               |
+
 ## Producer findings
 
 The corpus includes 19 journeys and 918 events. Two DeepAgents resume journeys
@@ -55,5 +74,6 @@ acknowledgement or demonstrated production outage.
 - Add licensed recordings for missing event families with exact source provenance.
 - Evaluate onboarding time and retained external CI usage.
 
+See the [case study](case-study-deepagents.md) and [adoption ledger](adoption.md).
 No interviews or external adoption are claimed by this baseline. Do not change
 recorded fixtures or loosen expectations just to make the corpus pass.

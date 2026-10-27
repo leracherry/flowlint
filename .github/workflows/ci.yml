@@ -25,6 +25,8 @@ jobs:
       - run: pnpm check
       - run: pnpm stress
       - run: pnpm verify:package
+      - name: Verify the recorded-evidence demo
+        run: node scripts/demo.mjs
       - run: node dist/cli.js check examples/valid.ndjson
       - name: Verify lint findings fail CI with exit code 1
         shell: bash

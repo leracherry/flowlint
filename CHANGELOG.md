@@ -4,6 +4,12 @@
 
 ### Added
 
+- A verified recorded-evidence demo, DeepAgents case study, first-integration guide,
+  explicit adoption ledger, and clearer published-versus-main onboarding.
+- Read-only weekly producer compatibility reports with immutable source revisions,
+  bounded downloads, data-only replay, coverage gaps, and reviewable drift results.
+- Finding/integration issue forms and documented triage categories.
+
 - Versioned adapter-upgrade trace comparison with scoped identity mapping, adjacent
   chunk normalization, ownership checks, final shared-state digests, bounded source
   diffs, and explicit incomparable outcomes. Includes CLI and TypeScript APIs.

@@ -33,6 +33,7 @@
   ],
   "scripts": {
     "build": "tsup",
+    "demo": "pnpm build && node scripts/demo.mjs",
     "lint": "eslint . && prettier --check .",
     "format": "prettier --write .",
     "typecheck": "tsc --noEmit",

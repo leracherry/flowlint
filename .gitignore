@@ -3,3 +3,5 @@ dist/
 coverage/
 *.tgz
 release/
+demo-output/
+producer-check/

@@ -55,3 +55,11 @@ recordings must remain clearly identified and leave original fixture bytes intac
 
 Comparison stress workers cover concurrent entity mapping, many thread outcomes,
 and rechunked content with the same process budget as the batch stress checks.
+
+Run `pnpm demo` to verify the recorded DeepAgents evidence workflow in a new output
+directory. CI runs it on all supported platforms. Maintenance checks have offline
+mocked-network regressions in `test/maintenance.test.js`; use the separate
+[producer workflow](docs/maintenance.md) for live drift checks. Never import or
+execute downloaded producer code. Preserve the pinned corpus until changes and
+licensing have been reviewed. Adoption claims need the evidence described in
+[the ledger](docs/adoption.md).

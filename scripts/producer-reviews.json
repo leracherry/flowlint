@@ -1,0 +1,11 @@
+{
+  "schemaVersion": 1,
+  "reviews": [
+    {
+      "path": "apps/dojo/e2e/tests/langgraphFastAPITests/deepagentsSubagentsPage.event-trace.ts",
+      "revision": "4eac7a982228267dde4f80207e8a9a1351b4aba8",
+      "sha256": "3d16e22ebde84b9bdfd0bd438c76815ad0ce4c1e7e6850350b178b9fc6c2e590",
+      "reason": "Reviewed source diff changes the stored tool-result message ID from id-13 to id-4 in the two final snapshots, matching the streamed result identity. Journey counts and the four ITEM_REOPEN findings remain unchanged. The original corpus and its expectations stay pinned."
+    }
+  ]
+}

@@ -3,3 +3,5 @@ dist/
 pnpm-lock.yaml
 *.tgz
 release/
+demo-output/
+producer-check/

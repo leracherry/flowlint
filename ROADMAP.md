@@ -52,3 +52,14 @@ remain outstanding.
 
 Each feature must have independently verifiable acceptance criteria. New
 protocols, hosted dashboards, and automatic event repairs are outside this sequence.
+
+## Adoption and maintenance
+
+- [x] Document the recorded DeepAgents finding with immutable provenance and limits.
+- [x] Add a reproducible 90-second walkthrough, verified demo artifacts, and outcome-led onboarding.
+- [x] Maintain the coverage matrix and a separate weekly watched-producer compatibility check.
+- [x] Define finding/integration issue forms and triage categories.
+- [ ] Obtain independent confirmation, two external CI integrations, and retained usage through an upgrade.
+
+See [adoption evidence](docs/adoption.md) and [maintenance](docs/maintenance.md).
+The recorded case study is not evidence of production impact or independent adoption.

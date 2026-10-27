@@ -1,0 +1,23 @@
+name: Integration help or feedback
+description: Report capture, installation, CLI, report, or CI friction.
+labels: [integration issue]
+body:
+  - type: textarea
+    id: environment
+    attributes:
+      label: Versions and integration
+      description: FlowLint release or source commit, Node, operating system, and producer or CI setup.
+    validations:
+      required: true
+  - type: textarea
+    id: steps
+    attributes:
+      label: Steps and observed result
+      description: Include commands, expected result, and actual output with private details removed.
+    validations:
+      required: true
+  - type: textarea
+    id: outcome
+    attributes:
+      label: Usefulness or follow-up
+      description: Optionally describe what helped, what blocked you, or whether the check remained useful through an upgrade. Public evidence links are welcome.

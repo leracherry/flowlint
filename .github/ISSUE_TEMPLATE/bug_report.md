@@ -1,6 +1,6 @@
 ---
 name: Bug report
-about: Report a false positive, missed finding, or CLI problem
+about: Report a crash or general runtime problem
 title: ""
 labels: bug
 assignees: ""

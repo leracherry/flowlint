@@ -1,0 +1,40 @@
+name: Trace finding or coverage
+description: Report a questionable finding, missing coverage, or unclear producer behavior.
+labels: [bug]
+body:
+  - type: dropdown
+    id: category
+    attributes:
+      label: Report category
+      options:
+        - Possible false positive
+        - Missing coverage
+        - Producer ambiguity
+    validations:
+      required: true
+  - type: input
+    id: versions
+    attributes:
+      label: Versions
+      description: FlowLint release or source commit, Node, producer, and adapter versions.
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: Expected behavior and evidence
+      description: Link the relevant protocol requirement or explain the observed behavior.
+    validations:
+      required: true
+  - type: textarea
+    id: actual
+    attributes:
+      label: Command, diagnostics, and capture context
+      description: Include the command, exit code, exact findings, and whether the capture is complete or partial.
+    validations:
+      required: true
+  - type: textarea
+    id: trace
+    attributes:
+      label: Reviewed reproducer or public source
+      description: Use a synthetic or reviewed trace. Remove secrets and private content while preserving the issue and identifier relationships. A reduced trace is not automatically redacted.

@@ -1,0 +1,41 @@
+name: Producer compatibility
+on:
+  schedule:
+    - cron: "17 8 * * 1"
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: producer-compatibility
+  cancel-in-progress: false
+jobs:
+  recorded-inputs:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v7
+      - uses: pnpm/action-setup@v6
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 24
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm exec vitest run test/producer-traces.test.ts test/maintenance.test.js
+      - run: pnpm build
+      - name: Compare watched upstream recordings with the pinned corpus
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: node scripts/check-producer-updates.mjs producer-check
+      - name: Summarize findings
+        if: always()
+        run: |
+          if test -f producer-check/summary.md; then
+            cat producer-check/summary.md >> "$GITHUB_STEP_SUMMARY"
+          fi
+      - uses: actions/upload-artifact@v7
+        if: always()
+        with:
+          name: producer-compatibility-${{ github.run_id }}
+          path: producer-check/
+          if-no-files-found: warn
+          retention-days: 30

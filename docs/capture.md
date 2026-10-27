@@ -4,8 +4,8 @@ This integration records SSE bytes consumed by a Node.js AG-UI `HttpAgent` and
 writes an adjacent provenance manifest. It is tested with `@ag-ui/client` 1.0.3.
 It does not depend on a particular server framework or make model calls itself.
 
-The capture API is unreleased on main, along with suites. The published 1.0.0
-package does not include these APIs. From a checkout:
+The capture API and suites are available from 1.1.0. To run the bundled example
+from a repository checkout:
 
 ```sh
 pnpm install --frozen-lockfile
@@ -21,8 +21,8 @@ additional inputs. No endpoint, server, or model is started by the example.
 
 ## Add recording to an existing Node application
 
-Install a suite-capable FlowLint release once available and pin the client and
-FlowLint versions in your application's lockfile. The integration point is the
+Install `@leracherry/flowlint@1.1.0` and `@ag-ui/client@1.0.3`, and commit your
+application's lockfile. The integration point is the
 [official HttpAgent custom fetch option](https://github.com/ag-ui-protocol/ag-ui/blob/main/sdks/typescript/packages/client/src/agent/types.ts).
 
 ```ts

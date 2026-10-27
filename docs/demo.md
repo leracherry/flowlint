@@ -5,13 +5,13 @@ The generated artifacts contain a public upstream recording and clearly named
 derived copies. No model, credentials, or network access is needed for the demo.
 
 ```sh
-git clone https://github.com/leracherry/flowlint.git
+git clone --branch v1.1.0 https://github.com/leracherry/flowlint.git
 cd flowlint
 pnpm install --frozen-lockfile
 pnpm demo
 ```
 
-Use Node 22+ and pnpm 10.17.1. `pnpm demo` builds main's unreleased features and
+Use Node 22+ and pnpm 10.17.1. `pnpm demo` builds the checkout and
 creates a new `demo-output/` directory. It refuses to overwrite an existing run.
 For another run, choose a new directory: `pnpm demo ./another-demo`.
 The 90 seconds below are a presentation script, not measured first-time onboarding.

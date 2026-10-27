@@ -10,7 +10,7 @@ recorded protocol evidence; it does not certify application behavior.
 For the published checker:
 
 ```sh
-npm install --save-dev --save-exact @leracherry/flowlint@1.0.0
+npm install --save-dev --save-exact @leracherry/flowlint@1.1.0
 npx flowlint check traces/known-interaction.ndjson --format json
 ```
 
@@ -22,9 +22,9 @@ Do not weaken expected findings simply to make a build pass.
 
 The [capture](capture.md), [suite](../REFERENCE.md#trace-suites),
 [HTML report](html-reports.md), [reducer](reproducers.md), and
-[comparison](comparison.md) features currently require a source checkout. Record
-the exact FlowLint commit and lockfile when evaluating these unreleased features.
-Do not assume the npm 1.0.0 package contains them.
+[comparison](comparison.md) features are included in 1.1.0. The demo and maintenance
+scripts require a repository checkout. Record the exact FlowLint version or commit
+and lockfile when evaluating results.
 
 ## Evaluate usefulness
 

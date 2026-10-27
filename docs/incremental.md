@@ -1,9 +1,7 @@
 # Incremental validation
 
-The session and streaming APIs are unreleased on main. The published 1.0.0 package
-does not include them. Build the checkout or use a later release that includes
-these exports. Existing `lintEvents`, `parseTrace`, and CLI commands retain their
-batch contracts.
+The session and streaming APIs are available from 1.1.0. Existing `lintEvents`,
+`parseTrace`, and CLI commands retain their batch contracts.
 
 ## Check a byte stream
 

@@ -1,48 +1,51 @@
 # Changelog
 
-## Unreleased
+## 1.1.0 - 2026-10-26
+
+An additive release for turning recorded AG-UI interactions into repeatable
+regression checks. Install with `npm install --save-dev --save-exact @leracherry/flowlint@1.1.0`.
 
 ### Added
 
-- A verified recorded-evidence demo, DeepAgents case study, first-integration guide,
-  explicit adoption ledger, and clearer published-versus-main onboarding.
-- Read-only weekly producer compatibility reports with immutable source revisions,
-  bounded downloads, data-only replay, coverage gaps, and reviewable drift results.
-- Finding/integration issue forms and documented triage categories.
+- Source evidence for reopening findings, with related locations and structured
+  context. Public `RULES` metadata describes implemented checks.
+- `suite` for deterministic corpus checks, aggregate JSON, GitHub annotations,
+  and Markdown CI summaries.
+- `createHttpCapture` for bounded Node HttpAgent SSE recording and provenance.
+- Incremental lint sessions and NDJSON/SSE byte-stream APIs with source locations,
+  explicit finalization, cancellation, and resource budgets.
+- `report` and `generateHtmlReport` for standalone offline HTML with evidence
+  navigation, filtering, bounded timelines, and payload omission.
+- `minimize`, `getReproFindings`, and `minimizeTrace` for verified event-deletion
+  reproducers with finding identity, retained context, source maps, and budgets.
+- `compare`, `compareTraces`, and `formatComparison` with the versioned
+  `adapter-upgrade/v1` policy, scoped IDs, adjacent chunk normalization, ownership
+  and shared-state checks, bounded diffs, and explicit incomparable results.
+- Repository demo, recorded DeepAgents case study, adoption ledger, issue forms,
+  and a read-only weekly producer compatibility workflow. These maintenance tools
+  and the demo require a repository checkout; the runtime APIs ship in npm.
 
-- Versioned adapter-upgrade trace comparison with scoped identity mapping, adjacent
-  chunk normalization, ownership checks, final shared-state digests, bounded source
-  diffs, and explicit incomparable outcomes. Includes CLI and TypeScript APIs.
+### Compatibility and upgrading
 
-- Conservative lifecycle/reopening reproducer generation with versioned finding
-  identities, pinned context, no-new-diagnostic verification, cooperative budgets,
-  progress/cancellation, source mappings, and a human-reviewable artifact bundle.
+This is a minor release: existing `check`, `lintEvents`, and `parseTrace` acceptance,
+diagnostic identifiers/severities, supported encodings, resource limits, and exit
+meanings are preserved. AG-UI core remains pinned to 1.0.2; Node 22+ remains
+required, with Node 22/24 verified across Linux, macOS, and Windows. TypeScript
+consumers are checked with 5.9. No migration is required for existing checks.
 
-- Standalone HTML reports with finding/evidence links, bounded run/agent timelines,
-  metadata search, keyboard navigation, and payload omission. Includes the report
-  CLI and library API, restrictive policy hashes, and offline Chromium checks.
+JSON consumers must tolerate the new optional diagnostic `related` and `context`
+fields. Existing runtime exports remain available. The new session limit applies
+to incremental sessions and does not lower the existing batch limit.
 
-- Incremental lint sessions with detached snapshots, explicit finish/cancel status,
-  and a configurable event-count budget. Existing batch acceptance is preserved.
-- NDJSON/SSE byte-stream parsing and linting with source locations, bounded input,
-  source cleanup, and split UTF-8/line-ending handling.
-- Streaming stress checks for raw events, retained history, patches, and subagents.
+New commands have distinct outcomes: `compare` exits 0 for equal, 1 for changed,
+2 for input failure, and 3 for incomparable. A successful `minimize` exits 0 for a
+verified artifact even when the reproduced trace intentionally has lint findings.
+See each command's guide before adding it to a CI gate.
 
-- Node HttpAgent SSE capture with bounded retention, provenance manifests, explicit
-  outcomes, and a runnable integration example. Capture errors remain separate from
-  application results; original request metadata is not recorded.
-
-- `suite` command with deterministic file/glob discovery, isolated checks, versioned
-  aggregate JSON, escaped GitHub annotations, and Markdown summaries. Empty matches
-  and input errors fail with exit code 2 while other files are still checked.
-
-- Related source locations and structured context for reopening findings, including
-  snapshots, recorded input, and normalized chunks. Terminal output shows the
-  establishing event without including attribute values.
-- Public `RULES` metadata and `DiagnosticLocation` type. Existing acceptance, rule
-  identifiers, diagnostic ordering, and exit codes remain unchanged. These additive
-  exports and optional diagnostic fields are intended for a minor release.
-- Outcome-based roadmap and documented producer coverage gaps.
+The release is supported by regression, package, browser, stress, and recorded
+producer checks. The 19-journey corpus retains its four expected DeepAgents
+reopening findings. Independent confirmation, external CI retention, and a real
+adapter-upgrade trial remain open; this release does not claim those outcomes.
 
 ## 1.0.0 — 2026-10-17
 

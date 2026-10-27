@@ -9,6 +9,7 @@ import { tmpdir } from "node:os";
 import path from "node:path";
 import { execFileSync, spawnSync } from "node:child_process";
 import { beforeAll, expect, it, vi } from "vitest";
+import packageJson from "../package.json";
 vi.setConfig({ testTimeout: 20000 });
 beforeAll(() => {
   execFileSync(process.execPath, ["node_modules/tsup/dist/cli-default.js"], {
@@ -19,7 +20,7 @@ const cli = (...args: string[]) =>
   spawnSync(process.execPath, ["dist/cli.js", ...args], { encoding: "utf8" });
 it("prints help and version", () => {
   expect(cli("--help").status).toBe(0);
-  expect(cli("--version").stdout.trim()).toBe("1.0.0");
+  expect(cli("--version").stdout.trim()).toBe(packageJson.version);
 });
 it("returns 0 for valid input and 1 for lint errors", () => {
   expect(cli("check", "examples/valid.ndjson").status).toBe(0);

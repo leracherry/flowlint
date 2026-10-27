@@ -1,17 +1,18 @@
 # Compare recorded adapter behavior
 
-Available on main, not in the published 1.0.0 package. Compare recordings of the
+Available from 1.1.0. Compare recordings of the
 same controlled interaction before and after an adapter change. Run validation on
 both captures first, then review comparison details against their source events.
 This does not establish that a model, application, or unrecorded behavior is equal.
 
 ```sh
-pnpm build
-node dist/cli.js compare before.ndjson after.sse --policy adapter-upgrade/v1
-node dist/cli.js compare before.ndjson after.ndjson --format json --max-differences 100
+npm install --save-dev --save-exact @leracherry/flowlint@1.1.0
+npx flowlint compare before.ndjson after.sse --policy adapter-upgrade/v1
+npx flowlint compare before.ndjson after.ndjson --format json --max-differences 100
 ```
 
-Runnable fixtures demonstrate all three outcomes:
+From a repository checkout, run `pnpm build` and use the bundled fixtures to
+demonstrate all three outcomes:
 
 ```sh
 node dist/cli.js compare examples/compare-before.ndjson examples/compare-rechunked.ndjson

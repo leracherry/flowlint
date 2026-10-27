@@ -26,8 +26,8 @@ Before selecting a version, apply [COMPATIBILITY.md](COMPATIBILITY.md):
 2. Commit to main and wait for CI. Create and push a matching version tag (replace the example with the new version):
 
    ```sh
-   git tag -a v1.0.0 -m "FlowLint v1.0.0"
-   git push origin v1.0.0
+   git tag -a v1.1.0 -m "FlowLint v1.1.0"
+   git push origin v1.1.0
    ```
 
 3. The release workflow repeats checks on Node 22/24, verifies the installable

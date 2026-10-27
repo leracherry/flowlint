@@ -48,6 +48,8 @@ The `flowlint` executable and documented commands/options in
 - `--format pretty|json`, defaulting to `pretty`.
 - `--allow-partial`, with complete-capture checking as the default.
 - `--help` and `--version`.
+- `compare <before> <after>` with `--policy adapter-upgrade/v1`,
+  `--format pretty|json`, `--allow-partial`, and `--max-differences` (default 50; 1–1000).
 - `minimize <file> --list`, or `--finding <id> --output <new-directory>`, with
   `--allow-partial`, `--progress`, `--max-checks`, and `--max-duration-ms`.
 - `report <file> --output <file>` with `--input`, `--allow-partial`, and
@@ -59,7 +61,9 @@ The `flowlint` executable and documented commands/options in
 Exit **0** means no error diagnostics; warnings may exist. Exit **1** means schema
 or lint errors. Exit **2** means input, parsing, or usage failure. Help/version exit
 0; invoking the executable without a command exits 2. Reports go to stdout.
-The suite command uses its documented aggregate envelope.
+These exit meanings apply to `check`; `report` and `suite` preserve those meanings
+with their documented output contracts. `minimize` and `compare` use their separate
+exit contracts documented below. The suite command uses its aggregate envelope.
 `check --format json` produces one JSON result, including reported input/usage
 failures; help/version remain text. Automation should parse JSON and exit status,
 not pretty output, help prose, or diagnostic message wording.
@@ -74,9 +78,11 @@ The public library surface is the package-root ESM exports and their shipped
 TypeScript declarations: `lintEvents`, `parseTrace`, `formatJson`, `formatPretty`,
 `TraceInputError`, `MAX_INPUT_BYTES`, `SUPPORTED_RULES`, `RULES`, `createHttpCapture`, `createLintSession`, `parseTraceStream`,
 `lintTraceStream`, `generateHtmlReport`, `getReproFindings`, `minimizeTrace`,
+`compareTraces`, `formatComparison`,
 and the exported types
 `Diagnostic`, `DiagnosticLocation`, `InputFormat`, `LintOptions`, `LintResult`, `SourceEvent`, `CaptureManifest`, `HttpCaptureOptions`, `LintSession`, `LintSessionOptions`, `HtmlReportOptions`, `ReproFinding`, `ReproProgress`,
-`ReproOptions`, and `Reproducer`.
+`ReproOptions`, `Reproducer`, `CompareOptions`, `ComparisonIssue`, `EntityMapping`,
+`StateOutcome`, `TraceDifference`, and `TraceComparison`.
 Deep imports, source modules, internal classes, build filenames, and source maps
 are not supported APIs. CommonJS and browser runtimes are not currently promised.
 
@@ -184,8 +190,8 @@ fields are compatible; ignore unknown fields.
 
 ## Trace comparisons
 
-`compareTraces`, `formatComparison`, and the compare command are additive and
-unreleased. The [comparison guide](https://github.com/leracherry/flowlint/blob/main/docs/comparison.md)
+`compareTraces`, `formatComparison`, and the compare command are available from
+1.1.0. The [comparison guide](https://github.com/leracherry/flowlint/blob/main/docs/comparison.md)
 defines `adapter-upgrade/v1` and version-1 result semantics. A change to identity
 scope, ignored fields, or equivalence rules requires a new policy name. Optional
 result fields may be added. No existing validation acceptance or command exit
